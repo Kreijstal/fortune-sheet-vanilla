@@ -1,0 +1,38 @@
+{
+  "name": "@fortune-sheet/vanilla",
+  "version": "0.1.0",
+  "description": "Drop-in Excel-like spreadsheet component for the browser. No React required.",
+  "main": "dist/index.mjs",
+  "browser": "dist/fortune-sheet.vanilla.min.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "spreadsheet",
+    "sheet",
+    "excel",
+    "datatable",
+    "table",
+    "data grid",
+    "vanilla",
+    "javascript",
+    "no-react"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "demo": "node build.mjs && npx serve demo"
+  },
+  "dependencies": {
+    "@fortune-sheet/core": "^1.0.4",
+    "immer": "^9.0.12",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

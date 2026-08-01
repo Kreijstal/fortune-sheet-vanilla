@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>fortune-sheet · vanilla (no React)</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        font-family: system-ui, sans-serif;
+        background: #f4f5f7;
+      }
+      header {
+        padding: 14px 20px;
+        background: #fff;
+        border-bottom: 1px solid #e2e4e8;
+      }
+      header h1 {
+        margin: 0 0 4px;
+        font-size: 16px;
+      }
+      header p {
+        margin: 0;
+        font-size: 13px;
+        color: #666;
+      }
+      #buttons {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      #buttons button {
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 4px;
+        padding: 5px 10px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      #buttons button:hover {
+        background: #eef3ff;
+        border-color: #0188fb;
+      }
+      #sheet {
+        position: absolute;
+        top: 138px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        border: 1px solid #d5d8dc;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>fortune-sheet · vanilla build</h1>
+      <p>
+        Loaded from a single <code>&lt;script&gt;</code> tag — no React, no
+        bundler, no build step. Same @fortune-sheet/core engine underneath.
+      </p>
+      <div id="buttons">
+        <button id="btn-undo">Undo (Ctrl+Z)</button>
+        <button id="btn-redo">Redo (Ctrl+Y)</button>
+        <button id="btn-value">setCellValue(B2, 12345)</button>
+        <button id="btn-add-sheet">Add sheet</button>
+        <button id="btn-log">Log data</button>
+      </div>
+    </header>
+
+    <div id="sheet"></div>
+
+    <!-- the entire library, one file -->
+    <script src="dist/fortune-sheet.vanilla.min.js"></script>
+    <script>
+      const data = [
+        {
+          name: "Vanilla",
+          color: "#0188fb",
+          config: {
+            merge: {
+              "0_0": { r: 0, c: 0, rs: 1, cs: 6 },
+            },
+            columnlen: { 0: 130, 1: 110, 2: 110, 3: 110, 4: 110, 5: 110 },
+          },
+          celldata: [
+            { r: 0, c: 0, v: { v: "fortune-sheet, zero React", bl: 1, fs: 16 } },
+            { r: 2, c: 0, v: { v: "Revenue", bl: 1 } },
+            { r: 2, c: 1, v: { v: "Q1" } },
+            { r: 2, c: 2, v: { v: "Q2" } },
+            { r: 2, c: 3, v: { v: "Q3" } },
+            { r: 2, c: 4, v: { v: "Q4" } },
+            { r: 2, c: 5, v: { v: "Total" } },
+            { r: 3, c: 0, v: { v: "Product A", bl: 1 } },
+            { r: 3, c: 1, v: { v: 1200, m: "1200" } },
+            { r: 3, c: 2, v: { v: 1500, m: "1500" } },
+            { r: 3, c: 3, v: { v: 1800, m: "1800" } },
+            { r: 3, c: 4, v: { v: 2100, m: "2100" } },
+            { r: 3, c: 5, v: { v: 6600, f: "=SUM(B4:E4)", m: "6600" } },
+            { r: 4, c: 0, v: { v: "Product B", bl: 1 } },
+            { r: 4, c: 1, v: { v: 900, m: "900" } },
+            { r: 4, c: 2, v: { v: 1100, m: "1100" } },
+            { r: 4, c: 3, v: { v: 1300, m: "1300" } },
+            { r: 4, c: 4, v: { v: 1600, m: "1600" } },
+            { r: 4, c: 5, v: { v: 4900, f: "=SUM(B5:E5)", m: "4900" } },
+            { r: 5, c: 0, v: { v: "Total", bl: 1, fs: 12 } },
+            { r: 5, c: 5, v: { v: 11500, f: "=SUM(F4:F5)", m: "11500", bl: 1 } },
+            { r: 8, c: 0, v: { v: "Try: type in a cell, drag the fill handle,", ff: 10, fc: "#888" } },
+            { r: 9, c: 0, v: { v: "select a range, Ctrl+C / Ctrl+V, Ctrl+Z,", ff: 10, fc: "#888" } },
+            { r: 10, c: 0, v: { v: "double-click a sheet tab to rename it.", ff: 10, fc: "#888" } },
+          ],
+          row: 30,
+          column: 10,
+        },
+        {
+          name: "Sheet 2",
+          celldata: [
+            { r: 0, c: 0, v: { v: "A second sheet", bl: 1 } },
+            { r: 2, c: 0, v: { v: "hello from vanilla JS" } },
+          ],
+        },
+      ];
+
+      const sheet = new FortuneSheet(document.getElementById("sheet"), {
+        data,
+        allowEdit: true,
+        rowHeaderWidth: 46,
+        columnHeaderHeight: 20,
+        onChange: (d) => console.log("onChange", d.length, "sheet(s)"),
+      });
+
+      // expose the instance for the smoke test / debugging
+      document.getElementById("sheet").__sheet = sheet;
+
+      document.getElementById("btn-undo").onclick = () => sheet.undo();
+      document.getElementById("btn-redo").onclick = () => sheet.redo();
+      document.getElementById("btn-value").onclick = () =>
+        sheet.apiRef.setCellValue(1, 1, 12345);
+      document.getElementById("btn-add-sheet").onclick = () =>
+        sheet.apiRef.addSheet();
+      document.getElementById("btn-log").onclick = () =>
+        console.log(JSON.stringify(sheet.getData(), null, 2));
+    </script>
+  </body>
+</html>

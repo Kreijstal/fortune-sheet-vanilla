@@ -138,3 +138,8 @@ dist
 
 # storybook
 /storybook-static
+
+# vanilla build output
+packages/vanilla/dist/
+packages/vanilla/demo/dist/
+packages/vanilla/test/screenshot.png
