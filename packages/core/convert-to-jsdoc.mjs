@@ -492,6 +492,9 @@ for (const dtsPath of walk(emitDir).filter((p) => p.endsWith(".d.ts"))) {
   let code = fs.readFileSync(jsPath, "utf8");
   const fromDir = path.dirname(rel);
 
+  // strip leftover @ts-ignore / @ts-nocheck comment lines (meaningless in JS)
+  code = code.replace(/^\s*\/\/\s*@ts-(?:ignore|nocheck)[^\n]*\n?/gm, "");
+
   // 1. imports are NOT cleaned: tsc's emit already elides type-only imports
   //    and leftover value imports are real exports that esbuild resolves and
   //    tree-shakes. (Comment/string stripping is too fragile on regex-heavy

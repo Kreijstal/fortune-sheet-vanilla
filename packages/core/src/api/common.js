@@ -1,6 +1,6 @@
-import _ from "lodash";
-import { getSheetIndex } from "../utils";
-import { SHEET_NOT_FOUND } from "./errors";
+import _ from 'lodash';
+import { getSheetIndex } from '../utils';
+import { SHEET_NOT_FOUND } from './errors';
 /**
  * @type {Array<function(CellMatrix | undefined) => CellWithRowAndCol[];
 export declare const celldataToData: (celldata: CellWithRowAndCol[], rowCount?: number, colCount?: number): CellMatrix;
@@ -25,19 +25,19 @@ export declare function getSheetWithLatestCelldata(ctx: Context, options?: Commo
         row: number>}
  */
 export const dataToCelldata = (data) => {
-    const celldata = [];
-    if (data == null) {
-        return celldata;
-    }
-    for (let r = 0; r < data.length; r += 1) {
-        for (let c = 0; c < data[r].length; c += 1) {
-            const v = data[r][c];
-            if (v != null) {
-                celldata.push({ r, c, v });
-            }
-        }
-    }
+  const celldata = [];
+  if (data == null) {
     return celldata;
+  }
+  for (let r = 0; r < data.length; r += 1) {
+    for (let c = 0; c < data[r].length; c += 1) {
+      const v = data[r][c];
+      if (v != null) {
+        celldata.push({ r, c, v });
+      }
+    }
+  }
+  return celldata;
 };
 /**
  * @type {Array<function(Array<CellWithRowAndCol>, number, number): CellMatrix;
@@ -46,23 +46,24 @@ export declare function getSheetWithLatestCelldata(ctx: Context, options?: Commo
     celldata: CellWithRowAndCol>}
  */
 export const celldataToData = (celldata, rowCount, colCount) => {
-    var _a, _b;
-    const lastRow = _.maxBy(celldata, "r");
-    const lastCol = _.maxBy(celldata, "c");
-    let lastRowNum = ((_a = lastRow === null || lastRow === void 0 ? void 0 : lastRow.r) !== null && _a !== void 0 ? _a : 0) + 1;
-    let lastColNum = ((_b = lastCol === null || lastCol === void 0 ? void 0 : lastCol.c) !== null && _b !== void 0 ? _b : 0) + 1;
-    if (rowCount != null && colCount != null && rowCount > 0 && colCount > 0) {
-        lastRowNum = Math.max(lastRowNum, rowCount);
-        lastColNum = Math.max(lastColNum, colCount);
-    }
-    if (lastRowNum && lastColNum) {
-        const expandedData = _.times(lastRowNum, () => _.times(lastColNum, () => null));
-        celldata === null || celldata === void 0 ? void 0 : celldata.forEach((d) => {
-            expandedData[d.r][d.c] = d.v;
-        });
-        return expandedData;
-    }
-    return null;
+  const lastRow = _.maxBy(celldata, 'r');
+  const lastCol = _.maxBy(celldata, 'c');
+  let lastRowNum = (lastRow?.r ?? 0) + 1;
+  let lastColNum = (lastCol?.c ?? 0) + 1;
+  if (rowCount != null && colCount != null && rowCount > 0 && colCount > 0) {
+    lastRowNum = Math.max(lastRowNum, rowCount);
+    lastColNum = Math.max(lastColNum, colCount);
+  }
+  if (lastRowNum && lastColNum) {
+    const expandedData = _.times(lastRowNum, () =>
+      _.times(lastColNum, () => null)
+    );
+    celldata?.forEach((d) => {
+      expandedData[d.r][d.c] = d.v;
+    });
+    return expandedData;
+  }
+  return null;
 };
 /**
  * @param {Context} ctx
@@ -70,15 +71,16 @@ export const celldataToData = (celldata, rowCount, colCount) => {
  * @returns {Sheet}
  */
 export function getSheet(ctx, options = {}) {
-    const { index = getSheetIndex(ctx, options.id || ctx.currentSheetId) } = options;
-    if (index == null) {
-        throw SHEET_NOT_FOUND;
-    }
-    const sheet = ctx.luckysheetfile[index];
-    if (sheet == null) {
-        throw SHEET_NOT_FOUND;
-    }
-    return sheet;
+  const { index = getSheetIndex(ctx, options.id || ctx.currentSheetId) } =
+    options;
+  if (index == null) {
+    throw SHEET_NOT_FOUND;
+  }
+  const sheet = ctx.luckysheetfile[index];
+  if (sheet == null) {
+    throw SHEET_NOT_FOUND;
+  }
+  return sheet;
 }
 /**
  * @param {Context} ctx
@@ -133,8 +135,8 @@ export function getSheet(ctx, options = {}) {
 }}
  */
 export function getSheetWithLatestCelldata(ctx, options = {}) {
-    const sheet = getSheet(ctx, options);
-    return { ...sheet, celldata: dataToCelldata(sheet.data) };
+  const sheet = getSheet(ctx, options);
+  return { ...sheet, celldata: dataToCelldata(sheet.data) };
 }
 
 /**
