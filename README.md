@@ -7,13 +7,17 @@ no-framework wrapper.
 
 ```
 packages/
-├── core            @fortune-sheet/core            — the engine (unchanged, already React-free)
-├── formula-parser  @fortune-sheet/formula-parser  — formula parser (unchanged)
+├── core            @fortune-sheet/core            — the engine, converted to plain JS + JSDoc
+├── formula-parser  @fortune-sheet/formula-parser  — formula parser (already JS)
 └── vanilla         @fortune-sheet/vanilla         — NEW: plain-JS UI shell
 ```
 
 Everything that was React-specific (`packages/react`, storybook, toolbar &
-dialog components, react peer deps) has been **removed**.
+dialog components, react peer deps) has been **removed**, and the remaining
+TypeScript engine has been converted to **JavaScript with JSDoc types** —
+zero TypeScript in the repo, but IDEs still get full autocomplete via the
+`@typedef`/`@param` annotations (`import("@fortune-sheet/core").Context`
+etc. resolves; verified with `tsc --checkJs`).
 
 ## Quick start
 
@@ -47,6 +51,13 @@ So the fork replaces that shell with ~6 small vanilla modules
 The engine handlers (`handleCellAreaMouseDown`, `handleGlobalKeyDown`,
 `handlePaste`, `handleGlobalWheel`, …) are called with the exact same
 arguments as before — just without React in between.
+
+The engine itself was then converted from TypeScript to **JavaScript + JSDoc**
+(`packages/core/convert-to-jsdoc.mjs` documents the conversion): tsc emitted
+clean JS, and every exported type/interface/function signature was turned
+into `@typedef` / `@param` / `@returns` comments. The whole repo is now pure
+JS — no `.ts` files, no TS toolchain needed at build time (esbuild bundles it
+directly).
 
 ## Commands
 

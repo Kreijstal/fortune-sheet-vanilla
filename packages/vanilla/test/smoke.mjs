@@ -158,6 +158,20 @@ try {
   );
   check("wheel scrolling works", scrollTop > 0, `scrollTop=${scrollTop}`);
 
+  // 9. API getters read the live context (not a stale snapshot)
+  const live = await page.evaluate(async () => {
+    const s = document.getElementById("sheet").__sheet;
+    const api = s.apiRef;
+    api.setCellValue(15, 2, "live-check");
+    await new Promise((res) => setTimeout(res, 80));
+    return { v: api.getCellValue(15, 2), sel: !!api.getSelection() };
+  });
+  check(
+    "API getters see live context",
+    live.v === "live-check" && live.sel,
+    JSON.stringify(live)
+  );
+
   await page.screenshot({ path: path.join(here, "screenshot.png") });
 
   check("no page errors", pageErrors.length === 0, pageErrors.join(" | ").slice(0, 300));

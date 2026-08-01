@@ -24,7 +24,7 @@ const workspaceAliasPlugin = {
       build.onResolve({ filter: new RegExp(`^${from}$`) }, () => ({
         path: path.join(root, "packages", to),
       }));
-    alias("@fortune-sheet/core", "core/src/index.ts");
+    alias("@fortune-sheet/core", "core/src/index.js");
     alias("@fortune-sheet/formula-parser", "formula-parser/src/index.js");
   },
 };

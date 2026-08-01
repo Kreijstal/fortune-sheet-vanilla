@@ -1,0 +1,2001 @@
+import _ from "lodash";
+import { getSheetIndex } from "../utils";
+import { getcellFormula } from "./cell";
+import { functionStrChange } from "./formula";
+const refreshLocalMergeData = (merge_new, file) => {
+    Object.entries(merge_new).forEach(([, v]) => {
+        var _a, _b, _c, _d;
+        const { r, c, rs, cs } = v;
+        for (let i = r; i < r + rs; i += 1) {
+            for (let j = c; j < c + cs; j += 1) {
+                if ((_b = (_a = file === null || file === void 0 ? void 0 : file.data) === null || _a === void 0 ? void 0 : _a[i]) === null || _b === void 0 ? void 0 : _b[j]) {
+                    file.data[i][j] = { ...file.data[i][j], mc: { r, c } };
+                }
+            }
+        }
+        if ((_d = (_c = file === null || file === void 0 ? void 0 : file.data) === null || _c === void 0 ? void 0 : _c[r]) === null || _d === void 0 ? void 0 : _d[c]) {
+            file.data[r][c] = { ...file.data[r][c], mc: { r, c, rs, cs } };
+        }
+    });
+};
+/**
+ * @param {Context} ctx
+ * @param {{
+    type: "row" | "column";
+    index: number;
+    count: number;
+    direction: "lefttop" | "rightbottom";
+    id: string;
+}} op
+ * @param {boolean} [changeSelection]
+ */
+export function insertRowCol(ctx, op, changeSelection = true) {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w;
+    let { count, id } = op;
+    const { type, index, direction } = op;
+    id = id || ctx.currentSheetId;
+    const curOrder = getSheetIndex(ctx, id);
+    if (curOrder == null)
+        return;
+    const file = ctx.luckysheetfile[curOrder];
+    if (!file)
+        return;
+    const d = file.data;
+    if (!d)
+        return;
+    const cfg = file.config || {};
+    if (changeSelection) {
+        if (type === "row") {
+            if ((_a = cfg.rowReadOnly) === null || _a === void 0 ? void 0 : _a[index]) {
+                throw new Error("readOnly");
+            }
+        }
+        else {
+            if ((_b = cfg.colReadOnly) === null || _b === void 0 ? void 0 : _b[index]) {
+                throw new Error("readOnly");
+            }
+        }
+    }
+    if (type === "row" && d.length + count >= 10000) {
+        throw new Error("maxExceeded");
+    }
+    if (type === "column" && d[0] && d[0].length + count >= 1000) {
+        throw new Error("maxExceeded");
+    }
+    count = Math.floor(count);
+    if (cfg.merge == null) {
+        cfg.merge = {};
+    }
+    const merge_new = {};
+    _.forEach(cfg.merge, (mc) => {
+        const { r, c, rs, cs } = mc;
+        if (type === "row") {
+            if (index < r) {
+                merge_new[`${r + count}_${c}`] = { r: r + count, c, rs, cs };
+            }
+            else if (index === r) {
+                if (direction === "lefttop") {
+                    merge_new[`${r + count}_${c}`] = {
+                        r: r + count,
+                        c,
+                        rs,
+                        cs,
+                    };
+                }
+                else {
+                    merge_new[`${r}_${c}`] = { r, c, rs: rs + count, cs };
+                }
+            }
+            else if (index < r + rs - 1) {
+                merge_new[`${r}_${c}`] = { r, c, rs: rs + count, cs };
+            }
+            else if (index === r + rs - 1) {
+                if (direction === "lefttop") {
+                    merge_new[`${r}_${c}`] = { r, c, rs: rs + count, cs };
+                }
+                else {
+                    merge_new[`${r}_${c}`] = { r, c, rs, cs };
+                }
+            }
+            else {
+                merge_new[`${r}_${c}`] = { r, c, rs, cs };
+            }
+        }
+        else if (type === "column") {
+            if (index < c) {
+                merge_new[`${r}_${c + count}`] = {
+                    r,
+                    c: c + count,
+                    rs,
+                    cs,
+                };
+            }
+            else if (index === c) {
+                if (direction === "lefttop") {
+                    merge_new[`${r}_${c + count}`] = {
+                        r,
+                        c: c + count,
+                        rs,
+                        cs,
+                    };
+                }
+                else {
+                    merge_new[`${r}_${c}`] = { r, c, rs, cs: cs + count };
+                }
+            }
+            else if (index < c + cs - 1) {
+                merge_new[`${r}_${c}`] = { r, c, rs, cs: cs + count };
+            }
+            else if (index === c + cs - 1) {
+                if (direction === "lefttop") {
+                    merge_new[`${r}_${c}`] = { r, c, rs, cs: cs + count };
+                }
+                else {
+                    merge_new[`${r}_${c}`] = { r, c, rs, cs };
+                }
+            }
+            else {
+                merge_new[`${r}_${c}`] = { r, c, rs, cs };
+            }
+        }
+    });
+    cfg.merge = merge_new;
+    const newCalcChain = [];
+    for (let SheetIndex = 0; SheetIndex < ctx.luckysheetfile.length; SheetIndex += 1) {
+        if (_.isNil(ctx.luckysheetfile[SheetIndex].calcChain) ||
+            ctx.luckysheetfile.length === 0) {
+            continue;
+        }
+        const { calcChain } = ctx.luckysheetfile[SheetIndex];
+        const { data } = ctx.luckysheetfile[SheetIndex];
+        for (let i = 0; i < calcChain.length; i += 1) {
+            const calc = _.cloneDeep(calcChain[i]);
+            const calc_r = calc.r;
+            const calc_c = calc.c;
+            const calc_i = calc.id;
+            const calc_funcStr = getcellFormula(ctx, calc_r, calc_c, calc_i);
+            if (type === "row" && SheetIndex === curOrder) {
+                const functionStr = `=${functionStrChange(calc_funcStr, "add", "row", direction, index, count)}`;
+                if (((_d = (_c = d[calc_r]) === null || _c === void 0 ? void 0 : _c[calc_c]) === null || _d === void 0 ? void 0 : _d.f) === calc_funcStr) {
+                    d[calc_r][calc_c].f = functionStr;
+                }
+                if (direction === "lefttop") {
+                    if (calc_r >= index) {
+                        calc.r += count;
+                    }
+                }
+                else if (direction === "rightbottom") {
+                    if (calc_r > index) {
+                        calc.r += count;
+                    }
+                }
+                newCalcChain.push(calc);
+            }
+            else if (type === "row") {
+                const functionStr = `=${functionStrChange(calc_funcStr, "add", "row", direction, index, count)}`;
+                if (((_f = (_e = data[calc_r]) === null || _e === void 0 ? void 0 : _e[calc_c]) === null || _f === void 0 ? void 0 : _f.f) === calc_funcStr) {
+                    data[calc_r][calc_c].f = functionStr;
+                }
+            }
+            else if (type === "column" && SheetIndex === curOrder) {
+                const functionStr = `=${functionStrChange(calc_funcStr, "add", "col", direction, index, count)}`;
+                if (((_h = (_g = d[calc_r]) === null || _g === void 0 ? void 0 : _g[calc_c]) === null || _h === void 0 ? void 0 : _h.f) === calc_funcStr) {
+                    d[calc_r][calc_c].f = functionStr;
+                }
+                if (direction === "lefttop") {
+                    if (calc_c >= index) {
+                        calc.c += count;
+                    }
+                }
+                else if (direction === "rightbottom") {
+                    if (calc_c > index) {
+                        calc.c += count;
+                    }
+                }
+                newCalcChain.push(calc);
+            }
+            else if (type === "column") {
+                const functionStr = `=${functionStrChange(calc_funcStr, "add", "col", direction, index, count)}`;
+                if (((_k = (_j = data[calc_r]) === null || _j === void 0 ? void 0 : _j[calc_c]) === null || _k === void 0 ? void 0 : _k.f) === calc_funcStr) {
+                    data[calc_r][calc_c].f = functionStr;
+                }
+            }
+        }
+    }
+    const { filter_select } = file;
+    const { filter } = file;
+    let newFilterObj = null;
+    if (!_.isEmpty(filter_select) && filter_select != null) {
+        newFilterObj = { filter_select: null, filter: null };
+        let f_r1 = filter_select.row[0];
+        let f_r2 = filter_select.row[1];
+        let f_c1 = filter_select.column[0];
+        let f_c2 = filter_select.column[1];
+        if (type === "row") {
+            if (f_r1 < index) {
+                if (f_r2 === index && direction === "lefttop") {
+                    f_r2 += count;
+                }
+                else if (f_r2 > index) {
+                    f_r2 += count;
+                }
+            }
+            else if (f_r1 === index) {
+                if (direction === "lefttop") {
+                    f_r1 += count;
+                    f_r2 += count;
+                }
+                else if (direction === "rightbottom" && f_r2 > index) {
+                    f_r2 += count;
+                }
+            }
+            else {
+                f_r1 += count;
+                f_r2 += count;
+            }
+            if (filter != null) {
+                newFilterObj.filter = {};
+                _.forEach(filter, (v, k) => {
+                    const f_rowhidden = filter[k].rowhidden;
+                    const f_rowhidden_new = {};
+                    _.forEach(f_rowhidden, (v1, nstr) => {
+                        const n = parseFloat(nstr);
+                        if (n < index) {
+                            f_rowhidden_new[n] = 0;
+                        }
+                        else if (n === index) {
+                            if (direction === "lefttop") {
+                                f_rowhidden_new[n + count] = 0;
+                            }
+                            else if (direction === "rightbottom") {
+                                f_rowhidden_new[n] = 0;
+                            }
+                        }
+                        else {
+                            f_rowhidden_new[n + count] = 0;
+                        }
+                    });
+                    newFilterObj.filter[k] = _.cloneDeep(filter[k]);
+                    newFilterObj.filter[k].rowhidden = f_rowhidden_new;
+                    newFilterObj.filter[k].str = f_r1;
+                    newFilterObj.filter[k].edr = f_r2;
+                });
+            }
+        }
+        else if (type === "column") {
+            if (f_c1 < index) {
+                if (f_c2 === index && direction === "lefttop") {
+                    f_c2 += count;
+                }
+                else if (f_c2 > index) {
+                    f_c2 += count;
+                }
+            }
+            else if (f_c1 === index) {
+                if (direction === "lefttop") {
+                    f_c1 += count;
+                    f_c2 += count;
+                }
+                else if (direction === "rightbottom" && f_c2 > index) {
+                    f_c2 += count;
+                }
+            }
+            else {
+                f_c1 += count;
+                f_c2 += count;
+            }
+            if (filter != null) {
+                newFilterObj.filter = {};
+                _.forEach(filter, (v, k) => {
+                    let f_cindex = filter[k].cindex;
+                    if (f_cindex === index && direction === "lefttop") {
+                        f_cindex += count;
+                    }
+                    else if (f_cindex > index) {
+                        f_cindex += count;
+                    }
+                    newFilterObj.filter[f_cindex - f_c1] = _.cloneDeep(filter[k]);
+                    newFilterObj.filter[f_cindex - f_c1].cindex = f_cindex;
+                    newFilterObj.filter[f_cindex - f_c1].stc = f_c1;
+                    newFilterObj.filter[f_cindex - f_c1].edc = f_c2;
+                });
+            }
+        }
+        newFilterObj.filter_select = { row: [f_r1, f_r2], column: [f_c1, f_c2] };
+    }
+    if (newFilterObj != null && newFilterObj.filter != null) {
+        if (cfg.rowhidden == null) {
+            cfg.rowhidden = {};
+        }
+        _.forEach(newFilterObj.filter, (v, k) => {
+            const f_rowhidden = newFilterObj.filter[k].rowhidden;
+            _.forEach(f_rowhidden, (v1, n) => {
+                cfg.rowhidden[n] = 0;
+            });
+        });
+    }
+    const CFarr = file.luckysheet_conditionformat_save;
+    const newCFarr = [];
+    if (CFarr != null && CFarr.length > 0) {
+        for (let i = 0; i < CFarr.length; i += 1) {
+            const cf_range = CFarr[i].cellrange;
+            const cf_new_range = [];
+            for (let j = 0; j < cf_range.length; j += 1) {
+                let CFr1 = cf_range[j].row[0];
+                let CFr2 = cf_range[j].row[1];
+                let CFc1 = cf_range[j].column[0];
+                let CFc2 = cf_range[j].column[1];
+                if (type === "row") {
+                    if (CFr1 < index) {
+                        if (CFr2 === index && direction === "lefttop") {
+                            CFr2 += count;
+                        }
+                        else if (CFr2 > index) {
+                            CFr2 += count;
+                        }
+                    }
+                    else if (CFr1 === index) {
+                        if (direction === "lefttop") {
+                            CFr1 += count;
+                            CFr2 += count;
+                        }
+                        else if (direction === "rightbottom" && CFr2 > index) {
+                            CFr2 += count;
+                        }
+                    }
+                    else {
+                        CFr1 += count;
+                        CFr2 += count;
+                    }
+                }
+                else if (type === "column") {
+                    if (CFc1 < index) {
+                        if (CFc2 === index && direction === "lefttop") {
+                            CFc2 += count;
+                        }
+                        else if (CFc2 > index) {
+                            CFc2 += count;
+                        }
+                    }
+                    else if (CFc1 === index) {
+                        if (direction === "lefttop") {
+                            CFc1 += count;
+                            CFc2 += count;
+                        }
+                        else if (direction === "rightbottom" && CFc2 > index) {
+                            CFc2 += count;
+                        }
+                    }
+                    else {
+                        CFc1 += count;
+                        CFc2 += count;
+                    }
+                }
+                cf_new_range.push({ row: [CFr1, CFr2], column: [CFc1, CFc2] });
+            }
+            const cf = _.clone(CFarr[i]);
+            cf.cellrange = cf_new_range;
+            newCFarr.push(cf);
+        }
+    }
+    const AFarr = file.luckysheet_alternateformat_save;
+    const newAFarr = [];
+    if (AFarr != null && AFarr.length > 0) {
+        for (let i = 0; i < AFarr.length; i += 1) {
+            let AFr1 = AFarr[i].cellrange.row[0];
+            let AFr2 = AFarr[i].cellrange.row[1];
+            let AFc1 = AFarr[i].cellrange.column[0];
+            let AFc2 = AFarr[i].cellrange.column[1];
+            const af = _.clone(AFarr[i]);
+            if (type === "row") {
+                if (AFr1 < index) {
+                    if (AFr2 === index && direction === "lefttop") {
+                        AFr2 += count;
+                    }
+                    else if (AFr2 > index) {
+                        AFr2 += count;
+                    }
+                }
+                else if (AFr1 === index) {
+                    if (direction === "lefttop") {
+                        AFr1 += count;
+                        AFr2 += count;
+                    }
+                    else if (direction === "rightbottom" && AFr2 > index) {
+                        AFr2 += count;
+                    }
+                }
+                else {
+                    AFr1 += count;
+                    AFr2 += count;
+                }
+            }
+            else if (type === "column") {
+                if (AFc1 < index) {
+                    if (AFc2 === index && direction === "lefttop") {
+                        AFc2 += count;
+                    }
+                    else if (AFc2 > index) {
+                        AFc2 += count;
+                    }
+                }
+                else if (AFc1 === index) {
+                    if (direction === "lefttop") {
+                        AFc1 += count;
+                        AFc2 += count;
+                    }
+                    else if (direction === "rightbottom" && AFc2 > index) {
+                        AFc2 += count;
+                    }
+                }
+                else {
+                    AFc1 += count;
+                    AFc2 += count;
+                }
+            }
+            af.cellrange = { row: [AFr1, AFr2], column: [AFc1, AFc2] };
+            newAFarr.push(af);
+        }
+    }
+    const { frozen } = file;
+    if (frozen) {
+        const normalizedIndex = direction === "lefttop" ? index - 1 : index;
+        if (type === "row" &&
+            (frozen.type === "rangeRow" || frozen.type === "rangeBoth")) {
+            if (((_m = (_l = frozen.range) === null || _l === void 0 ? void 0 : _l.row_focus) !== null && _m !== void 0 ? _m : -1) > normalizedIndex) {
+                frozen.range.row_focus += count;
+            }
+        }
+        if (type === "column" &&
+            (frozen.type === "rangeColumn" || frozen.type === "rangeBoth")) {
+            if (((_p = (_o = frozen.range) === null || _o === void 0 ? void 0 : _o.column_focus) !== null && _p !== void 0 ? _p : -1) > normalizedIndex) {
+                frozen.range.column_focus += count;
+            }
+        }
+    }
+    const { dataVerification } = file;
+    const newDataVerification = {};
+    if (dataVerification != null) {
+        _.forEach(dataVerification, (v, key) => {
+            const r = Number(key.split("_")[0]);
+            const c = Number(key.split("_")[1]);
+            const item = dataVerification[key];
+            if (type === "row") {
+                if (index < r) {
+                    newDataVerification[`${r + count}_${c}`] = item;
+                }
+                else if (index === r) {
+                    if (direction === "lefttop") {
+                        newDataVerification[`${r + count}_${c}`] = item;
+                        for (let i = 0; i < count; i += 1) {
+                            newDataVerification[`${r + i}_${c}`] = item;
+                        }
+                    }
+                    else {
+                        newDataVerification[`${r}_${c}`] = item;
+                        for (let i = 0; i < count; i += 1) {
+                            newDataVerification[`${r + i + 1}_${c}`] = item;
+                        }
+                    }
+                }
+                else {
+                    newDataVerification[`${r}_${c}`] = item;
+                }
+            }
+            else if (type === "column") {
+                if (index < c) {
+                    newDataVerification[`${r}_${c + count}`] = item;
+                }
+                else if (index === c) {
+                    if (direction === "lefttop") {
+                        newDataVerification[`${r}_${c + count}`] = item;
+                        for (let i = 0; i < count; i += 1) {
+                            newDataVerification[`${r}_${c + i}`] = item;
+                        }
+                    }
+                    else {
+                        newDataVerification[`${r}_${c}`] = item;
+                        for (let i = 0; i < count; i += 1) {
+                            newDataVerification[`${r}_${c + i + 1}`] = item;
+                        }
+                    }
+                }
+                else {
+                    newDataVerification[`${r}_${c}`] = item;
+                }
+            }
+        });
+    }
+    const { hyperlink } = file;
+    const newHyperlink = {};
+    if (hyperlink != null) {
+        _.forEach(hyperlink, (v, key) => {
+            const r = Number(key.split("_")[0]);
+            const c = Number(key.split("_")[1]);
+            const item = hyperlink[key];
+            if (type === "row") {
+                if (index < r) {
+                    newHyperlink[`${r + count}_${c}`] = item;
+                }
+                else if (index === r) {
+                    if (direction === "lefttop") {
+                        newHyperlink[`${r + count}_${c}`] = item;
+                    }
+                    else {
+                        newHyperlink[`${r}_${c}`] = item;
+                    }
+                }
+                else {
+                    newHyperlink[`${r}_${c}`] = item;
+                }
+            }
+            else if (type === "column") {
+                if (index < c) {
+                    newHyperlink[`${r}_${c + count}`] = item;
+                }
+                else if (index === c) {
+                    if (direction === "lefttop") {
+                        newHyperlink[`${r}_${c + count}`] = item;
+                    }
+                    else {
+                        newHyperlink[`${r}_${c}`] = item;
+                    }
+                }
+                else {
+                    newHyperlink[`${r}_${c}`] = item;
+                }
+            }
+        });
+    }
+    let type1;
+    if (type === "row") {
+        type1 = "r";
+        if (cfg.rowlen != null) {
+            const rowlen_new = {};
+            const rowReadOnly_new = {};
+            _.forEach(cfg.rowlen, (v, rstr) => {
+                const r = parseFloat(rstr);
+                if (r < index) {
+                    rowlen_new[r] = cfg.rowlen[r];
+                }
+                else if (r === index) {
+                    if (direction === "lefttop") {
+                        rowlen_new[r + count] = cfg.rowlen[r];
+                    }
+                    else if (direction === "rightbottom") {
+                        rowlen_new[r] = cfg.rowlen[r];
+                    }
+                }
+                else {
+                    rowlen_new[r + count] = cfg.rowlen[r];
+                }
+            });
+            _.forEach(cfg.rowReadOnly, (v, rstr) => {
+                const r = parseFloat(rstr);
+                if (r < index) {
+                    rowReadOnly_new[r] = cfg.rowReadOnly[r];
+                }
+                else if (r > index) {
+                    rowReadOnly_new[r + count] = cfg.rowReadOnly[r];
+                }
+            });
+            cfg.rowlen = rowlen_new;
+            cfg.rowReadOnly = rowReadOnly_new;
+        }
+        if (cfg.customHeight != null) {
+            const customHeight_new = {};
+            _.forEach(cfg.customHeight, (v, rstr) => {
+                const r = parseFloat(rstr);
+                if (r < index) {
+                    customHeight_new[r] = cfg.customHeight[r];
+                }
+                else if (r === index) {
+                    if (direction === "lefttop") {
+                        customHeight_new[r + count] = cfg.customHeight[r];
+                    }
+                    else if (direction === "rightbottom") {
+                        customHeight_new[r] = cfg.customHeight[r];
+                    }
+                }
+                else {
+                    customHeight_new[r + count] = cfg.customHeight[r];
+                }
+            });
+            cfg.customHeight = customHeight_new;
+        }
+        if (cfg.customHeight != null) {
+            const customHeight_new = {};
+            _.forEach(cfg.customHeight, (v, rstr) => {
+                const r = parseFloat(rstr);
+                if (r < index) {
+                    customHeight_new[r] = cfg.customHeight[r];
+                }
+                else if (r === index) {
+                    if (direction === "lefttop") {
+                        customHeight_new[r + count] = cfg.customHeight[r];
+                    }
+                    else if (direction === "rightbottom") {
+                        customHeight_new[r] = cfg.customHeight[r];
+                    }
+                }
+                else {
+                    customHeight_new[r + count] = cfg.customHeight[r];
+                }
+            });
+            cfg.customHeight = customHeight_new;
+        }
+        if (cfg.rowhidden != null) {
+            const rowhidden_new = {};
+            _.forEach(cfg.rowhidden, (v, rstr) => {
+                const r = parseFloat(rstr);
+                if (r < index) {
+                    rowhidden_new[r] = cfg.rowhidden[r];
+                }
+                else if (r === index) {
+                    if (direction === "lefttop") {
+                        rowhidden_new[r + count] = cfg.rowhidden[r];
+                    }
+                    else if (direction === "rightbottom") {
+                        rowhidden_new[r] = cfg.rowhidden[r];
+                    }
+                }
+                else {
+                    rowhidden_new[r + count] = cfg.rowhidden[r];
+                }
+            });
+            cfg.rowhidden = rowhidden_new;
+        }
+        const row = [];
+        const curRow = [...d][index];
+        for (let c = 0; c < d[0].length; c += 1) {
+            const cell = curRow[c];
+            let templateCell = null;
+            if ((cell === null || cell === void 0 ? void 0 : cell.mc) && (direction === "rightbottom" || index !== cell.mc.r)) {
+                if (cell.mc.rs) {
+                    cell.mc.rs += count;
+                }
+                templateCell = { ...cell };
+                if (!((_r = (_q = d === null || d === void 0 ? void 0 : d[index + 1]) === null || _q === void 0 ? void 0 : _q[c]) === null || _r === void 0 ? void 0 : _r.mc)) {
+                    templateCell.mc = undefined;
+                }
+                delete templateCell.v;
+                delete templateCell.m;
+                delete templateCell.ps;
+                delete templateCell.f;
+            }
+            row.push(templateCell);
+        }
+        const cellBorderConfig = [];
+        if (cfg.borderInfo && cfg.borderInfo.length > 0) {
+            const borderInfo = [];
+            for (let i = 0; i < cfg.borderInfo.length; i += 1) {
+                const { rangeType } = cfg.borderInfo[i];
+                if (rangeType === "range") {
+                    const borderRange = cfg.borderInfo[i].range;
+                    const emptyRange = [];
+                    for (let j = 0; j < borderRange.length; j += 1) {
+                        let bd_r1 = borderRange[j].row[0];
+                        let bd_r2 = borderRange[j].row[1];
+                        if (direction === "lefttop") {
+                            if (index <= bd_r1) {
+                                bd_r1 += count;
+                                bd_r2 += count;
+                            }
+                            else if (index <= bd_r2) {
+                                bd_r2 += count;
+                            }
+                        }
+                        else {
+                            if (index < bd_r1) {
+                                bd_r1 += count;
+                                bd_r2 += count;
+                            }
+                            else if (index < bd_r2) {
+                                bd_r2 += count;
+                            }
+                        }
+                        if (bd_r2 >= bd_r1) {
+                            emptyRange.push({
+                                row: [bd_r1, bd_r2],
+                                column: borderRange[j].column,
+                            });
+                        }
+                    }
+                    if (emptyRange.length > 0) {
+                        const bd_obj = {
+                            rangeType: "range",
+                            borderType: cfg.borderInfo[i].borderType,
+                            style: cfg.borderInfo[i].style,
+                            color: cfg.borderInfo[i].color,
+                            range: emptyRange,
+                        };
+                        borderInfo.push(bd_obj);
+                    }
+                }
+                else if (rangeType === "cell") {
+                    let { row_index } = cfg.borderInfo[i].value;
+                    if (row_index === index) {
+                        cellBorderConfig.push(JSON.parse(JSON.stringify(cfg.borderInfo[i])));
+                    }
+                    if (direction === "lefttop") {
+                        if (index <= row_index) {
+                            row_index += count;
+                        }
+                    }
+                    else {
+                        if (index < row_index) {
+                            row_index += count;
+                        }
+                    }
+                    cfg.borderInfo[i].value.row_index = row_index;
+                    borderInfo.push(cfg.borderInfo[i]);
+                }
+            }
+            cfg.borderInfo = borderInfo;
+        }
+        const arr = [];
+        for (let r = 0; r < count; r += 1) {
+            arr.push(JSON.stringify(row));
+            if (cellBorderConfig.length) {
+                const cellBorderConfigCopy = _.cloneDeep(cellBorderConfig);
+                cellBorderConfigCopy.forEach((item) => {
+                    if (direction === "rightbottom") {
+                        item.value.row_index += r + 1;
+                    }
+                    else if (direction === "lefttop") {
+                        item.value.row_index += r;
+                    }
+                });
+                (_s = cfg.borderInfo) === null || _s === void 0 ? void 0 : _s.push(...cellBorderConfigCopy);
+            }
+        }
+        if (direction === "lefttop") {
+            if (index === 0) {
+                new Function("d", `return d.unshift(${arr.join(",")})`)(d);
+            }
+            else {
+                new Function("d", `return d.splice(${index}, 0, ${arr.join(",")})`)(d);
+            }
+        }
+        else {
+            new Function("d", `return d.splice(${index + 1}, 0, ${arr.join(",")})`)(d);
+        }
+    }
+    else {
+        type1 = "c";
+        if (cfg.columnlen != null) {
+            const columnlen_new = {};
+            const columnReadOnly_new = {};
+            _.forEach(cfg.columnlen, (v, cstr) => {
+                const c = parseFloat(cstr);
+                if (c < index) {
+                    columnlen_new[c] = cfg.columnlen[c];
+                }
+                else if (c === index) {
+                    if (direction === "lefttop") {
+                        columnlen_new[c + count] = cfg.columnlen[c];
+                    }
+                    else if (direction === "rightbottom") {
+                        columnlen_new[c] = cfg.columnlen[c];
+                    }
+                }
+                else {
+                    columnlen_new[c + count] = cfg.columnlen[c];
+                }
+            });
+            _.forEach(cfg.colReadOnly, (v, cstr) => {
+                const c = parseFloat(cstr);
+                if (c < index) {
+                    columnReadOnly_new[c] = cfg.colReadOnly[c];
+                }
+                else if (c > index) {
+                    columnReadOnly_new[c + count] = cfg.colReadOnly[c];
+                }
+            });
+            cfg.columnlen = columnlen_new;
+            cfg.colReadOnly = columnReadOnly_new;
+        }
+        if (cfg.customWidth != null) {
+            const customWidth_new = {};
+            _.forEach(cfg.customWidth, (v, cstr) => {
+                const c = parseFloat(cstr);
+                if (c < index) {
+                    customWidth_new[c] = cfg.customWidth[c];
+                }
+                else if (c === index) {
+                    if (direction === "lefttop") {
+                        customWidth_new[c + count] = cfg.customWidth[c];
+                    }
+                    else if (direction === "rightbottom") {
+                        customWidth_new[c] = cfg.customWidth[c];
+                    }
+                }
+                else {
+                    customWidth_new[c + count] = cfg.customWidth[c];
+                }
+            });
+            cfg.customWidth = customWidth_new;
+        }
+        if (cfg.customWidth != null) {
+            const customWidth_new = {};
+            _.forEach(cfg.customWidth, (v, cstr) => {
+                const c = parseFloat(cstr);
+                if (c < index) {
+                    customWidth_new[c] = cfg.customWidth[c];
+                }
+                else if (c === index) {
+                    if (direction === "lefttop") {
+                        customWidth_new[c + count] = cfg.customWidth[c];
+                    }
+                    else if (direction === "rightbottom") {
+                        customWidth_new[c] = cfg.customWidth[c];
+                    }
+                }
+                else {
+                    customWidth_new[c + count] = cfg.customWidth[c];
+                }
+            });
+            cfg.customWidth = customWidth_new;
+        }
+        if (cfg.colhidden != null) {
+            const colhidden_new = {};
+            _.forEach(cfg.colhidden, (v, cstr) => {
+                const c = parseFloat(cstr);
+                if (c < index) {
+                    colhidden_new[c] = cfg.colhidden[c];
+                }
+                else if (c === index) {
+                    if (direction === "lefttop") {
+                        colhidden_new[c + count] = cfg.colhidden[c];
+                    }
+                    else if (direction === "rightbottom") {
+                        colhidden_new[c] = cfg.colhidden[c];
+                    }
+                }
+                else {
+                    colhidden_new[c + count] = cfg.colhidden[c];
+                }
+            });
+            cfg.colhidden = colhidden_new;
+        }
+        const col = [];
+        const curd = [...d];
+        for (let r = 0; r < d.length; r += 1) {
+            const cell = curd[r][index];
+            let templateCell = null;
+            if ((cell === null || cell === void 0 ? void 0 : cell.mc) && (direction === "rightbottom" || index !== cell.mc.c)) {
+                if (cell.mc.cs) {
+                    cell.mc.cs += count;
+                }
+                templateCell = { ...cell };
+                if (!((_u = (_t = curd === null || curd === void 0 ? void 0 : curd[r]) === null || _t === void 0 ? void 0 : _t[index + 1]) === null || _u === void 0 ? void 0 : _u.mc)) {
+                    templateCell.mc = undefined;
+                }
+                delete templateCell.v;
+                delete templateCell.m;
+                delete templateCell.ps;
+                delete templateCell.f;
+            }
+            col.push(templateCell);
+        }
+        const cellBorderConfig = [];
+        if (cfg.borderInfo && cfg.borderInfo.length > 0) {
+            const borderInfo = [];
+            for (let i = 0; i < cfg.borderInfo.length; i += 1) {
+                const { rangeType } = cfg.borderInfo[i];
+                if (rangeType === "range") {
+                    const borderRange = cfg.borderInfo[i].range;
+                    const emptyRange = [];
+                    for (let j = 0; j < borderRange.length; j += 1) {
+                        let bd_c1 = borderRange[j].column[0];
+                        let bd_c2 = borderRange[j].column[1];
+                        if (direction === "lefttop") {
+                            if (index <= bd_c1) {
+                                bd_c1 += count;
+                                bd_c2 += count;
+                            }
+                            else if (index <= bd_c2) {
+                                bd_c2 += count;
+                            }
+                        }
+                        else {
+                            if (index < bd_c1) {
+                                bd_c1 += count;
+                                bd_c2 += count;
+                            }
+                            else if (index < bd_c2) {
+                                bd_c2 += count;
+                            }
+                        }
+                        if (bd_c2 >= bd_c1) {
+                            emptyRange.push({
+                                row: borderRange[j].row,
+                                column: [bd_c1, bd_c2],
+                            });
+                        }
+                    }
+                    if (emptyRange.length > 0) {
+                        const bd_obj = {
+                            rangeType: "range",
+                            borderType: cfg.borderInfo[i].borderType,
+                            style: cfg.borderInfo[i].style,
+                            color: cfg.borderInfo[i].color,
+                            range: emptyRange,
+                        };
+                        borderInfo.push(bd_obj);
+                    }
+                }
+                else if (rangeType === "cell") {
+                    let { col_index } = cfg.borderInfo[i].value;
+                    if (col_index === index) {
+                        cellBorderConfig.push(JSON.parse(JSON.stringify(cfg.borderInfo[i])));
+                    }
+                    if (direction === "lefttop") {
+                        if (index <= col_index) {
+                            col_index += count;
+                        }
+                    }
+                    else {
+                        if (index < col_index) {
+                            col_index += count;
+                        }
+                    }
+                    cfg.borderInfo[i].value.col_index = col_index;
+                    borderInfo.push(cfg.borderInfo[i]);
+                }
+            }
+            cfg.borderInfo = borderInfo;
+        }
+        if (cellBorderConfig.length) {
+            for (let i = 0; i < count; i += 1) {
+                const cellBorderConfigCopy = _.cloneDeep(cellBorderConfig);
+                cellBorderConfigCopy.forEach((item) => {
+                    if (direction === "rightbottom") {
+                        item.value.col_index += i + 1;
+                    }
+                    else if (direction === "lefttop") {
+                        item.value.col_index += i;
+                    }
+                });
+                (_v = cfg.borderInfo) === null || _v === void 0 ? void 0 : _v.push(...cellBorderConfigCopy);
+            }
+        }
+        for (let r = 0; r < d.length; r += 1) {
+            const row = d[r];
+            for (let i = 0; i < count; i += 1) {
+                if (direction === "lefttop") {
+                    if (index === 0) {
+                        row.unshift(col[r]);
+                    }
+                    else {
+                        row.splice(index, 0, col[r]);
+                    }
+                }
+                else {
+                    row.splice(index + 1, 0, col[r]);
+                }
+            }
+        }
+    }
+    file.data = d;
+    file.config = cfg;
+    file.calcChain = newCalcChain;
+    if (newFilterObj != null) {
+        file.filter = newFilterObj.filter;
+        file.filter_select = newFilterObj.filter_select;
+    }
+    file.luckysheet_conditionformat_save = newCFarr;
+    file.luckysheet_alternateformat_save = newAFarr;
+    file.dataVerification = newDataVerification;
+    file.hyperlink = newHyperlink;
+    if (file.id === ctx.currentSheetId) {
+        ctx.config = cfg;
+    }
+    let range = null;
+    if (type === "row") {
+        if (direction === "lefttop") {
+            range = [
+                { row: [index, index + count - 1], column: [0, d[0].length - 1] },
+            ];
+        }
+        else {
+            range = [
+                { row: [index + 1, index + count], column: [0, d[0].length - 1] },
+            ];
+        }
+        file.row = file.data.length;
+    }
+    else {
+        if (direction === "lefttop") {
+            range = [{ row: [0, d.length - 1], column: [index, index + count - 1] }];
+        }
+        else {
+            range = [{ row: [0, d.length - 1], column: [index + 1, index + count] }];
+        }
+        file.column = (_w = file.data[0]) === null || _w === void 0 ? void 0 : _w.length;
+    }
+    if (changeSelection) {
+        file.luckysheet_select_save = range;
+        if (file.id === ctx.currentSheetId) {
+            ctx.luckysheet_select_save = range;
+        }
+    }
+    refreshLocalMergeData(merge_new, file);
+    ctx.formulaCache.formulaCellInfoMap = null;
+}
+/**
+ * @param {Context} ctx
+ * @param {{
+    type: "row" | "column";
+    start: number;
+    end: number;
+    id?: string;
+}} op
+ */
+export function deleteRowCol(ctx, op) {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+    const { type } = op;
+    let { start, end, id } = op;
+    id = id || ctx.currentSheetId;
+    const curOrder = getSheetIndex(ctx, id);
+    if (curOrder == null)
+        return;
+    const file = ctx.luckysheetfile[curOrder];
+    if (!file)
+        return;
+    const cfg = file.config || {};
+    if (type === "row") {
+        for (let r = start; r <= end; r += 1) {
+            if ((_a = cfg.rowReadOnly) === null || _a === void 0 ? void 0 : _a[r]) {
+                throw new Error("readOnly");
+            }
+        }
+    }
+    else {
+        for (let c = start; c <= end; c += 1) {
+            if ((_b = cfg.colReadOnly) === null || _b === void 0 ? void 0 : _b[c]) {
+                throw new Error("readOnly");
+            }
+        }
+    }
+    const d = file.data;
+    if (!d)
+        return;
+    if (start < 0) {
+        start = 0;
+    }
+    if (end < 0) {
+        end = 0;
+    }
+    if (type === "row") {
+        if (start > d.length - 1) {
+            start = d.length - 1;
+        }
+        if (end > d.length - 1) {
+            end = d.length - 1;
+        }
+    }
+    else {
+        if (start > d[0].length - 1) {
+            start = d[0].length - 1;
+        }
+        if (end > d[0].length - 1) {
+            end = d[0].length - 1;
+        }
+    }
+    if (start > end) {
+        return;
+    }
+    const slen = end - start + 1;
+    if (cfg.merge == null) {
+        cfg.merge = {};
+    }
+    const merge_new = {};
+    _.forEach(cfg.merge, (mc) => {
+        const { r } = mc;
+        const { c } = mc;
+        const { rs } = mc;
+        const { cs } = mc;
+        if (type === "row") {
+            if (r < start) {
+                if (r + rs - 1 < start) {
+                    merge_new[`${r}_${c}`] = { r, c, rs, cs };
+                }
+                else if (r + rs - 1 >= start && r + rs - 1 < end) {
+                    merge_new[`${r}_${c}`] = { r, c, rs: start - r, cs };
+                }
+                else if (r + rs - 1 >= end) {
+                    merge_new[`${r}_${c}`] = { r, c, rs: rs - slen, cs };
+                }
+            }
+            else if (r >= start && r <= end) {
+                if (r + rs - 1 > end) {
+                    merge_new[`${start}_${c}`] = {
+                        r: start,
+                        c,
+                        rs: r + rs - 1 - end,
+                        cs,
+                    };
+                }
+            }
+            else if (r > end) {
+                merge_new[`${r - slen}_${c}`] = { r: r - slen, c, rs, cs };
+            }
+        }
+        else if (type === "column") {
+            if (c < start) {
+                if (c + cs - 1 < start) {
+                    merge_new[`${r}_${c}`] = { r, c, rs, cs };
+                }
+                else if (c + cs - 1 >= start && c + cs - 1 < end) {
+                    merge_new[`${r}_${c}`] = { r, c, rs, cs: start - c };
+                }
+                else if (c + cs - 1 >= end) {
+                    merge_new[`${r}_${c}`] = { r, c, rs, cs: cs - slen };
+                }
+            }
+            else if (c >= start && c <= end) {
+                if (c + cs - 1 > end) {
+                    merge_new[`${r}_${start}`] = {
+                        r,
+                        c: start,
+                        rs,
+                        cs: c + cs - 1 - end,
+                    };
+                }
+            }
+            else if (c > end) {
+                merge_new[`${r}_${c - slen}`] = { r, c: c - slen, rs, cs };
+            }
+        }
+    });
+    cfg.merge = merge_new;
+    const newCalcChain = [];
+    for (let SheetIndex = 0; SheetIndex < ctx.luckysheetfile.length; SheetIndex += 1) {
+        if (_.isNil(ctx.luckysheetfile[SheetIndex].calcChain) ||
+            ctx.luckysheetfile.length === 0) {
+            continue;
+        }
+        const { calcChain } = ctx.luckysheetfile[SheetIndex];
+        const { data } = ctx.luckysheetfile[SheetIndex];
+        for (let i = 0; i < calcChain.length; i += 1) {
+            const calc = _.cloneDeep(calcChain[i]);
+            const calc_r = calc.r;
+            const calc_c = calc.c;
+            const calc_i = calc.id;
+            const calc_funcStr = getcellFormula(ctx, calc_r, calc_c, calc_i);
+            if (type === "row" && SheetIndex === curOrder) {
+                if (calc_r < start || calc_r > end) {
+                    const functionStr = `=${functionStrChange(calc_funcStr, "del", "row", null, start, slen)}`;
+                    if (((_d = (_c = data[calc_r]) === null || _c === void 0 ? void 0 : _c[calc_c]) === null || _d === void 0 ? void 0 : _d.f) === calc_funcStr) {
+                        data[calc_r][calc_c].f = functionStr;
+                    }
+                    if (calc_r > end) {
+                        calc.r = calc_r - slen;
+                    }
+                    newCalcChain.push(calc);
+                }
+            }
+            else if (type === "row") {
+                const functionStr = `=${functionStrChange(calc_funcStr, "del", "row", null, start, slen)}`;
+                if (((_f = (_e = data[calc_r]) === null || _e === void 0 ? void 0 : _e[calc_c]) === null || _f === void 0 ? void 0 : _f.f) === calc_funcStr) {
+                    data[calc_r][calc_c].f = functionStr;
+                }
+            }
+            else if (type === "column" && SheetIndex === curOrder) {
+                if (calc_c < start || calc_c > end) {
+                    const functionStr = `=${functionStrChange(calc_funcStr, "del", "col", null, start, slen)}`;
+                    if (((_h = (_g = data[calc_r]) === null || _g === void 0 ? void 0 : _g[calc_c]) === null || _h === void 0 ? void 0 : _h.f) === calc_funcStr) {
+                        data[calc_r][calc_c].f = functionStr;
+                    }
+                    if (calc_c > end) {
+                        calc.c = calc_c - slen;
+                    }
+                    newCalcChain.push(calc);
+                }
+            }
+            else if (type === "column") {
+                const functionStr = `=${functionStrChange(calc_funcStr, "del", "col", null, start, slen)}`;
+                if (((_k = (_j = data[calc_r]) === null || _j === void 0 ? void 0 : _j[calc_c]) === null || _k === void 0 ? void 0 : _k.f) === calc_funcStr) {
+                    data[calc_r][calc_c].f = functionStr;
+                }
+            }
+        }
+    }
+    const { filter_select } = file;
+    const { filter } = file;
+    let newFilterObj = null;
+    if (!_.isEmpty(filter_select) && filter_select != null) {
+        newFilterObj = { filter_select: null, filter: null };
+        let f_r1 = filter_select.row[0];
+        let f_r2 = filter_select.row[1];
+        let f_c1 = filter_select.column[0];
+        let f_c2 = filter_select.column[1];
+        if (type === "row") {
+            if (f_r1 > end) {
+                f_r1 -= slen;
+                f_r2 -= slen;
+                newFilterObj.filter_select = {
+                    row: [f_r1, f_r2],
+                    column: [f_c1, f_c2],
+                };
+            }
+            else if (f_r1 < start) {
+                if (f_r2 < start) {
+                }
+                else if (f_r2 <= end) {
+                    f_r2 = start - 1;
+                }
+                else {
+                    f_r2 -= slen;
+                }
+                newFilterObj.filter_select = {
+                    row: [f_r1, f_r2],
+                    column: [f_c1, f_c2],
+                };
+            }
+            if (newFilterObj.filter_select != null && filter != null) {
+                _.forEach(filter, (v, k) => {
+                    const f_rowhidden = filter[k].rowhidden;
+                    const f_rowhidden_new = {};
+                    _.forEach(f_rowhidden, (v1, nstr) => {
+                        const n = parseFloat(nstr);
+                        if (n < start) {
+                            f_rowhidden_new[n] = 0;
+                        }
+                        else if (n > end) {
+                            f_rowhidden_new[n - slen] = 0;
+                        }
+                    });
+                    if (!_.isEmpty(f_rowhidden_new)) {
+                        if (newFilterObj.filter == null) {
+                            newFilterObj.filter = {};
+                        }
+                        newFilterObj.filter[k] = _.cloneDeep(filter[k]);
+                        newFilterObj.filter[k].rowhidden = f_rowhidden_new;
+                        newFilterObj.filter[k].str = f_r1;
+                        newFilterObj.filter[k].edr = f_r2;
+                    }
+                });
+            }
+        }
+        else if (type === "column") {
+            if (f_c1 > end) {
+                f_c1 -= slen;
+                f_c2 -= slen;
+                newFilterObj.filter_select = {
+                    row: [f_r1, f_r2],
+                    column: [f_c1, f_c2],
+                };
+            }
+            else if (f_c1 < start) {
+                if (f_c2 < start) {
+                }
+                else if (f_c2 <= end) {
+                    f_c2 = start - 1;
+                }
+                else {
+                    f_c2 -= slen;
+                }
+                newFilterObj.filter_select = {
+                    row: [f_r1, f_r2],
+                    column: [f_c1, f_c2],
+                };
+            }
+            else {
+                if (f_c2 > end) {
+                    f_c1 = start;
+                    f_c2 -= slen;
+                    newFilterObj.filter_select = {
+                        row: [f_r1, f_r2],
+                        column: [f_c1, f_c2],
+                    };
+                }
+            }
+            if (newFilterObj.filter_select != null && filter != null) {
+                _.forEach(filter, (v, k) => {
+                    let f_cindex = filter[k].cindex;
+                    if (f_cindex < start) {
+                        if (newFilterObj.filter == null) {
+                            newFilterObj.filter = {};
+                        }
+                        newFilterObj.filter[f_cindex - f_c1] = _.cloneDeep(filter[k]);
+                        newFilterObj.filter[f_cindex - f_c1].edc = f_c2;
+                    }
+                    else if (f_cindex > end) {
+                        f_cindex -= slen;
+                        if (newFilterObj.filter == null) {
+                            newFilterObj.filter = {};
+                        }
+                        newFilterObj.filter[f_cindex - f_c1] = _.cloneDeep(filter[k]);
+                        newFilterObj.filter[f_cindex - f_c1].cindex = f_cindex;
+                        newFilterObj.filter[f_cindex - f_c1].stc = f_c1;
+                        newFilterObj.filter[f_cindex - f_c1].edc = f_c2;
+                    }
+                });
+            }
+        }
+    }
+    if (newFilterObj != null && newFilterObj.filter != null) {
+        if (cfg.rowhidden == null) {
+            cfg.rowhidden = {};
+        }
+        _.forEach(newFilterObj.filter, (v, k) => {
+            const f_rowhidden = newFilterObj.filter[k].rowhidden;
+            _.forEach(f_rowhidden, (v1, n) => {
+                cfg.rowhidden[n] = 0;
+            });
+        });
+    }
+    const CFarr = file.luckysheet_conditionformat_save;
+    const newCFarr = [];
+    if (CFarr != null && CFarr.length > 0) {
+        for (let i = 0; i < CFarr.length; i += 1) {
+            const cf_range = CFarr[i].cellrange;
+            const cf_new_range = [];
+            for (let j = 0; j < cf_range.length; j += 1) {
+                let CFr1 = cf_range[j].row[0];
+                let CFr2 = cf_range[j].row[1];
+                let CFc1 = cf_range[j].column[0];
+                let CFc2 = cf_range[j].column[1];
+                if (type === "row") {
+                    if (!(CFr1 >= start && CFr2 <= end)) {
+                        if (CFr1 > end) {
+                            CFr1 -= slen;
+                            CFr2 -= slen;
+                        }
+                        else if (CFr1 < start) {
+                            if (CFr2 < start) {
+                            }
+                            else if (CFr2 <= end) {
+                                CFr2 = start - 1;
+                            }
+                            else {
+                                CFr2 -= slen;
+                            }
+                        }
+                        else {
+                            if (CFr2 > end) {
+                                CFr1 = start;
+                                CFr2 -= slen;
+                            }
+                        }
+                        cf_new_range.push({ row: [CFr1, CFr2], column: [CFc1, CFc2] });
+                    }
+                }
+                else if (type === "column") {
+                    if (!(CFc1 >= start && CFc2 <= end)) {
+                        if (CFc1 > end) {
+                            CFc1 -= slen;
+                            CFc2 -= slen;
+                        }
+                        else if (CFc1 < start) {
+                            if (CFc2 < start) {
+                            }
+                            else if (CFc2 <= end) {
+                                CFc2 = start - 1;
+                            }
+                            else {
+                                CFc2 -= slen;
+                            }
+                        }
+                        else {
+                            if (CFc2 > end) {
+                                CFc1 = start;
+                                CFc2 -= slen;
+                            }
+                        }
+                        cf_new_range.push({ row: [CFr1, CFr2], column: [CFc1, CFc2] });
+                    }
+                }
+            }
+            if (cf_new_range.length > 0) {
+                const cf = _.clone(CFarr[i]);
+                cf.cellrange = cf_new_range;
+                newCFarr.push(cf);
+            }
+        }
+    }
+    const AFarr = file.luckysheet_alternateformat_save;
+    const newAFarr = [];
+    if (AFarr != null && AFarr.length > 0) {
+        for (let i = 0; i < AFarr.length; i += 1) {
+            let AFr1 = AFarr[i].cellrange.row[0];
+            let AFr2 = AFarr[i].cellrange.row[1];
+            let AFc1 = AFarr[i].cellrange.column[0];
+            let AFc2 = AFarr[i].cellrange.column[1];
+            if (type === "row") {
+                if (!(AFr1 >= start && AFr2 <= end)) {
+                    const af = _.clone(AFarr[i]);
+                    if (AFr1 > end) {
+                        AFr1 -= slen;
+                        AFr2 -= slen;
+                    }
+                    else if (AFr1 < start) {
+                        if (AFr2 < start) {
+                        }
+                        else if (AFr2 <= end) {
+                            AFr2 = start - 1;
+                        }
+                        else {
+                            AFr2 -= slen;
+                        }
+                    }
+                    else {
+                        if (AFr2 > end) {
+                            AFr1 = start;
+                            AFr2 -= slen;
+                        }
+                    }
+                    af.cellrange = { row: [AFr1, AFr2], column: [AFc1, AFc2] };
+                    newAFarr.push(af);
+                }
+            }
+            else if (type === "column") {
+                if (!(AFc1 >= start && AFc2 <= end)) {
+                    const af = _.clone(AFarr[i]);
+                    if (AFc1 > end) {
+                        AFc1 -= slen;
+                        AFc2 -= slen;
+                    }
+                    else if (AFc1 < start) {
+                        if (AFc2 < start) {
+                        }
+                        else if (AFc2 <= end) {
+                            AFc2 = start - 1;
+                        }
+                        else {
+                            AFc2 -= slen;
+                        }
+                    }
+                    else {
+                        if (AFc2 > end) {
+                            AFc1 = start;
+                            AFc2 -= slen;
+                        }
+                    }
+                    af.cellrange = { row: [AFr1, AFr2], column: [AFc1, AFc2] };
+                    newAFarr.push(af);
+                }
+            }
+        }
+    }
+    const { frozen } = file;
+    if (frozen) {
+        if (type === "row" &&
+            (frozen.type === "rangeRow" || frozen.type === "rangeBoth")) {
+            if (((_m = (_l = frozen.range) === null || _l === void 0 ? void 0 : _l.row_focus) !== null && _m !== void 0 ? _m : -1) >= start) {
+                frozen.range.row_focus -=
+                    Math.min(end, frozen.range.row_focus) - start + 1;
+            }
+        }
+        if (type === "column" &&
+            (frozen.type === "rangeColumn" || frozen.type === "rangeBoth")) {
+            if (((_p = (_o = frozen.range) === null || _o === void 0 ? void 0 : _o.column_focus) !== null && _p !== void 0 ? _p : -1) >= start) {
+                frozen.range.column_focus -=
+                    Math.min(end, frozen.range.column_focus) - start + 1;
+            }
+        }
+    }
+    const { dataVerification } = file;
+    const newDataVerification = {};
+    if (dataVerification != null) {
+        _.forEach(dataVerification, (v, key) => {
+            const r = Number(key.split("_")[0]);
+            const c = Number(key.split("_")[1]);
+            const item = dataVerification[key];
+            if (type === "row") {
+                if (r < start) {
+                    newDataVerification[`${r}_${c}`] = item;
+                }
+                else if (r > end) {
+                    newDataVerification[`${r - slen}_${c}`] = item;
+                }
+            }
+            else if (type === "column") {
+                if (c < start) {
+                    newDataVerification[`${r}_${c}`] = item;
+                }
+                else if (c > end) {
+                    newDataVerification[`${r}_${c - slen}`] = item;
+                }
+            }
+        });
+    }
+    const { hyperlink } = file;
+    const newHyperlink = {};
+    if (hyperlink != null) {
+        _.forEach(hyperlink, (v, key) => {
+            const r = Number(key.split("_")[0]);
+            const c = Number(key.split("_")[1]);
+            const item = hyperlink[key];
+            if (type === "row") {
+                if (r < start) {
+                    newHyperlink[`${r}_${c}`] = item;
+                }
+                else if (r > end) {
+                    newHyperlink[`${r - slen}_${c}`] = item;
+                }
+            }
+            else if (type === "column") {
+                if (c < start) {
+                    newHyperlink[`${r}_${c}`] = item;
+                }
+                else if (c > end) {
+                    newHyperlink[`${r}_${c - slen}`] = item;
+                }
+            }
+        });
+    }
+    let type1;
+    if (type === "row") {
+        type1 = "r";
+        if (cfg.rowlen == null) {
+            cfg.rowlen = {};
+        }
+        const rowlen_new = {};
+        const rowReadOnly_new = {};
+        _.forEach(cfg.rowlen, (v, rstr) => {
+            const r = parseFloat(rstr);
+            if (r < start) {
+                rowlen_new[r] = cfg.rowlen[r];
+            }
+            else if (r > end) {
+                rowlen_new[r - slen] = cfg.rowlen[r];
+            }
+        });
+        _.forEach(cfg.rowReadOnly, (v, rstr) => {
+            const r = parseFloat(rstr);
+            if (r < start) {
+                rowReadOnly_new[r] = cfg.rowReadOnly[r];
+            }
+            else if (r > end) {
+                rowReadOnly_new[r - slen] = cfg.rowReadOnly[r];
+            }
+        });
+        cfg.rowlen = rowlen_new;
+        cfg.rowReadOnly = rowReadOnly_new;
+        if (cfg.rowhidden == null) {
+            cfg.rowhidden = {};
+        }
+        const rowhidden_new = {};
+        _.forEach(cfg.rowhidden, (v, rstr) => {
+            const r = parseFloat(rstr);
+            if (r < start) {
+                rowhidden_new[r] = cfg.rowhidden[r];
+            }
+            else if (r > end) {
+                rowhidden_new[r - slen] = cfg.rowhidden[r];
+            }
+        });
+        if (cfg.customHeight == null) {
+            cfg.customHeight = {};
+            const customHeight_new = {};
+            _.forEach(cfg.customHeight, (v, rstr) => {
+                const r = parseFloat(rstr);
+                if (r < start) {
+                    customHeight_new[r] = cfg.customHeight[r];
+                }
+                else if (r > end) {
+                    customHeight_new[r - slen] = cfg.customHeight[r];
+                }
+            });
+            cfg.customHeight = customHeight_new;
+        }
+        if (cfg.customHeight == null) {
+            cfg.customHeight = {};
+            const customHeight_new = {};
+            _.forEach(cfg.customHeight, (v, rstr) => {
+                const r = parseFloat(rstr);
+                if (r < start) {
+                    customHeight_new[r] = cfg.customHeight[r];
+                }
+                else if (r > end) {
+                    customHeight_new[r - slen] = cfg.customHeight[r];
+                }
+            });
+            cfg.customHeight = customHeight_new;
+        }
+        cfg.rowhidden = rowhidden_new;
+        if (cfg.borderInfo && cfg.borderInfo.length > 0) {
+            const borderInfo = [];
+            for (let i = 0; i < cfg.borderInfo.length; i += 1) {
+                const { rangeType } = cfg.borderInfo[i];
+                if (rangeType === "range") {
+                    const borderRange = cfg.borderInfo[i].range;
+                    const emptyRange = [];
+                    for (let j = 0; j < borderRange.length; j += 1) {
+                        let bd_r1 = borderRange[j].row[0];
+                        let bd_r2 = borderRange[j].row[1];
+                        for (let r = start; r <= end; r += 1) {
+                            if (r < borderRange[j].row[0]) {
+                                bd_r1 -= 1;
+                                bd_r2 -= 1;
+                            }
+                            else if (r <= borderRange[j].row[1]) {
+                                bd_r2 -= 1;
+                            }
+                        }
+                        if (bd_r2 >= bd_r1) {
+                            emptyRange.push({
+                                row: [bd_r1, bd_r2],
+                                column: borderRange[j].column,
+                            });
+                        }
+                    }
+                    if (emptyRange.length > 0) {
+                        const bd_obj = {
+                            rangeType: "range",
+                            borderType: cfg.borderInfo[i].borderType,
+                            style: cfg.borderInfo[i].style,
+                            color: cfg.borderInfo[i].color,
+                            range: emptyRange,
+                        };
+                        borderInfo.push(bd_obj);
+                    }
+                }
+                else if (rangeType === "cell") {
+                    const { row_index } = cfg.borderInfo[i].value;
+                    if (row_index < start) {
+                        borderInfo.push(cfg.borderInfo[i]);
+                    }
+                    else if (row_index > end) {
+                        cfg.borderInfo[i].value.row_index = row_index - (end - start + 1);
+                        borderInfo.push(cfg.borderInfo[i]);
+                    }
+                }
+            }
+            cfg.borderInfo = borderInfo;
+        }
+        d.splice(start, slen);
+        file.row = d.length;
+    }
+    else {
+        type1 = "c";
+        if (cfg.columnlen == null) {
+            cfg.columnlen = {};
+        }
+        const columnlen_new = {};
+        const columnReadOnly_new = {};
+        _.forEach(cfg.columnlen, (v, cstr) => {
+            const c = parseFloat(cstr);
+            if (c < start) {
+                columnlen_new[c] = cfg.columnlen[c];
+            }
+            else if (c > end) {
+                columnlen_new[c - slen] = cfg.columnlen[c];
+            }
+        });
+        _.forEach(cfg.colReadOnly, (v, cstr) => {
+            const c = parseFloat(cstr);
+            if (c < start) {
+                columnReadOnly_new[c] = cfg.colReadOnly[c];
+            }
+            else if (c > end) {
+                columnReadOnly_new[c - slen] = cfg.colReadOnly[c];
+            }
+        });
+        cfg.columnlen = columnlen_new;
+        cfg.colReadOnly = columnReadOnly_new;
+        if (cfg.customWidth == null) {
+            cfg.customWidth = {};
+            const customWidth_new = {};
+            _.forEach(cfg.customWidth, (v, rstr) => {
+                const r = parseFloat(rstr);
+                if (r < start) {
+                    customWidth_new[r] = cfg.customWidth[r];
+                }
+                else if (r > end) {
+                    customWidth_new[r - slen] = cfg.customWidth[r];
+                }
+            });
+            cfg.customWidth = customWidth_new;
+        }
+        cfg.colReadOnly = columnReadOnly_new;
+        if (cfg.colhidden == null) {
+            cfg.colhidden = {};
+        }
+        const colhidden_new = {};
+        _.forEach(cfg.colhidden, (v, cstr) => {
+            const c = parseFloat(cstr);
+            if (c < start) {
+                colhidden_new[c] = cfg.colhidden[c];
+            }
+            else if (c > end) {
+                colhidden_new[c - slen] = cfg.colhidden[c];
+            }
+        });
+        cfg.colhidden = colhidden_new;
+        if (cfg.borderInfo && cfg.borderInfo.length > 0) {
+            const borderInfo = [];
+            for (let i = 0; i < cfg.borderInfo.length; i += 1) {
+                const { rangeType } = cfg.borderInfo[i];
+                if (rangeType === "range") {
+                    const borderRange = cfg.borderInfo[i].range;
+                    const emptyRange = [];
+                    for (let j = 0; j < borderRange.length; j += 1) {
+                        let bd_c1 = borderRange[j].column[0];
+                        let bd_c2 = borderRange[j].column[1];
+                        for (let c = start; c <= end; c += 1) {
+                            if (c < borderRange[j].column[0]) {
+                                bd_c1 -= 1;
+                                bd_c2 -= 1;
+                            }
+                            else if (c <= borderRange[j].column[1]) {
+                                bd_c2 -= 1;
+                            }
+                        }
+                        if (bd_c2 >= bd_c1) {
+                            emptyRange.push({
+                                row: borderRange[j].row,
+                                column: [bd_c1, bd_c2],
+                            });
+                        }
+                    }
+                    if (emptyRange.length > 0) {
+                        const bd_obj = {
+                            rangeType: "range",
+                            borderType: cfg.borderInfo[i].borderType,
+                            style: cfg.borderInfo[i].style,
+                            color: cfg.borderInfo[i].color,
+                            range: emptyRange,
+                        };
+                        borderInfo.push(bd_obj);
+                    }
+                }
+                else if (rangeType === "cell") {
+                    const { col_index } = cfg.borderInfo[i].value;
+                    if (col_index < start) {
+                        borderInfo.push(cfg.borderInfo[i]);
+                    }
+                    else if (col_index > end) {
+                        cfg.borderInfo[i].value.col_index = col_index - (end - start + 1);
+                        borderInfo.push(cfg.borderInfo[i]);
+                    }
+                }
+            }
+            cfg.borderInfo = borderInfo;
+        }
+        for (let r = 0; r < d.length; r += 1) {
+            d[r].splice(start, slen);
+        }
+        file.column = (_q = d[0]) === null || _q === void 0 ? void 0 : _q.length;
+    }
+    ctx.luckysheet_select_save = undefined;
+    file.data = d;
+    file.config = cfg;
+    file.calcChain = newCalcChain;
+    if (newFilterObj != null) {
+        file.filter = newFilterObj.filter;
+        file.filter_select = newFilterObj.filter_select;
+    }
+    file.luckysheet_conditionformat_save = newCFarr;
+    file.luckysheet_alternateformat_save = newAFarr;
+    file.dataVerification = newDataVerification;
+    file.hyperlink = newHyperlink;
+    refreshLocalMergeData(merge_new, file);
+    ctx.formulaCache.formulaCellInfoMap = null;
+    if (file.id === ctx.currentSheetId) {
+        ctx.config = cfg;
+    }
+    else {
+    }
+}
+/**
+ * @param {Context} ctx
+ * @param {number} rowHeight
+ * @param {any} cfg
+ * @returns {Array<any>}
+ */
+export function computeRowlenArr(ctx, rowHeight, cfg) {
+    const rowlenArr = [];
+    let rh_height = 0;
+    for (let i = 0; i < rowHeight; i += 1) {
+        let rowlen = ctx.defaultrowlen;
+        if (cfg.rowlen != null && cfg.rowlen[i] != null) {
+            rowlen = cfg.rowlen[i];
+        }
+        if (cfg.rowhidden != null && cfg.rowhidden[i] != null) {
+            rowlen = cfg.rowhidden[i];
+            rowlenArr.push(rh_height);
+            continue;
+        }
+        else {
+            rh_height += rowlen + 1;
+        }
+        rowlenArr.push(rh_height);
+    }
+    return rowlenArr;
+}
+/**
+ * @param {Context} ctx
+ * @param {string} type
+ * @returns {"" | "noMulti"}
+ */
+export function hideSelected(ctx, type) {
+    var _a, _b;
+    if (!ctx.luckysheet_select_save || ctx.luckysheet_select_save.length > 1)
+        return "noMulti";
+    const index = getSheetIndex(ctx, ctx.currentSheetId);
+    if (type === "row") {
+        const rowhidden = (_a = ctx.config.rowhidden) !== null && _a !== void 0 ? _a : {};
+        const r1 = ctx.luckysheet_select_save[0].row[0];
+        const r2 = ctx.luckysheet_select_save[0].row[1];
+        const rowhiddenNumber = r2;
+        for (let r = r1; r <= r2; r += 1) {
+            rowhidden[r] = 0;
+        }
+        ctx.config.rowhidden = rowhidden;
+        const rowLen = ctx.luckysheetfile[index].data.length;
+        const isEndRow = rowLen - 1 === rowhiddenNumber ||
+            Object.keys(rowhidden).findIndex((o) => parseInt(o, 10) - 1 === rowhiddenNumber) >= 0;
+        if (isEndRow) {
+            ctx.luckysheet_select_save[0].row[0] -= 1;
+            ctx.luckysheet_select_save[0].row[1] -= 1;
+        }
+        else {
+            ctx.luckysheet_select_save[0].row[0] += 1;
+            ctx.luckysheet_select_save[0].row[1] += 1;
+        }
+    }
+    else if (type === "column") {
+        const colhidden = (_b = ctx.config.colhidden) !== null && _b !== void 0 ? _b : {};
+        const c1 = ctx.luckysheet_select_save[0].column[0];
+        const c2 = ctx.luckysheet_select_save[0].column[1];
+        const colhiddenNumber = c2;
+        for (let c = c1; c <= c2; c += 1) {
+            colhidden[c] = 0;
+        }
+        ctx.config.colhidden = colhidden;
+        const columnLen = ctx.luckysheetfile[index].data[0].length;
+        const isEndColumn = columnLen - 1 === colhiddenNumber ||
+            Object.keys(colhidden).findIndex((o) => parseInt(o, 10) - 1 === colhiddenNumber) >= 0;
+        if (isEndColumn) {
+            ctx.luckysheet_select_save[0].column[0] -= 1;
+            ctx.luckysheet_select_save[0].column[1] -= 1;
+        }
+        else {
+            ctx.luckysheet_select_save[0].column[0] += 1;
+            ctx.luckysheet_select_save[0].column[1] += 1;
+        }
+    }
+    ctx.luckysheetfile[index].config = ctx.config;
+    return "";
+}
+/**
+ * @param {Context} ctx
+ * @param {string} type
+ * @returns {"" | "noMulti"}
+ */
+export function showSelected(ctx, type) {
+    var _a, _b;
+    if (!ctx.luckysheet_select_save || ctx.luckysheet_select_save.length > 1)
+        return "noMulti";
+    const index = getSheetIndex(ctx, ctx.currentSheetId);
+    if (type === "row") {
+        const rowhidden = (_a = ctx.config.rowhidden) !== null && _a !== void 0 ? _a : {};
+        const r1 = ctx.luckysheet_select_save[0].row[0];
+        const r2 = ctx.luckysheet_select_save[0].row[1];
+        for (let r = r1; r <= r2; r += 1) {
+            delete rowhidden[r];
+        }
+        ctx.config.rowhidden = rowhidden;
+    }
+    else if (type === "column") {
+        const colhidden = (_b = ctx.config.colhidden) !== null && _b !== void 0 ? _b : {};
+        const c1 = ctx.luckysheet_select_save[0].column[0];
+        const c2 = ctx.luckysheet_select_save[0].column[1];
+        for (let c = c1; c <= c2; c += 1) {
+            delete colhidden[c];
+        }
+        ctx.config.colhidden = colhidden;
+    }
+    ctx.luckysheetfile[index].config = ctx.config;
+    return "";
+}
+/**
+ * @param {Context} ctx
+ * @returns {boolean}
+ */
+export function isShowHidenCR(ctx) {
+    var _a, _b, _c, _d;
+    if (!ctx.luckysheet_select_save ||
+        (!ctx.config.colhidden && !ctx.config.rowhidden))
+        return false;
+    if (!!ctx.config.colhidden && _.size(ctx.config.colhidden) >= 1) {
+        const ctxColumn = (_b = (_a = ctx.luckysheet_select_save[0]) === null || _a === void 0 ? void 0 : _a.column) === null || _b === void 0 ? void 0 : _b[0];
+        const isHidenColumn = Object.keys(ctx.config.colhidden).findIndex((o) => {
+            return ctxColumn === parseInt(o, 10);
+        }) >= 0;
+        if (isHidenColumn) {
+            return true;
+        }
+    }
+    if (!!ctx.config.rowhidden && _.size(ctx.config.rowhidden) >= 1) {
+        const ctxRow = (_d = (_c = ctx.luckysheet_select_save[0]) === null || _c === void 0 ? void 0 : _c.row) === null || _d === void 0 ? void 0 : _d[0];
+        const isHidenRow = Object.keys(ctx.config.rowhidden).findIndex((o) => {
+            return ctxRow === parseInt(o, 10);
+        }) >= 0;
+        if (isHidenRow) {
+            return true;
+        }
+    }
+    return false;
+}
+/**
+ * @param {Context} ctx
+ * @param {string} type
+ * @returns {number}
+ */
+export function hideCRCount(ctx, type) {
+    var _a, _b;
+    let count = 1;
+    if (!ctx.luckysheet_select_save)
+        return 0;
+    const section = ctx.luckysheet_select_save[0];
+    const rowhidden = (_a = ctx.config.rowhidden) !== null && _a !== void 0 ? _a : {};
+    const colhidden = (_b = ctx.config.colhidden) !== null && _b !== void 0 ? _b : {};
+    if (type === "ArrowUp" || type === "ArrowDown") {
+        const rowArr = Object.keys(rowhidden);
+        if (type === "ArrowUp") {
+            let row = section.row[0] - 1;
+            const rowIndex = rowArr.indexOf(row.toString());
+            for (let i = rowIndex; i >= 0; i -= 1) {
+                if (parseInt(rowArr[i], 10) === row) {
+                    count += 1;
+                    row -= 1;
+                }
+                else {
+                    return count;
+                }
+            }
+        }
+        else {
+            let row = section.row[0] + 1;
+            const rowIndex = rowArr.indexOf(`${row}`);
+            for (let i = rowIndex; i < rowArr.length; i += 1) {
+                if (parseInt(rowArr[i], 10) === row) {
+                    count += 1;
+                    row += 1;
+                }
+                else {
+                    return count;
+                }
+            }
+        }
+    }
+    else if (type === "ArrowLeft" || type === "ArrowRight") {
+        const columnArr = Object.keys(colhidden);
+        if (type === "ArrowLeft") {
+            let column = section.column[0] - 1;
+            const columnIndex = columnArr.indexOf(column.toString());
+            for (let i = columnIndex; i >= 0; i -= 1) {
+                if (parseInt(columnArr[i], 10) === column) {
+                    count += 1;
+                    column -= 1;
+                }
+                else {
+                    return count;
+                }
+            }
+        }
+        else {
+            let column = section.column[0] + 1;
+            const columnIndex = columnArr.indexOf(`${column}`);
+            for (let i = columnIndex; i < columnArr.length; i += 1) {
+                if (parseInt(columnArr[i], 10) === column) {
+                    count += 1;
+                    column += 1;
+                }
+                else {
+                    return count;
+                }
+            }
+        }
+    }
+    return count;
+}
+
+/**
+ * @typedef {import("./context.js").Context} Context
+ */

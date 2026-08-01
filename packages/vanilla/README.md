@@ -8,7 +8,8 @@ everything onto a `<canvas>` and exposes plain event handlers. The only React
 in the original project was the UI shell around it (mounting the canvas,
 wiring events, re-rendering the overlays). This package replaces that shell
 with **plain JavaScript and DOM**, so you can embed a full-featured Excel-like
-grid with zero framework dependencies.
+grid with zero framework dependencies. The engine itself is plain JS too
+(JSDoc types) — no TypeScript anywhere.
 
 ## Quick start (script tag)
 
@@ -97,8 +98,8 @@ node packages/vanilla/test/smoke.mjs   # headless-browser smoke test
 ```
 
 The bundle inlines `@fortune-sheet/core`, `@fortune-sheet/formula-parser`,
-`lodash` and `immer` — it is fully self-contained (~3 MB unminified core
-engine included).
+`lodash` and `immer` — it is fully self-contained. No TypeScript toolchain is
+involved: core is JavaScript with JSDoc types.
 
 ## License
 

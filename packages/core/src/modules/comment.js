@@ -1,0 +1,703 @@
+import _ from "lodash";
+import { mergeBorder } from "./cell";
+import { getFlowdata } from "../context";
+import { colLocation, rowLocation } from "./location";
+import { isAllowEdit } from "../utils";
+/**
+ * @param {number} fromX
+ * @param {number} fromY
+ * @param {number} toX
+ * @param {number} toY
+ * @returns {{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    fromX: number;
+    fromY: number;
+    toX: number;
+    toY: number;
+}}
+ */
+export function getArrowCanvasSize(fromX, fromY, toX, toY) {
+    let left = toX - 5;
+    if (fromX < toX) {
+        left = fromX - 5;
+    }
+    let top = toY - 5;
+    if (fromY < toY) {
+        top = fromY - 5;
+    }
+    const width = Math.abs(fromX - toX) + 10;
+    const height = Math.abs(fromY - toY) + 10;
+    let x1 = width - 5;
+    let x2 = 5;
+    if (fromX < toX) {
+        x1 = 5;
+        x2 = width - 5;
+    }
+    let y1 = height - 5;
+    let y2 = 5;
+    if (fromY < toY) {
+        y1 = 5;
+        y2 = height - 5;
+    }
+    return { left, top, width, height, fromX: x1, fromY: y1, toX: x2, toY: y2 };
+}
+/**
+ * @param {string} rc
+ * @param {{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    fromX: number;
+    fromY: number;
+    toX: number;
+    toY: number;
+}} { left, top, width, height, fromX, fromY, toX, toY, }
+ * @param {string} [color]
+ * @param {number} [theta]
+ * @param {number} [headlen]
+ */
+export function drawArrow(rc, { left, top, width, height, fromX, fromY, toX, toY, }, color, theta, headlen) {
+    const canvas = document.getElementById(`arrowCanvas-${rc}`);
+    const ctx = canvas.getContext("2d");
+    if (!canvas || !ctx)
+        return;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style.left = `${left}px`;
+    canvas.style.top = `${top}px`;
+    const { width: canvasWidth, height: canvasHeight } = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    theta = theta || 30;
+    headlen = headlen || 6;
+    const arrowWidth = 1;
+    color = color || "#000";
+    const angle = (Math.atan2(fromY - toY, fromX - toX) * 180) / Math.PI;
+    const angle1 = ((angle + theta) * Math.PI) / 180;
+    const angle2 = ((angle - theta) * Math.PI) / 180;
+    const topX = headlen * Math.cos(angle1);
+    const topY = headlen * Math.sin(angle1);
+    const botX = headlen * Math.cos(angle2);
+    const botY = headlen * Math.sin(angle2);
+    ctx.save();
+    ctx.beginPath();
+    let arrowX = fromX - topX;
+    let arrowY = fromY - topY;
+    ctx.moveTo(arrowX, arrowY);
+    ctx.moveTo(fromX, fromY);
+    ctx.lineTo(toX, toY);
+    ctx.lineWidth = arrowWidth;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    arrowX = toX + topX;
+    arrowY = toY + topY;
+    ctx.moveTo(arrowX, arrowY);
+    ctx.lineTo(toX, toY);
+    arrowX = toX + botX;
+    arrowY = toY + botY;
+    ctx.lineTo(arrowX, arrowY);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+}
+/**
+ * @type {CommentBoxProps}
+ */
+export const commentBoxProps = {
+    defaultWidth: 144,
+    defaultHeight: 84,
+    currentObj: null,
+    currentWinW: null,
+    currentWinH: null,
+    resize: null,
+    resizeXY: null,
+    move: false,
+    moveXY: null,
+    cursorStartPosition: null,
+};
+/**
+ * @param {Context} ctx
+ * @param {CellMatrix} flowdata
+ * @param {number} r
+ * @param {number} c
+ * @returns {{
+    toX: number;
+    toY: number;
+}}
+ */
+export function getCellTopRightPostion(ctx, flowdata, r, c) {
+    let row_pre = r - 1 === -1 ? 0 : ctx.visibledatarow[r - 1];
+    let col = ctx.visibledatacolumn[c];
+    const margeset = mergeBorder(ctx, flowdata, r, c);
+    if (margeset) {
+        [row_pre] = margeset.row;
+        [, col] = margeset.column;
+    }
+    const toX = col;
+    const toY = row_pre;
+    return { toX, toY };
+}
+/**
+ * @param {Context} ctx
+ * @param {CellMatrix} flowdata
+ * @param {number} r
+ * @param {number} c
+ * @returns {{
+    r: number;
+    c: number;
+    rc: string;
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    value: string;
+    size: {
+        left: number;
+        top: number;
+        width: number;
+        height: number;
+        fromX: number;
+        fromY: number;
+        toX: number;
+        toY: number;
+    };
+    autoFocus: boolean;
+}}
+ */
+export function getCommentBoxByRC(ctx, flowdata, r, c) {
+    var _a;
+    const comment = (_a = flowdata[r][c]) === null || _a === void 0 ? void 0 : _a.ps;
+    const { toX, toY } = getCellTopRightPostion(ctx, flowdata, r, c);
+    const left = (comment === null || comment === void 0 ? void 0 : comment.left) == null
+        ? toX + 18 * ctx.zoomRatio
+        : comment.left * ctx.zoomRatio;
+    let top = (comment === null || comment === void 0 ? void 0 : comment.top) == null
+        ? toY - 18 * ctx.zoomRatio
+        : comment.top * ctx.zoomRatio;
+    const width = (comment === null || comment === void 0 ? void 0 : comment.width) == null
+        ? commentBoxProps.defaultWidth * ctx.zoomRatio
+        : comment.width * ctx.zoomRatio;
+    const height = (comment === null || comment === void 0 ? void 0 : comment.height) == null
+        ? commentBoxProps.defaultHeight * ctx.zoomRatio
+        : comment.height * ctx.zoomRatio;
+    const value = (comment === null || comment === void 0 ? void 0 : comment.value) == null ? "" : comment.value;
+    if (top < 0) {
+        top = 2;
+    }
+    const size = getArrowCanvasSize(left, top, toX, toY);
+    const rc = `${r}_${c}`;
+    return { r, c, rc, left, top, width, height, value, size, autoFocus: false };
+}
+/**
+ * @param {Context} ctx
+ * @param {CellMatrix} flowdata
+ * @param {number} r
+ * @param {number} c
+ */
+export function setEditingComment(ctx, flowdata, r, c) {
+    ctx.editingCommentBox = getCommentBoxByRC(ctx, flowdata, r, c);
+}
+/**
+ * @param {Context} ctx
+ * @param {GlobalCache} globalCache
+ */
+export function removeEditingComment(ctx, globalCache) {
+    var _a, _b;
+    const { editingCommentBoxEle } = globalCache;
+    ctx.editingCommentBox = undefined;
+    let r = editingCommentBoxEle === null || editingCommentBoxEle === void 0 ? void 0 : editingCommentBoxEle.dataset.r;
+    let c = editingCommentBoxEle === null || editingCommentBoxEle === void 0 ? void 0 : editingCommentBoxEle.dataset.c;
+    if (!r || !c || !editingCommentBoxEle)
+        return;
+    r = parseInt(r, 10);
+    c = parseInt(c, 10);
+    const value = editingCommentBoxEle.innerHTML || "";
+    const flowdata = getFlowdata(ctx);
+    globalCache.editingCommentBoxEle = undefined;
+    if (!flowdata)
+        return;
+    if (((_b = (_a = ctx.hooks).beforeUpdateComment) === null || _b === void 0 ? void 0 : _b.call(_a, r, c, value)) === false) {
+        return;
+    }
+    const cell = flowdata === null || flowdata === void 0 ? void 0 : flowdata[r][c];
+    if (!(cell === null || cell === void 0 ? void 0 : cell.ps))
+        return;
+    const oldValue = cell.ps.value;
+    cell.ps.value = value;
+    if (!cell.ps.isShow) {
+        ctx.commentBoxes = _.filter(ctx.commentBoxes, (v) => v.rc !== `${r}_${c}`);
+    }
+    if (ctx.hooks.afterUpdateComment) {
+        setTimeout(() => {
+            var _a, _b;
+            (_b = (_a = ctx.hooks).afterUpdateComment) === null || _b === void 0 ? void 0 : _b.call(_a, r, c, oldValue, value);
+        });
+    }
+}
+/**
+ * @param {Context} ctx
+ * @param {GlobalCache} globalCache
+ * @param {number} r
+ * @param {number} c
+ */
+export function newComment(ctx, globalCache, r, c) {
+    var _a, _b;
+    const allowEdit = isAllowEdit(ctx);
+    if (!allowEdit)
+        return;
+    if (((_b = (_a = ctx.hooks).beforeInsertComment) === null || _b === void 0 ? void 0 : _b.call(_a, r, c)) === false) {
+        return;
+    }
+    removeEditingComment(ctx, globalCache);
+    const flowdata = getFlowdata(ctx);
+    if (!flowdata)
+        return;
+    let cell = flowdata[r][c];
+    if (cell == null) {
+        cell = {};
+        flowdata[r][c] = cell;
+    }
+    cell.ps = {
+        left: null,
+        top: null,
+        width: null,
+        height: null,
+        value: "",
+        isShow: false,
+    };
+    ctx.editingCommentBox = {
+        ...getCommentBoxByRC(ctx, flowdata, r, c),
+        autoFocus: true,
+    };
+    if (ctx.hooks.afterInsertComment) {
+        setTimeout(() => {
+            var _a, _b;
+            (_b = (_a = ctx.hooks).afterInsertComment) === null || _b === void 0 ? void 0 : _b.call(_a, r, c);
+        });
+    }
+}
+/**
+ * @param {Context} ctx
+ * @param {GlobalCache} globalCache
+ * @param {number} r
+ * @param {number} c
+ */
+export function editComment(ctx, globalCache, r, c) {
+    var _a;
+    const allowEdit = isAllowEdit(ctx);
+    if (!allowEdit)
+        return;
+    const flowdata = getFlowdata(ctx);
+    removeEditingComment(ctx, globalCache);
+    const comment = (_a = flowdata === null || flowdata === void 0 ? void 0 : flowdata[r][c]) === null || _a === void 0 ? void 0 : _a.ps;
+    const commentBoxes = _.concat(ctx.commentBoxes, ctx.editingCommentBox);
+    if (_.findIndex(commentBoxes, (v) => (v === null || v === void 0 ? void 0 : v.rc) === `${r}_${c}`) !== -1) {
+        const editCommentBox = document.getElementById(`comment-editor-${r}_${c}`);
+        editCommentBox === null || editCommentBox === void 0 ? void 0 : editCommentBox.focus();
+    }
+    if (comment) {
+        ctx.editingCommentBox = {
+            ...getCommentBoxByRC(ctx, flowdata, r, c),
+            autoFocus: true,
+        };
+    }
+}
+/**
+ * @param {Context} ctx
+ * @param {GlobalCache} globalCache
+ * @param {number} r
+ * @param {number} c
+ */
+export function deleteComment(ctx, globalCache, r, c) {
+    var _a, _b;
+    const allowEdit = isAllowEdit(ctx);
+    if (!allowEdit)
+        return;
+    if (((_b = (_a = ctx.hooks).beforeDeleteComment) === null || _b === void 0 ? void 0 : _b.call(_a, r, c)) === false) {
+        return;
+    }
+    const flowdata = getFlowdata(ctx);
+    if (!flowdata)
+        return;
+    const cell = flowdata[r][c];
+    if (!cell)
+        return;
+    cell.ps = undefined;
+    if (ctx.hooks.afterDeleteComment) {
+        setTimeout(() => {
+            var _a, _b;
+            (_b = (_a = ctx.hooks).afterDeleteComment) === null || _b === void 0 ? void 0 : _b.call(_a, r, c);
+        });
+    }
+}
+/**
+ * @param {Context} ctx
+ * @param {Array<{
+    r: number;
+    c: number;
+}>} commentShowCells
+ */
+export function showComments(ctx, commentShowCells) {
+    const flowdata = getFlowdata(ctx);
+    if (flowdata) {
+        const commentBoxes = commentShowCells.map(({ r, c }) => getCommentBoxByRC(ctx, flowdata, r, c));
+        ctx.commentBoxes = commentBoxes;
+    }
+}
+/**
+ * @param {Context} ctx
+ * @param {GlobalCache} globalCache
+ * @param {number} r
+ * @param {number} c
+ */
+export function showHideComment(ctx, globalCache, r, c) {
+    var _a;
+    const flowdata = getFlowdata(ctx);
+    const comment = (_a = flowdata === null || flowdata === void 0 ? void 0 : flowdata[r][c]) === null || _a === void 0 ? void 0 : _a.ps;
+    if (!comment)
+        return;
+    const { isShow } = comment;
+    const rc = `${r}_${c}`;
+    if (isShow) {
+        comment.isShow = false;
+        ctx.commentBoxes = _.filter(ctx.commentBoxes, (v) => v.rc !== rc);
+    }
+    else {
+        comment.isShow = true;
+    }
+}
+/**
+ * @param {Context} ctx
+ */
+export function showHideAllComments(ctx) {
+    var _a, _b;
+    const flowdata = getFlowdata(ctx);
+    if (!flowdata)
+        return;
+    let isAllShow = true;
+    const allComments = [];
+    for (let r = 0; r < flowdata.length; r += 1) {
+        for (let c = 0; c < flowdata[0].length; c += 1) {
+            const cell = flowdata[r][c];
+            if (cell === null || cell === void 0 ? void 0 : cell.ps) {
+                allComments.push({ r, c });
+                if (!cell.ps.isShow) {
+                    isAllShow = false;
+                }
+            }
+        }
+    }
+    const rcs = [];
+    if (allComments.length > 0) {
+        if (isAllShow) {
+            for (let i = 0; i < allComments.length; i += 1) {
+                const { r, c } = allComments[i];
+                const comment = (_a = flowdata[r][c]) === null || _a === void 0 ? void 0 : _a.ps;
+                if (comment === null || comment === void 0 ? void 0 : comment.isShow) {
+                    comment.isShow = false;
+                    rcs.push(`${r}_${c}`);
+                }
+            }
+            ctx.commentBoxes = [];
+        }
+        else {
+            for (let i = 0; i < allComments.length; i += 1) {
+                const { r, c } = allComments[i];
+                const comment = (_b = flowdata[r][c]) === null || _b === void 0 ? void 0 : _b.ps;
+                if (comment && !comment.isShow) {
+                    comment.isShow = true;
+                }
+            }
+        }
+    }
+}
+/**
+ * @param {Context} ctx
+ * @param {MouseEvent} e
+ * @param {HTMLDivElement} scrollX
+ * @param {HTMLDivElement} scrollY
+ * @param {HTMLDivElement} container
+ */
+export function overShowComment(ctx, e, scrollX, scrollY, container) {
+    var _a, _b, _c, _d;
+    const flowdata = getFlowdata(ctx);
+    if (!flowdata)
+        return;
+    const { scrollLeft } = scrollX;
+    const { scrollTop } = scrollY;
+    const rect = container.getBoundingClientRect();
+    let x = e.pageX - rect.left - ctx.rowHeaderWidth;
+    let y = e.pageY - rect.top - ctx.columnHeaderHeight;
+    const offsetX = 0;
+    const offsetY = 0;
+    x += scrollLeft;
+    y += scrollTop;
+    let r = rowLocation(y, ctx.visibledatarow)[2];
+    let c = colLocation(x, ctx.visibledatacolumn)[2];
+    const margeset = mergeBorder(ctx, flowdata, r, c);
+    if (margeset) {
+        [, , r] = margeset.row;
+        [, , c] = margeset.column;
+    }
+    const rc = `${r}_${c}`;
+    const comment = (_b = (_a = flowdata[r]) === null || _a === void 0 ? void 0 : _a[c]) === null || _b === void 0 ? void 0 : _b.ps;
+    if (comment == null ||
+        comment.isShow ||
+        _.findIndex(ctx.commentBoxes, (v) => v.rc === rc) !== -1 ||
+        ((_c = ctx.editingCommentBox) === null || _c === void 0 ? void 0 : _c.rc) === rc) {
+        ctx.hoveredCommentBox = undefined;
+        return;
+    }
+    if (((_d = ctx.hoveredCommentBox) === null || _d === void 0 ? void 0 : _d.rc) === rc)
+        return;
+    let row_pre = r - 1 === -1 ? 0 : ctx.visibledatarow[r - 1];
+    let col = ctx.visibledatacolumn[c];
+    if (margeset) {
+        [row_pre] = margeset.row;
+        [, col] = margeset.column;
+    }
+    const toX = col + offsetX;
+    const toY = row_pre + offsetY;
+    const left = comment.left == null
+        ? toX + 18 * ctx.zoomRatio
+        : comment.left * ctx.zoomRatio;
+    let top = comment.top == null
+        ? toY - 18 * ctx.zoomRatio
+        : comment.top * ctx.zoomRatio;
+    if (top < 0) {
+        top = 2;
+    }
+    const width = comment.width == null
+        ? commentBoxProps.defaultWidth * ctx.zoomRatio
+        : comment.width * ctx.zoomRatio;
+    const height = comment.height == null
+        ? commentBoxProps.defaultHeight * ctx.zoomRatio
+        : comment.height * ctx.zoomRatio;
+    const size = getArrowCanvasSize(left, top, toX, toY);
+    const value = comment.value == null ? "" : comment.value;
+    ctx.hoveredCommentBox = {
+        r,
+        c,
+        rc,
+        left,
+        top,
+        width,
+        height,
+        size,
+        value,
+        autoFocus: false,
+    };
+}
+/**
+ * @param {string} commentId
+ * @returns {{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+}}
+ */
+export function getCommentBoxPosition(commentId) {
+    const box = document.getElementById(commentId);
+    if (!box)
+        return undefined;
+    const { width, height } = box.getBoundingClientRect();
+    const left = box.offsetLeft;
+    const top = box.offsetTop;
+    return { left, top, width, height };
+}
+/**
+ * @param {Context} ctx
+ * @param {GlobalCache} globalCache
+ * @param {MouseEvent} e
+ * @param {{
+    r: number;
+    c: number;
+    rc: string;
+}} { r, c, rc }
+ * @param {string} resizingId
+ * @param {string} resizingSide
+ */
+export function onCommentBoxResizeStart(ctx, globalCache, e, { r, c, rc }, resizingId, resizingSide) {
+    const position = getCommentBoxPosition(resizingId);
+    if (position) {
+        _.set(globalCache, "commentBox", {
+            cursorMoveStartPosition: {
+                x: e.pageX,
+                y: e.pageY,
+            },
+            resizingId,
+            resizingSide,
+            commentRC: { r, c, rc },
+            boxInitialPosition: position,
+        });
+    }
+}
+/**
+ * @param {Context} ctx
+ * @param {GlobalCache} globalCache
+ * @param {MouseEvent} e
+ * @returns {boolean}
+ */
+export function onCommentBoxResize(ctx, globalCache, e) {
+    if (ctx.allowEdit === false)
+        return false;
+    const commentBox = globalCache === null || globalCache === void 0 ? void 0 : globalCache.commentBox;
+    if ((commentBox === null || commentBox === void 0 ? void 0 : commentBox.resizingId) && commentBox.resizingSide) {
+        const box = document.getElementById(commentBox.resizingId);
+        const { x: startX, y: startY } = commentBox.cursorMoveStartPosition;
+        let { top, left, width, height } = commentBox.boxInitialPosition;
+        const dx = e.pageX - startX;
+        const dy = e.pageY - startY;
+        const minHeight = 60 * ctx.zoomRatio;
+        const minWidth = 1.5 * 60 * ctx.zoomRatio;
+        if (["lm", "lt", "lb"].includes(commentBox.resizingSide)) {
+            if (width - dx < minWidth) {
+                left += width - minWidth;
+                width = minWidth;
+            }
+            else {
+                left += dx;
+                width -= dx;
+            }
+            if (left < 0)
+                left = 0;
+            box.style.left = `${left}px`;
+        }
+        if (["rm", "rt", "rb"].includes(commentBox.resizingSide)) {
+            width = width + dx < minWidth ? minWidth : width + dx;
+        }
+        if (["mt", "lt", "rt"].includes(commentBox.resizingSide)) {
+            if (height - dy < minHeight) {
+                top += height - minHeight;
+                height = minHeight;
+            }
+            else {
+                top += dy;
+                height -= dy;
+            }
+            if (top < 0)
+                top = 0;
+            box.style.top = `${top}px`;
+        }
+        if (["mb", "lb", "rb"].includes(commentBox.resizingSide)) {
+            height = height + dy < minHeight ? minHeight : height + dy;
+        }
+        box.style.width = `${width}px`;
+        box.style.height = `${height}px`;
+        return true;
+    }
+    return false;
+}
+/**
+ * @param {Context} ctx
+ * @param {GlobalCache} globalCache
+ */
+export function onCommentBoxResizeEnd(ctx, globalCache) {
+    var _a;
+    if ((_a = globalCache.commentBox) === null || _a === void 0 ? void 0 : _a.resizingId) {
+        const { resizingId, commentRC: { r, c }, } = globalCache.commentBox;
+        globalCache.commentBox.resizingId = undefined;
+        const position = getCommentBoxPosition(resizingId);
+        if (position) {
+            const { top, left, width, height } = position;
+            const flowdata = getFlowdata(ctx);
+            const cell = flowdata === null || flowdata === void 0 ? void 0 : flowdata[r][c];
+            if (!flowdata || !(cell === null || cell === void 0 ? void 0 : cell.ps))
+                return;
+            cell.ps.left = left / ctx.zoomRatio;
+            cell.ps.top = top / ctx.zoomRatio;
+            cell.ps.width = width / ctx.zoomRatio;
+            cell.ps.height = height / ctx.zoomRatio;
+            setEditingComment(ctx, flowdata, r, c);
+        }
+    }
+}
+/**
+ * @param {Context} ctx
+ * @param {GlobalCache} globalCache
+ * @param {MouseEvent} e
+ * @param {{
+    r: number;
+    c: number;
+    rc: string;
+}} { r, c, rc }
+ * @param {string} movingId
+ */
+export function onCommentBoxMoveStart(ctx, globalCache, e, { r, c, rc }, movingId) {
+    const position = getCommentBoxPosition(movingId);
+    if (position) {
+        const { top, left } = position;
+        _.set(globalCache, "commentBox", {
+            cursorMoveStartPosition: {
+                x: e.pageX,
+                y: e.pageY,
+            },
+            movingId,
+            commentRC: { r, c, rc },
+            boxInitialPosition: { left, top },
+        });
+    }
+}
+/**
+ * @param {Context} ctx
+ * @param {GlobalCache} globalCache
+ * @param {MouseEvent} e
+ * @returns {boolean}
+ */
+export function onCommentBoxMove(ctx, globalCache, e) {
+    const allowEdit = isAllowEdit(ctx);
+    if (!allowEdit)
+        return false;
+    const commentBox = globalCache === null || globalCache === void 0 ? void 0 : globalCache.commentBox;
+    if (commentBox === null || commentBox === void 0 ? void 0 : commentBox.movingId) {
+        const box = document.getElementById(commentBox.movingId);
+        const { x: startX, y: startY } = commentBox.cursorMoveStartPosition;
+        let { top, left } = commentBox.boxInitialPosition;
+        left += e.pageX - startX;
+        top += e.pageY - startY;
+        if (top < 0)
+            top = 0;
+        box.style.left = `${left}px`;
+        box.style.top = `${top}px`;
+        return true;
+    }
+    return false;
+}
+/**
+ * @param {Context} ctx
+ * @param {GlobalCache} globalCache
+ */
+export function onCommentBoxMoveEnd(ctx, globalCache) {
+    var _a;
+    if ((_a = globalCache.commentBox) === null || _a === void 0 ? void 0 : _a.movingId) {
+        const { movingId, commentRC: { r, c }, } = globalCache.commentBox;
+        globalCache.commentBox.movingId = undefined;
+        const position = getCommentBoxPosition(movingId);
+        if (position) {
+            const { top, left } = position;
+            const flowdata = getFlowdata(ctx);
+            const cell = flowdata === null || flowdata === void 0 ? void 0 : flowdata[r][c];
+            if (!flowdata || !(cell === null || cell === void 0 ? void 0 : cell.ps))
+                return;
+            cell.ps.left = left / ctx.zoomRatio;
+            cell.ps.top = top / ctx.zoomRatio;
+            setEditingComment(ctx, flowdata, r, c);
+        }
+    }
+}
+
+/**
+ * @typedef {Object} CommentBoxProps
+ */
+
+/**
+ * @typedef {import("./context.js").Context} Context
+ * @typedef {import("./types.js").CellMatrix} CellMatrix
+ * @typedef {import("./types.js").GlobalCache} GlobalCache
+ */

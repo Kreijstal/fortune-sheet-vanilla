@@ -17,7 +17,7 @@ import {
 
 export function generateAPIs(store, cellInput, scrollbarX, scrollbarY) {
   const setContext = (recipe, options) => store.setContext(recipe, options);
-  const context = store.ctx;
+  const getContext = () => store.ctx;
   const settings = store.settings;
   return {
     applyOp: (ops) => {
@@ -83,7 +83,7 @@ export function generateAPIs(store, cellInput, scrollbarX, scrollbarY) {
     },
 
     getCellValue: (row, column, options = {}) =>
-      api.getCellValue(context, row, column, options),
+      api.getCellValue(getContext(), row, column, options),
 
     setCellValue: (row, column, value, options = {}) =>
       setContext((draftCtx) =>
@@ -137,25 +137,25 @@ export function generateAPIs(store, cellInput, scrollbarX, scrollbarY) {
       ),
 
     getRowHeight: (rows, options = {}) =>
-      api.getRowHeight(context, rows, options),
+      api.getRowHeight(getContext(), rows, options),
 
     getColumnWidth: (columns, options = {}) =>
-      api.getColumnWidth(context, columns, options),
+      api.getColumnWidth(getContext(), columns, options),
 
-    getSelection: () => api.getSelection(context),
+    getSelection: () => api.getSelection(getContext()),
 
-    getFlattenRange: (range) => api.getFlattenRange(context, range),
+    getFlattenRange: (range) => api.getFlattenRange(getContext(), range),
 
     getCellsByFlattenRange: (range) =>
-      api.getCellsByFlattenRange(context, range),
+      api.getCellsByFlattenRange(getContext(), range),
 
-    getSelectionCoordinates: () => api.getSelectionCoordinates(context),
+    getSelectionCoordinates: () => api.getSelectionCoordinates(getContext()),
 
     getCellsByRange: (range, options = {}) =>
-      api.getCellsByRange(context, range, options),
+      api.getCellsByRange(getContext(), range, options),
 
     getHtmlByRange: (range, options = {}) =>
-      api.getHtmlByRange(context, range, options),
+      api.getHtmlByRange(getContext(), range, options),
 
     setSelection: (range, options = {}) =>
       setContext((draftCtx) => api.setSelection(draftCtx, range, options)),
@@ -176,14 +176,14 @@ export function generateAPIs(store, cellInput, scrollbarX, scrollbarY) {
     cancelMerge: (ranges, options = {}) =>
       setContext((draftCtx) => api.cancelMerge(draftCtx, ranges, options)),
 
-    getAllSheets: () => api.getAllSheets(context),
+    getAllSheets: () => api.getAllSheets(getContext()),
 
     getSheet: (options = {}) =>
-      api.getSheetWithLatestCelldata(context, options),
+      api.getSheetWithLatestCelldata(getContext(), options),
 
     addSheet: (sheetId) => {
       const existingSheetIds = api
-        .getAllSheets(context)
+        .getAllSheets(getContext())
         .map((sheet) => sheet.id || "");
       if (sheetId && existingSheetIds.includes(sheetId)) {
         console.error(
@@ -209,7 +209,7 @@ export function generateAPIs(store, cellInput, scrollbarX, scrollbarY) {
     setSheetOrder: (orderList) =>
       setContext((draftCtx) => api.setSheetOrder(draftCtx, orderList)),
 
-    scroll: (options) => api.scroll(context, scrollbarX, scrollbarY, options),
+    scroll: (options) => api.scroll(getContext(), scrollbarX, scrollbarY, options),
 
     addPresences: (newPresences) => {
       setContext((draftCtx) => {
