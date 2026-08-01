@@ -10,7 +10,7 @@
   "scripts": {
     "build": "node packages/vanilla/build.mjs",
     "demo": "node packages/vanilla/build.mjs && npx -y serve packages/vanilla/demo -l 8080",
-    "test": "node --test packages/vanilla/test"
+    "test": "node packages/vanilla/test/smoke.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.19.5",
