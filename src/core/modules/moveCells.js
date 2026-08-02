@@ -1,5 +1,4 @@
 import cloneDeep from 'lodash.clonedeep';
-import last from 'lodash.last';
 import set from 'lodash.set';
 import { getdatabyselection } from './cell.js';
 import { getFlowdata } from './../context.js';

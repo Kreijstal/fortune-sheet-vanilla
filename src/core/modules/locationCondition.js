@@ -1,5 +1,4 @@
 import cloneDeep from 'lodash.clonedeep';
-import filter from 'lodash.filter';
 import { getFlowdata } from './../context.js';
 import { normalizeSelection } from './selection.js';
 /**

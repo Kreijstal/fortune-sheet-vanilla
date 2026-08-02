@@ -1,4 +1,3 @@
-import forEach from 'lodash.foreach';
 import isNaN from 'lodash.isnan';
 import { getFlowdata } from './../context.js';
 import { getSheetIndex } from './../utils/index.js';
@@ -832,7 +831,7 @@ export function compute(ctx, ruleArr, d) {
             // 循环应用范围计算
             if (conditionValue0 === '0') {
               // 重复值
-              forEach(dmap, (x) => {
+              Object.values(dmap).forEach((x) => {
                 if (x.length > 1) {
                   for (let j = 0; j < x.length; j += 1) {
                     if (`${x[j].r}_${x[j].c}` in computeMap) {
@@ -849,7 +848,7 @@ export function compute(ctx, ruleArr, d) {
               });
             } else if (conditionValue0 === '1') {
               // 唯一值
-              forEach(dmap, (x) => {
+              Object.values(dmap).forEach((x) => {
                 if (x.length === 1) {
                   if (`${x[0].r}_${x[0].c}` in computeMap) {
                     computeMap[`${x[0].r}_${x[0].c}`].textColor = textColor;

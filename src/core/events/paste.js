@@ -1,12 +1,6 @@
 import cloneDeep from 'lodash.clonedeep';
-import forEach from 'lodash.foreach';
-import fromPairs from 'lodash.frompairs';
-import has from 'lodash.has';
-import includes from 'lodash.includes';
-import initial from 'lodash.initial';
 import isEmpty from 'lodash.isempty';
 import isPlainObject from 'lodash.isplainobject';
-import trim from 'lodash.trim';
 import zip from 'lodash.zip';
 import { getFlowdata } from './../context.js';
 import { locale } from './../locale/index.js';
@@ -530,7 +524,7 @@ function pasteHandlerOfCutPaste(ctx, copyRange) {
     ctx.luckysheet_select_save?.length === 1 &&
     ctx.luckysheet_copy_save?.copyRange.length === 1
   ) {
-    forEach(ctx.luckysheet_copy_save?.copyRange, (range) => {
+    ctx.luckysheet_copy_save?.copyRange?.forEach((range) => {
       for (let r = 0; r <= range.row[1] - range.row[0]; r += 1) {
         for (let c = 0; c <= range.column[1] - range.column[0]; c += 1) {
           const index = getSheetIndex(
@@ -1248,7 +1242,7 @@ function pasteHandlerOfCopyPaste(ctx, copyRange) {
     ctx.luckysheet_select_save?.length === 1 &&
     ctx.luckysheet_copy_save?.copyRange.length === 1
   ) {
-    forEach(ctx.luckysheet_copy_save?.copyRange, (range) => {
+    ctx.luckysheet_copy_save?.copyRange?.forEach((range) => {
       for (let r = 0; r <= range.row[1] - range.row[0]; r += 1) {
         for (let c = 0; c <= range.column[1] - range.column[0]; c += 1) {
           const index = getSheetIndex(
@@ -1447,7 +1441,7 @@ export function handlePaste(ctx, e) {
         }
         const data = new Array(trList.length);
         let colLen = 0;
-        forEach(trList[0].querySelectorAll('td'), (td) => {
+        trList[0].querySelectorAll('td').forEach((td) => {
           let colspan = td.colSpan;
           if (Number.isNaN(colspan)) {
             colspan = 1;
@@ -1463,11 +1457,11 @@ export function handlePaste(ctx, e) {
         const patternReg = /{([^}]*)}/g;
         const patternStyle = styleInner.match(patternReg);
         const nameReg = /^[^\t].*/gm;
-        const patternName = initial(styleInner.match(nameReg));
+        const patternName = styleInner.match(nameReg).slice(0, -1);
         const allStyleList =
           patternName.length === patternStyle?.length &&
           typeof patternName === typeof patternStyle
-            ? fromPairs(zip(patternName, patternStyle))
+            ? Object.fromEntries(zip(patternName, patternStyle))
             : {};
         const index = getSheetIndex(ctx, ctx.currentSheetId);
         if (index != null) {
@@ -1478,22 +1472,29 @@ export function handlePaste(ctx, e) {
             ctx.luckysheetfile[index].config.rowlen = {};
           }
           const rowHeightList = ctx.luckysheetfile[index].config.rowlen;
-          forEach(trList, (tr) => {
+          trList.forEach((tr) => {
             let c = 0;
             const targetR = ctx.luckysheet_select_save[0].row[0] + r;
-            const targetRowHeight = tr.getAttribute('height') != null
-              ? parseInt(tr.getAttribute('height'), 10)
-              : null;
+            const targetRowHeight =
+              tr.getAttribute('height') != null
+                ? parseInt(tr.getAttribute('height'), 10)
+                : null;
             if (
-              (has(ctx.luckysheetfile[index].config.rowlen, targetR) &&
+              (Object.hasOwn(
+                ctx.luckysheetfile[index].config.rowlen,
+                targetR
+              ) &&
                 ctx.luckysheetfile[index].config.rowlen[targetR] !==
                   targetRowHeight) ||
-              (!has(ctx.luckysheetfile[index].config.rowlen, targetR) &&
+              (!Object.hasOwn(
+                ctx.luckysheetfile[index].config.rowlen,
+                targetR
+              ) &&
                 ctx.luckysheetfile[index].defaultRowHeight !== targetRowHeight)
             ) {
               rowHeightList[targetR] = targetRowHeight;
             }
-            forEach(tr.querySelectorAll('td'), (td) => {
+            tr.querySelectorAll('td').forEach((td) => {
               // build cell from td
               const { className } = td;
               const cell = {};
@@ -1512,7 +1513,7 @@ export function handlePaste(ctx, e) {
                       .split('\n\t')
                   : [];
               const styles = {};
-              forEach(styleString, (s) => {
+              styleString.forEach((s) => {
                 const styleList = s.split(':');
                 styles[styleList[0]] = styleList?.[1].replace(';', '');
               });
@@ -1527,24 +1528,24 @@ export function handlePaste(ctx, e) {
                 (fontWight.toString() === '400' ||
                   fontWight === 'normal' ||
                   isEmpty(fontWight)) &&
-                !styles['font-style'].includes( 'bold') &&
+                !styles['font-style'].includes('bold') &&
                 (!styles['font-weight'] || styles['font-weight'] === '400')
                   ? 0
                   : 1;
               cell.it =
                 (td.style.fontStyle === 'normal' ||
                   isEmpty(td.style.fontStyle)) &&
-                !styles['font-style'].includes( 'italic')
+                !styles['font-style'].includes('italic')
                   ? 0
                   : 1;
-              cell.un = !styles['text-decoration'].includes( 'underline')
+              cell.un = !styles['text-decoration'].includes('underline')
                 ? undefined
                 : 1;
-              cell.cl = !td.innerHTML.includes( '<s>') ? undefined : 1;
+              cell.cl = !td.innerHTML.includes('<s>') ? undefined : 1;
               const ff = td.style.fontFamily || styles['font-family'] || '';
               const ffs = ff.split(',');
               for (let i = 0; i < ffs.length; i += 1) {
-                let fa = trim(ffs[i].toLowerCase());
+                let fa = ffs[i].toLowerCase().trim();
                 fa = locale_fontjson[fa];
                 if (fa == null) {
                   cell.ff = 0;

@@ -1,10 +1,4 @@
-import assign from 'lodash.assign';
-import find from 'lodash.find';
-import flatten from 'lodash.flatten';
-import keys from 'lodash.keys';
 import omit from 'lodash.omit';
-import reduce from 'lodash.reduce';
-import size from 'lodash.size';
 import { locale } from './../locale/index.js';
 import { getFlowdata } from './../context.js';
 import { getSheetIndex, isAllowEdit, rgbToHex } from './../utils/index.js';
@@ -141,7 +135,7 @@ export function createFilterOptions(
   if (sheetId != null && sheetId !== ctx.currentSheetId) return;
   const sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
   if (sheetIndex == null) return;
-  if (luckysheet_filter_save == null || size(luckysheet_filter_save) === 0) {
+  if (luckysheet_filter_save == null || luckysheet_filter_save.length === 0) {
     delete ctx.filterOptions;
     return;
   }
@@ -192,9 +186,8 @@ export function clearFilter(ctx) {
   const allowEdit = isAllowEdit(ctx);
   if (!allowEdit) return;
   const sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
-  const hiddenRows = reduce(
-    ctx.filter,
-    (pre, curr) => assign(pre, curr?.rowhidden || {}),
+  const hiddenRows = Object.values(ctx.filter).reduce(
+    (pre, curr) => Object.assign(pre, curr?.rowhidden || {}),
     {}
   );
   ctx.config.rowhidden = omit(ctx.config.rowhidden, Object.keys(hiddenRows));
@@ -205,7 +198,7 @@ export function clearFilter(ctx) {
   if (sheetIndex != null) {
     ctx.luckysheetfile[sheetIndex].filter = undefined;
     ctx.luckysheetfile[sheetIndex].filter_select = undefined;
-    ctx.luckysheetfile[sheetIndex].config = assign({}, ctx.config);
+    ctx.luckysheetfile[sheetIndex].config = { ...ctx.config };
   }
 }
 /**
@@ -215,7 +208,7 @@ export function createFilter(ctx) {
   // if (!checkProtectionAuthorityNormal(ctx.currentSheetIndex, "filter")) {
   //   return;
   // }
-  if (size(ctx.luckysheet_select_save) > 1) {
+  if (ctx.luckysheet_select_save.length > 1) {
     // const locale_splitText = locale().splitText;
     // if (isEditMode()) {
     //   alert(locale_splitText.tipNoMulti);
@@ -224,7 +217,7 @@ export function createFilter(ctx) {
     // }
     return;
   }
-  if (size(ctx.luckysheet_filter_save) > 0) {
+  if (ctx.luckysheet_filter_save.length > 0) {
     clearFilter(ctx);
     return;
   }
@@ -261,10 +254,10 @@ export function createFilter(ctx) {
       { row: [curR, curR], column: [st_c || 0, ed_c] }, // st_c default 0 ?
     ]);
     ctx.luckysheet_select_save = filterSave;
-    ctx.luckysheet_shiftpositon = assign({}, last);
+    ctx.luckysheet_shiftpositon = { ...last };
     // luckysheetMoveEndCell("down", "range");
   } else if (last.row[1] - last.row[0] < 2) {
-    ctx.luckysheet_shiftpositon = assign({}, last);
+    ctx.luckysheet_shiftpositon = { ...last };
     // luckysheetMoveEndCell("down", "range");
   }
   ctx.luckysheet_filter_save = assign(
@@ -286,9 +279,9 @@ export function createFilter(ctx) {
   // }
 }
 function getFilterHiddenRows(ctx, col, startCol) {
-  const otherHiddenRows = reduce(
-    ctx.filter,
-    (pre, curr) => assign(pre, (curr?.cindex !== col && curr?.rowhidden) || {}),
+  const otherHiddenRows = Object.values(ctx.filter).reduce(
+    (pre, curr) =>
+      Object.assign(pre, (curr?.cindex !== col && curr?.rowhidden) || {}),
     {}
   );
   const hiddenRows = ctx.filter[col - startCol]?.rowhidden || {};
@@ -358,7 +351,7 @@ export function getFilterColumnValues(ctx, col, startRow, endRow, startCol) {
       const y = dateStr.split('-')[0];
       const m = dateStr.split('-')[1];
       const d = dateStr.split('-')[2];
-      let yearValue = find(dates, (v) => v.value === y);
+      let yearValue = dates.find((v) => v.value === y);
       if (yearValue == null) {
         yearValue = {
           key: y,
@@ -372,7 +365,7 @@ export function getFilterColumnValues(ctx, col, startRow, endRow, startCol) {
         dates.push(yearValue);
         flattenValues.push(dateStr);
       }
-      let monthValue = find(yearValue.children, (v) => v.value === m);
+      let monthValue = yearValue.children.find((v) => v.value === m);
       if (monthValue == null) {
         monthValue = {
           key: `${y}-${m}`,
@@ -385,7 +378,7 @@ export function getFilterColumnValues(ctx, col, startRow, endRow, startCol) {
         };
         yearValue.children.push(monthValue);
       }
-      let dayValue = find(monthValue.children, (v) => v.value === d);
+      let dayValue = monthValue.children.find((v) => v.value === d);
       if (dayValue == null) {
         dayValue = {
           key: dateStr,
@@ -406,7 +399,7 @@ export function getFilterColumnValues(ctx, col, startRow, endRow, startCol) {
       dayValue.dateValues.push(dateStr);
       dateRowMap[dateStr] = (dateRowMap[dateStr] || []).concat(r);
       if (r in hiddenRows) {
-        datesUncheck = [...new Set([...datesUncheck, ... [dateStr]])];
+        datesUncheck = [...new Set([...datesUncheck, ...[dateStr]])];
       }
     } else {
       let v;
@@ -422,7 +415,7 @@ export function getFilterColumnValues(ctx, col, startRow, endRow, startCol) {
       const text = m == null ? filter.valueBlank : `${m}`;
       const key = `${v}#$$$#${m}`;
       if (data != null) {
-        let maskValue = find(data, (value) => value.mask === m);
+        let maskValue = data.find((value) => value.mask === m);
         if (maskValue == null) {
           maskValue = {
             key,
@@ -440,7 +433,7 @@ export function getFilterColumnValues(ctx, col, startRow, endRow, startCol) {
         flattenValues.push(text);
       }
       if (r in hiddenRows) {
-        valuesUncheck = [...new Set([...valuesUncheck, ... [key]])];
+        valuesUncheck = [...new Set([...valuesUncheck, ...[key]])];
       }
       valueRowMap[key] = (valueRowMap[key] || []).concat(r);
     }
@@ -449,7 +442,7 @@ export function getFilterColumnValues(ctx, col, startRow, endRow, startCol) {
     dates,
     datesUncheck,
     dateRowMap,
-    values: flatten(Array.from(valuesMap.values())),
+    values: Array.from(valuesMap.values()).flat(),
     valuesUncheck,
     valueRowMap,
     visibleRows,
@@ -542,8 +535,8 @@ export function getFilterColumnColors(ctx, col, startRow, endRow) {
       }
     }
   }
-  const bgColors = flatten(Array.from(bgMap.values()));
-  const fcColors = flatten(Array.from(fcMap.values()));
+  const bgColors = Array.from(bgMap.values()).flat();
+  const fcColors = Array.from(fcMap.values()).flat();
   return {
     bgColors: bgColors.length < 2 ? [] : bgColors,
     fcColors: fcColors.length < 2 ? [] : fcColors,
@@ -585,7 +578,7 @@ export function saveFilter(
     ed_c,
     true
   );
-  const cfg = assign({}, ctx.config);
+  const cfg = { ...ctx.config };
   cfg.rowhidden = rowHiddenAll;
   // config
   ctx.config = cfg;

@@ -1,6 +1,3 @@
-import concat from 'lodash.concat';
-import filter from 'lodash.filter';
-import findIndex from 'lodash.findindex';
 import set from 'lodash.set';
 import { mergeBorder } from './cell.js';
 import { getFlowdata } from './../context.js';
@@ -253,7 +250,7 @@ export function removeEditingComment(ctx, globalCache) {
   const oldValue = cell.ps.value;
   cell.ps.value = value;
   if (!cell.ps.isShow) {
-    ctx.commentBoxes = filter(ctx.commentBoxes, (v) => v.rc !== `${r}_${c}`);
+    ctx.commentBoxes = ctx.commentBoxes.filter((v) => v.rc !== `${r}_${c}`);
   }
   if (ctx.hooks.afterUpdateComment) {
     setTimeout(() => {
@@ -318,7 +315,7 @@ export function editComment(ctx, globalCache, r, c) {
   removeEditingComment(ctx, globalCache);
   const comment = flowdata?.[r][c]?.ps;
   const commentBoxes = concat(ctx.commentBoxes, ctx.editingCommentBox);
-  if (findIndex(commentBoxes, (v) => v?.rc === `${r}_${c}`) !== -1) {
+  if (commentBoxes.findIndex((v) => v?.rc === `${r}_${c}`) !== -1) {
     const editCommentBox = document.getElementById(`comment-editor-${r}_${c}`);
     editCommentBox?.focus();
   }
@@ -385,7 +382,7 @@ export function showHideComment(ctx, globalCache, r, c) {
   const rc = `${r}_${c}`;
   if (isShow) {
     comment.isShow = false;
-    ctx.commentBoxes = filter(ctx.commentBoxes, (v) => v.rc !== rc);
+    ctx.commentBoxes = ctx.commentBoxes.filter((v) => v.rc !== rc);
   } else {
     comment.isShow = true;
   }
@@ -489,7 +486,7 @@ export function overShowComment(ctx, e, scrollX, scrollY, container) {
   if (
     comment == null ||
     comment.isShow ||
-    findIndex(ctx.commentBoxes, (v) => v.rc === rc) !== -1 ||
+    ctx.commentBoxes.findIndex((v) => v.rc === rc) !== -1 ||
     ctx.editingCommentBox?.rc === rc
   ) {
     ctx.hoveredCommentBox = undefined;

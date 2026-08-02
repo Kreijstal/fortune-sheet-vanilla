@@ -1,5 +1,4 @@
 import cloneDeep from 'lodash.clonedeep';
-import forEach from 'lodash.foreach';
 import omit from 'lodash.omit';
 import set from 'lodash.set';
 import { getFlowdata } from './../context.js';

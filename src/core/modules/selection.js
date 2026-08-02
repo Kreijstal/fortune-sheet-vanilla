@@ -1,9 +1,7 @@
-import assign from 'lodash.assign';
 import cloneDeep from 'lodash.clonedeep';
 import isEmpty from 'lodash.isempty';
 import isPlainObject from 'lodash.isplainobject';
 import kebabCase from 'lodash.kebabcase';
-import map from 'lodash.map';
 import { getFlowdata } from './../context.js';
 import {
   getCellValue,
@@ -420,9 +418,9 @@ export function pasteHandlerOfPaintModel(ctx, copyRange) {
             if (value.ct && value.ct.t === 'inlineStr') {
               delete value.ct;
             }
-            x[c] = assign(x[c], cloneDeep(value));
+            x[c] = Object.assign(x[c], cloneDeep(value));
             if (x[c].ct && x[c].ct.t === 'inlineStr') {
-              x[c].ct.s.forEach((item) => assign(item, value));
+              x[c].ct.s.forEach((item) => Object.assign(item, value));
             }
             if (copyHasMC && x[c].mc) {
               if (x[c].mc.rs != null) {
@@ -1518,9 +1516,11 @@ export function rangeValueToHtml(ctx, sheetId, ranges) {
           c_value = getCellValue(r, c, d, 'm');
         }
         const styleObj = getStyleByCell(ctx, d, r, c);
-        style += map(styleObj, (v, key) => {
-          return `${kebabCase(key)}:${typeof v === 'number' ? `${v}px` : v};`;
-        }).join('');
+        style += Object.entries(styleObj)
+          .map(([key, v]) => {
+            return `${kebabCase(key)}:${typeof v === 'number' ? `${v}px` : v};`;
+          })
+          .join('');
         if (cell.mc) {
           if ('rs' in cell.mc) {
             span = `rowspan="${cell.mc.rs}" colspan="${cell.mc.cs}"`;

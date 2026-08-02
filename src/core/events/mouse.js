@@ -1,9 +1,6 @@
 import cloneDeep from 'lodash.clonedeep';
-import indexOf from 'lodash.indexof';
 import isEmpty from 'lodash.isempty';
-import last from 'lodash.last';
 import set from 'lodash.set';
-import some from 'lodash.some';
 import sortedIndex from 'lodash.sortedindex';
 import { getFlowdata } from './../context.js';
 import {
@@ -293,8 +290,7 @@ export function handleCellAreaMouseDown(
   if (e.button === 2) {
     // $("#luckysheet-dataVerification-showHintBox").hide();
     // 如果右键在选区内, 停止mousedown处理
-    const isInSelection = some(
-      ctx.luckysheet_select_save,
+    const isInSelection = (ctx.luckysheet_select_save ?? []).some(
       (obj_s) =>
         obj_s.row != null &&
         row_index >= obj_s.row[0] &&
@@ -432,7 +428,7 @@ export function handleCellAreaMouseDown(
         ctx.formulaCache.func_selectedrange = last;
       } else if (
         e.ctrlKey &&
-        last(cellInput.querySelectorAll('span'))?.innerText !== ','
+        [...cellInput.querySelectorAll('span')].at(-1)?.innerText !== ','
       ) {
         // 按住ctrl 选择选区时  先处理上一个选区
         let vText = cellInput.innerText;
@@ -452,10 +448,10 @@ export function handleCellAreaMouseDown(
             const currSelection = window.getSelection();
             if (currSelection == null) return;
             ctx.formulaCache.functionRangeIndex = [
-              indexOf(
-                currSelection.anchorNode?.parentNode?.parentNode?.childNodes,
-                currSelection.anchorNode?.parentNode
-              ),
+              Array.from(
+                currSelection.anchorNode?.parentNode?.parentNode?.childNodes ??
+                  []
+              ).indexOf(currSelection.anchorNode?.parentNode),
               currSelection.anchorOffset,
             ];
           } else {
@@ -1345,8 +1341,7 @@ export function handleContextMenu(
     const col_pre = col_location[0];
     const col_index = col_location[2];
     // 如果右键点击在选区内则不做选区处理
-    const isInSelection = some(
-      ctx.luckysheet_select_save,
+    const isInSelection = (ctx.luckysheet_select_save ?? []).some(
       (obj_s) =>
         obj_s.row != null &&
         row_index >= obj_s.row[0] &&
@@ -1474,8 +1469,7 @@ export function handleContextMenu(
     const row_pre = row_location[0];
     const row_index = row_location[2];
     // 如果右键点击在选区内则不做选区处理
-    const isInSelection = some(
-      ctx.luckysheet_select_save,
+    const isInSelection = (ctx.luckysheet_select_save ?? []).some(
       (obj_s) =>
         obj_s.row != null &&
         row_index >= obj_s.row[0] &&
@@ -1528,8 +1522,7 @@ export function handleContextMenu(
     const col_pre = col_location[0];
     const col_index = col_location[2];
     // 如果右键点击在选区内则不做选区处理
-    const isInSelection = some(
-      ctx.luckysheet_select_save,
+    const isInSelection = (ctx.luckysheet_select_save ?? []).some(
       (obj_s) =>
         obj_s.row != null &&
         col_index >= obj_s.column[0] &&
@@ -4150,8 +4143,7 @@ export function handleRowHeaderMouseDown(
   if (e.button === 2) {
     // 如果右键在选区内, 停止mousedown处理
     const flowdata = getFlowdata(ctx);
-    const isInSelection = some(
-      ctx.luckysheet_select_save,
+    const isInSelection = (ctx.luckysheet_select_save ?? []).some(
       (obj_s) =>
         obj_s.row != null &&
         row_index >= obj_s.row[0] &&
@@ -4253,7 +4245,7 @@ export function handleRowHeaderMouseDown(
         ctx.formulaCache.func_selectedrange = last;
       } else if (
         e.ctrlKey &&
-        last(cellInput.querySelectorAll('span'))?.innerText !== ','
+        [...cellInput.querySelectorAll('span')].at(-1)?.innerText !== ','
       ) {
         // 按住ctrl 选择选区时  先处理上一个选区
         let vText = `${cellInput.innerText},`;
@@ -4264,10 +4256,10 @@ export function handleRowHeaderMouseDown(
             const currSelection = window.getSelection();
             if (currSelection == null) return;
             ctx.formulaCache.functionRangeIndex = [
-              indexOf(
-                currSelection.anchorNode?.parentNode?.parentNode?.childNodes,
-                currSelection.anchorNode?.parentNode
-              ),
+              Array.from(
+                currSelection.anchorNode?.parentNode?.parentNode?.childNodes ??
+                  []
+              ).indexOf(currSelection.anchorNode?.parentNode),
               currSelection.anchorOffset,
             ];
           } else {
@@ -4552,8 +4544,7 @@ export function handleColumnHeaderMouseDown(
   // mousedown是右键
   if (e.button === 2) {
     const flowdata = getFlowdata(ctx);
-    const isInSelection = some(
-      ctx.luckysheet_select_save,
+    const isInSelection = (ctx.luckysheet_select_save ?? []).some(
       (obj_s) =>
         obj_s.column != null &&
         col_index >= obj_s.column[0] &&
@@ -4650,7 +4641,7 @@ export function handleColumnHeaderMouseDown(
         ctx.formulaCache.func_selectedrange = last;
       } else if (
         e.ctrlKey &&
-        last(cellInput.querySelectorAll('span'))?.innerText !== ','
+        [...cellInput.querySelectorAll('span')].at(-1)?.innerText !== ','
       ) {
         // 按住ctrl 选择选区时  先处理上一个选区
         let vText = `${cellInput.innerText},`;
@@ -4661,10 +4652,10 @@ export function handleColumnHeaderMouseDown(
             const currSelection = window.getSelection();
             if (currSelection == null) return;
             ctx.formulaCache.functionRangeIndex = [
-              indexOf(
-                currSelection.anchorNode?.parentNode?.parentNode?.childNodes,
-                currSelection.anchorNode?.parentNode
-              ),
+              Array.from(
+                currSelection.anchorNode?.parentNode?.parentNode?.childNodes ??
+                  []
+              ).indexOf(currSelection.anchorNode?.parentNode),
               currSelection.anchorOffset,
             ];
           } else {

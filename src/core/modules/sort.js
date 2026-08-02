@@ -1,4 +1,3 @@
-import findIndex from 'lodash.findindex';
 import numeral from 'numeral';
 import { execfunction, functionCopy, update } from './index.js';
 import {
@@ -110,7 +109,7 @@ export function sortDataRange(
   }
   // let allParam = {};
   // if (ctx.config.rowlen != null) {
-  //   let cfg = assign({}, ctx.config);
+  //   let cfg = {...ctx.config};
   //   cfg = rowlenByRange(d, str, edr, cfg);
   //   allParam = {
   //     cfg,

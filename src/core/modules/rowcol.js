@@ -1,8 +1,5 @@
-import clone from 'lodash.clone';
 import cloneDeep from 'lodash.clonedeep';
-import forEach from 'lodash.foreach';
 import isEmpty from 'lodash.isempty';
-import size from 'lodash.size';
 import { getSheetIndex } from './../utils/index.js';
 import { getcellFormula } from './cell.js';
 import { functionStrChange } from './formula.js';
@@ -86,7 +83,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
     cfg.merge = {};
   }
   const merge_new = {};
-  forEach(cfg.merge, (mc) => {
+  Object.values(cfg.merge).forEach((mc) => {
     const { r, c, rs, cs } = mc;
     if (type === 'row') {
       if (index < r) {
@@ -240,10 +237,10 @@ export function insertRowCol(ctx, op, changeSelection = true) {
       }
       if (filter != null) {
         newFilterObj.filter = {};
-        forEach(filter, (v, k) => {
+        Object.entries(filter).forEach(([k, v]) => {
           const f_rowhidden = filter[k].rowhidden;
           const f_rowhidden_new = {};
-          forEach(f_rowhidden, (v1, nstr) => {
+          Object.entries(f_rowhidden).forEach(([nstr, v1]) => {
             const n = parseFloat(nstr);
             if (n < index) {
               f_rowhidden_new[n] = 0;
@@ -283,7 +280,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
       }
       if (filter != null) {
         newFilterObj.filter = {};
-        forEach(filter, (v, k) => {
+        Object.entries(filter).forEach(([k, v]) => {
           let f_cindex = filter[k].cindex;
           if (f_cindex === index && direction === 'lefttop') {
             f_cindex += count;
@@ -303,9 +300,9 @@ export function insertRowCol(ctx, op, changeSelection = true) {
     if (cfg.rowhidden == null) {
       cfg.rowhidden = {};
     }
-    forEach(newFilterObj.filter, (v, k) => {
+    Object.entries(newFilterObj.filter).forEach(([k, v]) => {
       const f_rowhidden = newFilterObj.filter[k].rowhidden;
-      forEach(f_rowhidden, (v1, n) => {
+      Object.entries(f_rowhidden).forEach(([n, v1]) => {
         cfg.rowhidden[n] = 0;
       });
     });
@@ -361,7 +358,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
         }
         cf_new_range.push({ row: [CFr1, CFr2], column: [CFc1, CFc2] });
       }
-      const cf = clone(CFarr[i]);
+      const cf = { ...CFarr[i] };
       cf.cellrange = cf_new_range;
       newCFarr.push(cf);
     }
@@ -375,7 +372,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
       let AFr2 = AFarr[i].cellrange.row[1];
       let AFc1 = AFarr[i].cellrange.column[0];
       let AFc2 = AFarr[i].cellrange.column[1];
-      const af = clone(AFarr[i]);
+      const af = { ...AFarr[i] };
       if (type === 'row') {
         if (AFr1 < index) {
           if (AFr2 === index && direction === 'lefttop') {
@@ -442,7 +439,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
   const { dataVerification } = file;
   const newDataVerification = {};
   if (dataVerification != null) {
-    forEach(dataVerification, (v, key) => {
+    Object.entries(dataVerification).forEach(([key, v]) => {
       const r = Number(key.split('_')[0]);
       const c = Number(key.split('_')[1]);
       const item = dataVerification[key];
@@ -489,7 +486,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
   const { hyperlink } = file;
   const newHyperlink = {};
   if (hyperlink != null) {
-    forEach(hyperlink, (v, key) => {
+    Object.entries(hyperlink).forEach(([key, v]) => {
       const r = Number(key.split('_')[0]);
       const c = Number(key.split('_')[1]);
       const item = hyperlink[key];
@@ -527,7 +524,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
     if (cfg.rowlen != null) {
       const rowlen_new = {};
       const rowReadOnly_new = {};
-      forEach(cfg.rowlen, (v, rstr) => {
+      Object.entries(cfg.rowlen).forEach(([rstr, v]) => {
         const r = parseFloat(rstr);
         if (r < index) {
           rowlen_new[r] = cfg.rowlen[r];
@@ -541,7 +538,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
           rowlen_new[r + count] = cfg.rowlen[r];
         }
       });
-      forEach(cfg.rowReadOnly, (v, rstr) => {
+      Object.entries(cfg.rowReadOnly).forEach(([rstr, v]) => {
         const r = parseFloat(rstr);
         if (r < index) {
           rowReadOnly_new[r] = cfg.rowReadOnly[r];
@@ -555,7 +552,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
     // 自定义行高配置变动
     if (cfg.customHeight != null) {
       const customHeight_new = {};
-      forEach(cfg.customHeight, (v, rstr) => {
+      Object.entries(cfg.customHeight).forEach(([rstr, v]) => {
         const r = parseFloat(rstr);
         if (r < index) {
           customHeight_new[r] = cfg.customHeight[r];
@@ -574,7 +571,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
     // 自定义行高配置变动
     if (cfg.customHeight != null) {
       const customHeight_new = {};
-      forEach(cfg.customHeight, (v, rstr) => {
+      Object.entries(cfg.customHeight).forEach(([rstr, v]) => {
         const r = parseFloat(rstr);
         if (r < index) {
           customHeight_new[r] = cfg.customHeight[r];
@@ -593,7 +590,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
     // 隐藏行配置变动
     if (cfg.rowhidden != null) {
       const rowhidden_new = {};
-      forEach(cfg.rowhidden, (v, rstr) => {
+      Object.entries(cfg.rowhidden).forEach(([rstr, v]) => {
         const r = parseFloat(rstr);
         if (r < index) {
           rowhidden_new[r] = cfg.rowhidden[r];
@@ -733,7 +730,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
     if (cfg.columnlen != null) {
       const columnlen_new = {};
       const columnReadOnly_new = {};
-      forEach(cfg.columnlen, (v, cstr) => {
+      Object.entries(cfg.columnlen).forEach(([cstr, v]) => {
         const c = parseFloat(cstr);
         if (c < index) {
           columnlen_new[c] = cfg.columnlen[c];
@@ -747,7 +744,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
           columnlen_new[c + count] = cfg.columnlen[c];
         }
       });
-      forEach(cfg.colReadOnly, (v, cstr) => {
+      Object.entries(cfg.colReadOnly).forEach(([cstr, v]) => {
         const c = parseFloat(cstr);
         if (c < index) {
           columnReadOnly_new[c] = cfg.colReadOnly[c];
@@ -761,7 +758,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
     // 自定义列宽配置变动
     if (cfg.customWidth != null) {
       const customWidth_new = {};
-      forEach(cfg.customWidth, (v, cstr) => {
+      Object.entries(cfg.customWidth).forEach(([cstr, v]) => {
         const c = parseFloat(cstr);
         if (c < index) {
           customWidth_new[c] = cfg.customWidth[c];
@@ -780,7 +777,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
     // 自定义列宽配置变动
     if (cfg.customWidth != null) {
       const customWidth_new = {};
-      forEach(cfg.customWidth, (v, cstr) => {
+      Object.entries(cfg.customWidth).forEach(([cstr, v]) => {
         const c = parseFloat(cstr);
         if (c < index) {
           customWidth_new[c] = cfg.customWidth[c];
@@ -799,7 +796,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
     // 隐藏列配置变动
     if (cfg.colhidden != null) {
       const colhidden_new = {};
-      forEach(cfg.colhidden, (v, cstr) => {
+      Object.entries(cfg.colhidden).forEach(([cstr, v]) => {
         const c = parseFloat(cstr);
         if (c < index) {
           colhidden_new[c] = cfg.colhidden[c];
@@ -1090,7 +1087,7 @@ export function deleteRowCol(ctx, op) {
     cfg.merge = {};
   }
   const merge_new = {};
-  forEach(cfg.merge, (mc) => {
+  Object.values(cfg.merge).forEach((mc) => {
     const { r } = mc;
     const { c } = mc;
     const { rs } = mc;
@@ -1227,10 +1224,10 @@ export function deleteRowCol(ctx, op) {
         };
       }
       if (newFilterObj.filter_select != null && filter != null) {
-        forEach(filter, (v, k) => {
+        Object.entries(filter).forEach(([k, v]) => {
           const f_rowhidden = filter[k].rowhidden;
           const f_rowhidden_new = {};
-          forEach(f_rowhidden, (v1, nstr) => {
+          Object.entries(f_rowhidden).forEach(([nstr, v1]) => {
             const n = parseFloat(nstr);
             if (n < start) {
               f_rowhidden_new[n] = 0;
@@ -1279,7 +1276,7 @@ export function deleteRowCol(ctx, op) {
         }
       }
       if (newFilterObj.filter_select != null && filter != null) {
-        forEach(filter, (v, k) => {
+        Object.entries(filter).forEach(([k, v]) => {
           let f_cindex = filter[k].cindex;
           if (f_cindex < start) {
             if (newFilterObj.filter == null) {
@@ -1305,9 +1302,9 @@ export function deleteRowCol(ctx, op) {
     if (cfg.rowhidden == null) {
       cfg.rowhidden = {};
     }
-    forEach(newFilterObj.filter, (v, k) => {
+    Object.entries(newFilterObj.filter).forEach(([k, v]) => {
       const f_rowhidden = newFilterObj.filter[k].rowhidden;
-      forEach(f_rowhidden, (v1, n) => {
+      Object.entries(f_rowhidden).forEach(([n, v1]) => {
         cfg.rowhidden[n] = 0;
       });
     });
@@ -1367,7 +1364,7 @@ export function deleteRowCol(ctx, op) {
         }
       }
       if (cf_new_range.length > 0) {
-        const cf = clone(CFarr[i]);
+        const cf = { ...CFarr[i] };
         cf.cellrange = cf_new_range;
         newCFarr.push(cf);
       }
@@ -1384,7 +1381,7 @@ export function deleteRowCol(ctx, op) {
       let AFc2 = AFarr[i].cellrange.column[1];
       if (type === 'row') {
         if (!(AFr1 >= start && AFr2 <= end)) {
-          const af = clone(AFarr[i]);
+          const af = { ...AFarr[i] };
           if (AFr1 > end) {
             AFr1 -= slen;
             AFr2 -= slen;
@@ -1406,7 +1403,7 @@ export function deleteRowCol(ctx, op) {
         }
       } else if (type === 'column') {
         if (!(AFc1 >= start && AFc2 <= end)) {
-          const af = clone(AFarr[i]);
+          const af = { ...AFarr[i] };
           if (AFc1 > end) {
             AFc1 -= slen;
             AFc2 -= slen;
@@ -1455,7 +1452,7 @@ export function deleteRowCol(ctx, op) {
   const { dataVerification } = file;
   const newDataVerification = {};
   if (dataVerification != null) {
-    forEach(dataVerification, (v, key) => {
+    Object.entries(dataVerification).forEach(([key, v]) => {
       const r = Number(key.split('_')[0]);
       const c = Number(key.split('_')[1]);
       const item = dataVerification[key];
@@ -1478,7 +1475,7 @@ export function deleteRowCol(ctx, op) {
   const { hyperlink } = file;
   const newHyperlink = {};
   if (hyperlink != null) {
-    forEach(hyperlink, (v, key) => {
+    Object.entries(hyperlink).forEach(([key, v]) => {
       const r = Number(key.split('_')[0]);
       const c = Number(key.split('_')[1]);
       const item = hyperlink[key];
@@ -1507,7 +1504,7 @@ export function deleteRowCol(ctx, op) {
     }
     const rowlen_new = {};
     const rowReadOnly_new = {};
-    forEach(cfg.rowlen, (v, rstr) => {
+    Object.entries(cfg.rowlen).forEach(([rstr, v]) => {
       const r = parseFloat(rstr);
       if (r < start) {
         rowlen_new[r] = cfg.rowlen[r];
@@ -1515,7 +1512,7 @@ export function deleteRowCol(ctx, op) {
         rowlen_new[r - slen] = cfg.rowlen[r];
       }
     });
-    forEach(cfg.rowReadOnly, (v, rstr) => {
+    Object.entries(cfg.rowReadOnly).forEach(([rstr, v]) => {
       const r = parseFloat(rstr);
       if (r < start) {
         rowReadOnly_new[r] = cfg.rowReadOnly[r];
@@ -1530,7 +1527,7 @@ export function deleteRowCol(ctx, op) {
       cfg.rowhidden = {};
     }
     const rowhidden_new = {};
-    forEach(cfg.rowhidden, (v, rstr) => {
+    Object.entries(cfg.rowhidden).forEach(([rstr, v]) => {
       const r = parseFloat(rstr);
       if (r < start) {
         rowhidden_new[r] = cfg.rowhidden[r];
@@ -1542,7 +1539,7 @@ export function deleteRowCol(ctx, op) {
     if (cfg.customHeight == null) {
       cfg.customHeight = {};
       const customHeight_new = {};
-      forEach(cfg.customHeight, (v, rstr) => {
+      Object.entries(cfg.customHeight).forEach(([rstr, v]) => {
         const r = parseFloat(rstr);
         if (r < start) {
           customHeight_new[r] = cfg.customHeight[r];
@@ -1556,7 +1553,7 @@ export function deleteRowCol(ctx, op) {
     if (cfg.customHeight == null) {
       cfg.customHeight = {};
       const customHeight_new = {};
-      forEach(cfg.customHeight, (v, rstr) => {
+      Object.entries(cfg.customHeight).forEach(([rstr, v]) => {
         const r = parseFloat(rstr);
         if (r < start) {
           customHeight_new[r] = cfg.customHeight[r];
@@ -1641,7 +1638,7 @@ export function deleteRowCol(ctx, op) {
     }
     const columnlen_new = {};
     const columnReadOnly_new = {};
-    forEach(cfg.columnlen, (v, cstr) => {
+    Object.entries(cfg.columnlen).forEach(([cstr, v]) => {
       const c = parseFloat(cstr);
       if (c < start) {
         columnlen_new[c] = cfg.columnlen[c];
@@ -1649,7 +1646,7 @@ export function deleteRowCol(ctx, op) {
         columnlen_new[c - slen] = cfg.columnlen[c];
       }
     });
-    forEach(cfg.colReadOnly, (v, cstr) => {
+    Object.entries(cfg.colReadOnly).forEach(([cstr, v]) => {
       const c = parseFloat(cstr);
       if (c < start) {
         columnReadOnly_new[c] = cfg.colReadOnly[c];
@@ -1663,7 +1660,7 @@ export function deleteRowCol(ctx, op) {
     if (cfg.customWidth == null) {
       cfg.customWidth = {};
       const customWidth_new = {};
-      forEach(cfg.customWidth, (v, rstr) => {
+      Object.entries(cfg.customWidth).forEach(([rstr, v]) => {
         const r = parseFloat(rstr);
         if (r < start) {
           customWidth_new[r] = cfg.customWidth[r];
@@ -1679,7 +1676,7 @@ export function deleteRowCol(ctx, op) {
       cfg.colhidden = {};
     }
     const colhidden_new = {};
-    forEach(cfg.colhidden, (v, cstr) => {
+    Object.entries(cfg.colhidden).forEach(([cstr, v]) => {
       const c = parseFloat(cstr);
       if (c < start) {
         colhidden_new[c] = cfg.colhidden[c];
@@ -1930,7 +1927,7 @@ export function isShowHidenCR(ctx) {
   )
     return false;
   // 如果当先选区处在隐藏行列的时候则不可编辑
-  if (!!ctx.config.colhidden && size(ctx.config.colhidden) >= 1) {
+  if (!!ctx.config.colhidden && Object.keys(ctx.config.colhidden).length >= 1) {
     const ctxColumn = ctx.luckysheet_select_save[0]?.column?.[0];
     const isHidenColumn =
       Object.keys(ctx.config.colhidden).findIndex((o) => {
@@ -1940,7 +1937,7 @@ export function isShowHidenCR(ctx) {
       return true;
     }
   }
-  if (!!ctx.config.rowhidden && size(ctx.config.rowhidden) >= 1) {
+  if (!!ctx.config.rowhidden && Object.keys(ctx.config.rowhidden).length >= 1) {
     const ctxRow = ctx.luckysheet_select_save[0]?.row?.[0];
     const isHidenRow =
       Object.keys(ctx.config.rowhidden).findIndex((o) => {

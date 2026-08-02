@@ -1,6 +1,4 @@
 import cloneDeep from 'lodash.clonedeep';
-import sortBy from 'lodash.sortby';
-import times from 'lodash.times';
 import { v4 as uuidv4 } from 'uuid';
 import { initSheetData } from './../api/sheet.js';
 import { locale } from './../locale/index.js';
@@ -112,20 +110,21 @@ export function addSheet(
       return sheet;
     });
   }
-  const sheetconfig = sheetData == null
-    ? {
-        name: sheetName === undefined ? sheetname : sheetName,
-        status: 0,
-        order,
-        id,
-        row: ctx.defaultrowNum,
-        column: ctx.defaultcolumnNum,
-        config: {},
-        pivotTable: null,
-        isPivotTable: !!isPivotTable,
-        zoomRatio: 1,
-      }
-    : sheetData;
+  const sheetconfig =
+    sheetData == null
+      ? {
+          name: sheetName === undefined ? sheetname : sheetName,
+          status: 0,
+          order,
+          id,
+          row: ctx.defaultrowNum,
+          column: ctx.defaultcolumnNum,
+          config: {},
+          pivotTable: null,
+          isPivotTable: !!isPivotTable,
+          zoomRatio: 1,
+        }
+      : sheetData;
   if (sheetName !== undefined) sheetconfig.name = sheetName;
   if (sheetconfig.id === undefined) sheetconfig.id = uuidv4();
   if (ctx.hooks.beforeAddSheet?.(sheetconfig) === false) {
@@ -175,7 +174,7 @@ export function deleteSheet(ctx, id) {
     const shownSheets = cloneDeep(ctx.luckysheetfile).filter(
       (singleSheet) => singleSheet.hide === undefined || singleSheet.hide !== 1
     );
-    const orderSheets = sortBy(shownSheets, (sheet) => sheet.order);
+    const orderSheets = [...shownSheets].sort((a, b) => a.order - b.order);
     ctx.currentSheetId = orderSheets?.[0]?.id;
   }
   if (ctx.hooks.afterDeleteSheet) {
@@ -203,8 +202,8 @@ export function updateSheet(ctx, newData) {
         lastRowNum = Math.max(lastRowNum, ctx.defaultrowNum);
         lastColNum = Math.max(lastColNum, ctx.defaultcolumnNum);
       }
-      const expandedData = times(lastRowNum, () =>
-        times(lastColNum, () => null)
+      const expandedData = Array.from({ length: lastRowNum }, () =>
+        Array.from({ length: lastColNum }, () => null)
       );
       for (let i = 0; i < data.length; i += 1) {
         for (let j = 0; j < data[i].length; j += 1) {
@@ -323,7 +322,7 @@ export function expandRowsAndColumns(data, rowsToAdd, columnsToAdd) {
     }
   }
   for (let r = 0; r < rowsToAdd; r += 1) {
-    data.push(times(currentColLen + columnsToAdd, () => null));
+    data.push(Array.from({ length: currentColLen + columnsToAdd }, () => null));
   }
   return data;
 }

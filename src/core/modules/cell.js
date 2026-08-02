@@ -1,14 +1,8 @@
-import assign from 'lodash.assign';
 import camelCase from 'lodash.camelcase';
 import cloneDeep from 'lodash.clonedeep';
-import every from 'lodash.every';
-import forEach from 'lodash.foreach';
-import indexOf from 'lodash.indexof';
-import isArray from 'lodash.isarray';
 import isEmpty from 'lodash.isempty';
 import isPlainObject from 'lodash.isplainobject';
 import kebabCase from 'lodash.kebabcase';
-import map from 'lodash.map';
 import { getFlowdata } from './../context.js';
 import {
   getSheetIndex,
@@ -184,7 +178,10 @@ export function setCellValue(ctx, r, c, d, v) {
   }
   // 1.为null
   // 2.数据透视表的数据，flowdata的每个数据可能为字符串，结果就是cell === v === 一个字符串或者数字数据
-  if (isRealNull(cell) || ((typeof cell === 'string' || typeof cell === 'number') && cell === v)) {
+  if (
+    isRealNull(cell) ||
+    ((typeof cell === 'string' || typeof cell === 'number') && cell === v)
+  ) {
     cell = {};
   }
   if (!cell) return;
@@ -272,7 +269,11 @@ export function setCellValue(ctx, r, c, d, v) {
     } else if (cell.ct != null && cell.ct.fa === '@') {
       cell.m = vupdateStr;
       cell.v = vupdate;
-    } else if (cell.ct != null && cell.ct.t === 'd' && typeof vupdate === 'string') {
+    } else if (
+      cell.ct != null &&
+      cell.ct.t === 'd' &&
+      typeof vupdate === 'string'
+    ) {
       const mask = genarate(vupdate);
       if (mask[1].t !== 'd' || mask[1].fa === cell.ct.fa) {
         [cell.m, cell.ct, cell.v] = mask;
@@ -742,7 +743,11 @@ export function updateCell(ctx, r, c, $input, value, canvas) {
         return;
       }
     }
-    if (typeof value === 'string' && value.slice(0, 1) === '=' && value.length > 1) {
+    if (
+      typeof value === 'string' &&
+      value.slice(0, 1) === '=' &&
+      value.length > 1
+    ) {
     } else if (
       isPlainObject(curv) &&
       curv &&
@@ -1164,13 +1169,13 @@ export function isAllSelectedCellsInStatus(ctx, attr, status) {
       const endSpan = endContainer.parentNode;
       const allSpans = startSpan?.parentNode?.querySelectorAll('span');
       if (allSpans) {
-        const startSpanIndex = allSpans.indexOf( startSpan);
-        const endSpanIndex = allSpans.indexOf( endSpan);
+        const startSpanIndex = allSpans.indexOf(startSpan);
+        const endSpanIndex = allSpans.indexOf(endSpan);
         const rangeSpans = [];
         for (let i = startSpanIndex; i <= endSpanIndex; i += 1) {
           rangeSpans.push(allSpans[i]);
         }
-        return every(rangeSpans, (s) => !isEmpty(s.style[cssField]));
+        return rangeSpans.every((s) => !isEmpty(s.style[cssField]));
       }
     }
   }
@@ -1197,7 +1202,7 @@ export function getFontStyleByCell(cell, checksAF, checksCF, isCheck = true) {
   if (!cell) {
     return style;
   }
-  forEach(cell, (v, key) => {
+  Object.entries(cell).forEach(([key, v]) => {
     let value = cell[key];
     if (isCheck) {
       value = normalizedCellAttr(cell, key);
@@ -1293,7 +1298,7 @@ export function getStyleByCell(ctx, d, r, c) {
     }
   }
   if (!isInline) {
-    style = assign(style, getFontStyleByCell(cell, checksAF, checksCF));
+    style = Object.assign(style, getFontStyleByCell(cell, checksAF, checksCF));
   }
   return style;
 }
@@ -1312,9 +1317,11 @@ export function getInlineStringHTML(r, c, data) {
       const strObj = strings[i];
       if (strObj.v) {
         const style = getFontStyleByCell(strObj);
-        const styleStr = map(style, (v, key) => {
-          return `${kebabCase(key)}:${typeof v === 'number' ? `${v}px` : v};`;
-        }).join('');
+        const styleStr = Object.entries(style)
+          .map(([key, v]) => {
+            return `${kebabCase(key)}:${typeof v === 'number' ? `${v}px` : v};`;
+          })
+          .join('');
         value += `<span class="luckysheet-input-span" index='${i}' style='${styleStr}'>${strObj.v}</span>`;
       }
     }

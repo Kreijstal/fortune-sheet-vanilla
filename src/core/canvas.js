@@ -1,4 +1,3 @@
-import forEach from 'lodash.foreach';
 import isEmpty from 'lodash.isempty';
 import isPlainObject from 'lodash.isplainobject';
 import sortedIndex from 'lodash.sortedindex';
@@ -2190,8 +2189,8 @@ export class Canvas {
     let colIndex; // 溢出单元格 列下标
     let stc;
     let edc;
-    forEach(map, (row, rkey) => {
-      forEach(row, (mapItem, ckey) => {
+    Object.entries(map).forEach(([rkey, row]) => {
+      row.forEach((mapItem, ckey) => {
         rowIndex = Number(rkey);
         colIndex = Number(ckey);
         stc = mapItem.stc;

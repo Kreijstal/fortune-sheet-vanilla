@@ -1,6 +1,4 @@
-import clone from 'lodash.clone';
 import cloneDeep from 'lodash.clonedeep';
-import includes from 'lodash.includes';
 import isEmpty from 'lodash.isempty';
 import { hideCRCount, removeActiveImage } from '../index.js';
 import { getFlowdata } from './../context.js';
@@ -51,7 +49,7 @@ export function handleGlobalEnter(ctx, cellInput, e, canvas) {
     //     )
     //   );
     // } else {
-    const lastCellUpdate = clone(ctx.luckysheetCellUpdate);
+    const lastCellUpdate = [...ctx.luckysheetCellUpdate];
     updateCell(
       ctx,
       ctx.luckysheetCellUpdate[0],

@@ -1,5 +1,3 @@
-import filter from 'lodash.filter';
-import find from 'lodash.find';
 import set from 'lodash.set';
 import { mergeBorder } from './index.js';
 import { getFlowdata } from './../context.js';

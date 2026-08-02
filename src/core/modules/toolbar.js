@@ -1,9 +1,6 @@
 import cloneDeep from 'lodash.clonedeep';
-import forEach from 'lodash.foreach';
-import includes from 'lodash.includes';
 import isPlainObject from 'lodash.isplainobject';
 import pick from 'lodash.pick';
-import round from 'lodash.round';
 import set from 'lodash.set';
 import { mergeCells } from './merge.js';
 import { getFlowdata } from './../context.js';
@@ -196,7 +193,7 @@ export function updateFormatCell(
               cellWidth,
             });
             if (!textInfo) continue;
-            const rowHeight = round(textInfo.textHeightAll);
+            const rowHeight = Math.round(textInfo.textHeightAll);
             const currentRowHeight =
               cfg.rowlen?.[r] ||
               ctx.luckysheetfile[sheetIndex].defaultRowHeight ||
@@ -252,7 +249,7 @@ export function updateFormat(ctx, $input, d, attr, foucsStatus, canvas) {
   if (cfg.rowlen == null) {
     cfg.rowlen = {};
   }
-  forEach(ctx.luckysheet_select_save, (selection) => {
+  (ctx.luckysheet_select_save ?? []).forEach((selection) => {
     const [row_st, row_ed] = selection.row;
     const [col_st, col_ed] = selection.column;
     updateFormatCell(
@@ -687,7 +684,7 @@ export function autoSelectionFormula(ctx, cellInput, fxInput, formula, cache) {
     }
   }
   if (!ctx.luckysheet_select_save) return;
-  forEach(ctx.luckysheet_select_save, (selection) => {
+  (ctx.luckysheet_select_save ?? []).forEach((selection) => {
     const [st_r, ed_r] = selection.row;
     const [st_c, ed_c] = selection.column;
     const row_index = selection.row_focus;
@@ -1291,11 +1288,11 @@ export function handleBorder(ctx, type, borderColor, borderStyle) {
     cfg.borderInfo.push(borderInfo);
   } else {
     const rangeList = [];
-    forEach(ctx.luckysheet_select_save, (selection) => {
+    (ctx.luckysheet_select_save ?? []).forEach((selection) => {
       for (let r = selection.row[0]; r <= selection.row[1]; r += 1) {
         for (let c = selection.column[0]; c <= selection.column[1]; c += 1) {
           const range = `${r}_${c}`;
-          if (rangeList.includes( range)) continue;
+          if (rangeList.includes(range)) continue;
           const borderInfo = {
             rangeType: 'range',
             borderType: type,
