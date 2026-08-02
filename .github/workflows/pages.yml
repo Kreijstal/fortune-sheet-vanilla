@@ -21,7 +21,7 @@ jobs:
         run: |
           SHORT="${GITHUB_SHA:0:7}"
           sed -i -E "s|https://esm.sh/gh/Kreijstal/fortune-sheet-vanilla(@[a-f0-9]{7})?|https://esm.sh/gh/Kreijstal/fortune-sheet-vanilla@${SHORT}|g" site/index.html
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
