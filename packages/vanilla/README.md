@@ -1,7 +1,12 @@
 # @fortune-sheet/vanilla
 
 A **React-free** spreadsheet component for the browser, forked from
-[fortune-sheet](https://github.com/ruilisi/fortune-sheet).
+[fortune-sheet](https://github.com/ruilisi/fortune-sheet) — a TypeScript
+rewrite of [Luckysheet](https://github.com/mengshukeji/Luckysheet), MIT
+licensed. This package is the UI shell from the
+[fortune-sheet-vanilla](https://github.com/kreijstal/fortune-sheet-vanilla)
+fork, which removed upstream's React layer and converted the engine to
+plain JS + JSDoc.
 
 The spreadsheet engine (`@fortune-sheet/core`) was already vanilla — it paints
 everything onto a `<canvas>` and exposes plain event handlers. The only React
@@ -103,4 +108,4 @@ involved: core is JavaScript with JSDoc types.
 
 ## License
 
-MIT (same as upstream fortune-sheet).
+MIT (inherited from upstream [fortune-sheet](https://github.com/ruilisi/fortune-sheet)).

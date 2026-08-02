@@ -1,23 +1,41 @@
 # fortune-sheet-vanilla
 
-**React-free fork of [fortune-sheet](https://github.com/ruilisi/fortune-sheet)** — the
-same spreadsheet engine (`@fortune-sheet/core`, canvas-based, formula engine,
-undo/redo, collaboration ops), with the React UI shell replaced by a
-no-framework wrapper.
+A **React-free, no-TypeScript fork of [FortuneSheet](https://github.com/ruilisi/fortune-sheet)**.
+
+## About this fork
+
+**Upstream:** [`ruilisi/fortune-sheet`](https://github.com/ruilisi/fortune-sheet) —
+a drop-in JavaScript spreadsheet library with an Excel / Google Sheets–style
+interface (canvas rendering, formulas, undo/redo, collaboration ops).
+FortuneSheet is itself a TypeScript rewrite of
+[Luckysheet](https://github.com/mengshukeji/Luckysheet) by
+[Ruilisi](https://github.com/ruilisi) (xiemala), and is MIT-licensed.
+
+**Basis:** this repo is cut from upstream at commit
+[`9434660`](https://github.com/ruilisi/fortune-sheet/commit/9434660) (the
+upstream `HEAD` when forked), shipping `@fortune-sheet/core` `1.0.4`,
+`@fortune-sheet/react` `1.0.4` and `@fortune-sheet/formula-parser` `0.2.13`.
+That commit and everything before it is unmodified upstream history; the fork's
+own commits are `8ffd07d` and later.
+
+**What this fork changed:**
+
+1. **Removed React.** The upstream UI shell (`packages/react` — Workbook,
+   Sheet, SheetOverlay, Toolbar, dialogs, storybook) is gone along with all
+   React dependencies.
+2. **Added a vanilla wrapper** — `@fortune-sheet/vanilla`: the same engine
+   mounted from plain JavaScript (`new FortuneSheet(el, { data })`), with a
+   single-file `<script>` build.
+3. **Dropped TypeScript.** The engine (`packages/core`) was converted from
+   TS to **JavaScript with JSDoc types** — zero `.ts` files remain, but IDE
+   autocomplete still works via `@typedef`/`@param` annotations.
 
 ```
 packages/
 ├── core            @fortune-sheet/core            — the engine, converted to plain JS + JSDoc
-├── formula-parser  @fortune-sheet/formula-parser  — formula parser (already JS)
+├── formula-parser  @fortune-sheet/formula-parser  — formula parser (already JS, from upstream)
 └── vanilla         @fortune-sheet/vanilla         — NEW: plain-JS UI shell
 ```
-
-Everything that was React-specific (`packages/react`, storybook, toolbar &
-dialog components, react peer deps) has been **removed**, and the remaining
-TypeScript engine has been converted to **JavaScript with JSDoc types** —
-zero TypeScript in the repo, but IDEs still get full autocomplete via the
-`@typedef`/`@param` annotations (`import("@fortune-sheet/core").Context`
-etc. resolves; verified with `tsc --checkJs`).
 
 ## Quick start
 
@@ -80,4 +98,6 @@ sort, images, comments, …).
 
 ## License
 
-MIT (upstream is MIT).
+MIT — this fork inherits the upstream [MIT license](LICENSE). Upstream
+`ruilisi/fortune-sheet` is also MIT; the formula engine derives from
+[handsoncode/formula-parser](https://github.com/handsontable/formula-parser).
