@@ -39,7 +39,7 @@
     "test:esmsh": "node test/esmsh.mjs"
   },
   "dependencies": {
-    "@formulajs/formulajs": "^2.9.3",
+    "@formulajs/formulajs": "^4.6.1",
     "dayjs": "^1.11.0",
     "immer": "^9.0.12",
     "numeral": "^2.0.6",
