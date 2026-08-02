@@ -31,11 +31,12 @@ upstream history; the fork's own commits start at `8ffd07d`.
    **JavaScript with JSDoc types** — IDE autocomplete still works via the
    `@typedef`/`@param` annotations, but there are zero `.ts` files.
 4. **Merged into one package.** Upstream's monorepo (`core` + `formula-parser`
-   + `react`) became a single npm package:
+   + `react`) became a single npm package, and its entry re-exports
+   **everything** the original packages exposed:
 
    ```
    src/
-   ├── index.js            — public API (FortuneSheet class)
+   ├── index.js            — public API (FortuneSheet class) + full engine + parser
    ├── store.js … events.js, sync.js, renderer.js, api.js, standalone.js
    ├── core/               — the engine: canvas, data model, events, formulas
    └── formula-parser/     — formula parser (from upstream)
@@ -74,6 +75,32 @@ npm install fortune-sheet-vanilla
 import { FortuneSheet } from "fortune-sheet-vanilla";
 const sheet = new FortuneSheet(document.getElementById("sheet"), { data });
 ```
+
+## What the package exposes
+
+The main entry re-exports **all three original packages**, so nothing is hidden:
+
+```js
+import {
+  // the vanilla shell
+  FortuneSheet, Store,
+  // the engine (@fortune-sheet/core): api namespace, Canvas, event handlers, …
+  api, Canvas, defaultContext, defaultSettings, handleGlobalKeyDown,
+  handlePaste, insertRowCol, …,
+  // the formula parser (@fortune-sheet/formula-parser)
+  Parser, SUPPORTED_FORMULAS, ERROR_REF, ERROR_VALUE, columnIndexToLabel, …,
+} from "fortune-sheet-vanilla";
+```
+
+Heritage subpaths work too, mirroring the original package split:
+
+```js
+import { api } from "fortune-sheet-vanilla/core"; // the engine
+import { Parser } from "fortune-sheet-vanilla/formula-parser"; // the parser
+```
+
+The instance also exposes the engine API at runtime as `sheet.apiRef.*` (same
+method names as the upstream React `Workbook` ref).
 
 ## What works
 
@@ -115,7 +142,10 @@ yarn           # install
 yarn build     # bundles dist/index.mjs + dist/fortune-sheet.vanilla.min.js
 yarn demo      # build + serve the demo at http://localhost:8080
 yarn test      # headless-browser smoke test (10 checks)
-node -e "import('./src/index.js').then(m => console.log(m.FortuneSheet))"  # standalone Node import
+```bash
+node test/exports.mjs # export-surface regression (19 checks)
+node test/smoke.mjs   # headless-browser smoke test (10 checks)
+```
 ```
 
 The bundles inline `lodash`, `immer`, `dayjs`, `numeral`, `uuid`,

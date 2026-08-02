@@ -376,3 +376,21 @@ export class FortuneSheet {
     );
   }
 }
+
+/**
+ * The full engine API and formula parser are re-exported from this package,
+ * so everything the original three packages exposed is available from one
+ * import:
+ *
+ *   import { FortuneSheet, api, Canvas, Parser, SUPPORTED_FORMULAS } from 'fortune-sheet-vanilla';
+ *
+ * Heritage subpaths also work: 'fortune-sheet-vanilla/core' and
+ * 'fortune-sheet-vanilla/formula-parser'.
+ */
+export * from './core/index.js';
+export * from './formula-parser/index.js';
+export { Store } from './store.js';
+
+/**
+ * @typedef {import("./store.js").SetContextOptions} SetContextOptions
+ */

@@ -7,6 +7,12 @@
   "module": "src/index.js",
   "browser": "dist/fortune-sheet.vanilla.min.js",
   "types": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./core": "./src/core/index.js",
+    "./formula-parser": "./src/formula-parser/index.js",
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
     "src"
@@ -28,7 +34,7 @@
   "scripts": {
     "build": "node build.mjs",
     "demo": "node build.mjs && npx -y serve demo -l 8080",
-    "test": "node test/smoke.mjs",
+    "test": "node test/exports.mjs && node test/smoke.mjs",
     "fix-imports": "node scripts/fix-imports.mjs"
   },
   "dependencies": {
