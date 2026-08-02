@@ -143,3 +143,8 @@ dist
 packages/vanilla/dist/
 packages/vanilla/demo/dist/
 packages/vanilla/test/screenshot.png
+
+# build output
+/dist/
+/demo/dist/
+/test/screenshot.png

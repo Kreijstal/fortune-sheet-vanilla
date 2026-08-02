@@ -1,103 +1,136 @@
 # fortune-sheet-vanilla
 
-A **React-free, no-TypeScript fork of [FortuneSheet](https://github.com/ruilisi/fortune-sheet)**.
+A **single-package, React-free, TypeScript-free fork of
+[FortuneSheet](https://github.com/ruilisi/fortune-sheet)** — an Excel /
+Google Sheets-style spreadsheet for the browser.
+
+Everything is in one npm package: the canvas engine, the formula parser, and
+a no-framework UI shell. No React, no TypeScript, no build step required to
+use it — just a `<script>` tag or `npm install`.
 
 ## About this fork
 
-**Upstream:** [`ruilisi/fortune-sheet`](https://github.com/ruilisi/fortune-sheet) —
-a drop-in JavaScript spreadsheet library with an Excel / Google Sheets–style
-interface (canvas rendering, formulas, undo/redo, collaboration ops).
-FortuneSheet is itself a TypeScript rewrite of
+**Upstream:** [`ruilisi/fortune-sheet`](https://github.com/ruilisi/fortune-sheet)
+is a drop-in JavaScript spreadsheet library (canvas rendering, formulas,
+undo/redo, collaboration ops). It is itself a TypeScript rewrite of
 [Luckysheet](https://github.com/mengshukeji/Luckysheet) by
 [Ruilisi](https://github.com/ruilisi) (xiemala), and is MIT-licensed.
 
-**Basis:** this repo is cut from upstream at commit
-[`9434660`](https://github.com/ruilisi/fortune-sheet/commit/9434660) (the
-upstream `HEAD` when forked), shipping `@fortune-sheet/core` `1.0.4`,
-`@fortune-sheet/react` `1.0.4` and `@fortune-sheet/formula-parser` `0.2.13`.
-That commit and everything before it is unmodified upstream history; the fork's
-own commits are `8ffd07d` and later.
+**Basis:** cut from upstream at commit
+[`9434660`](https://github.com/ruilisi/fortune-sheet/commit/9434660) (upstream
+`HEAD` at fork time). That commit and everything before it is unmodified
+upstream history; the fork's own commits start at `8ffd07d`.
 
 **What this fork changed:**
 
-1. **Removed React.** The upstream UI shell (`packages/react` — Workbook,
-   Sheet, SheetOverlay, Toolbar, dialogs, storybook) is gone along with all
-   React dependencies.
-2. **Added a vanilla wrapper** — `@fortune-sheet/vanilla`: the same engine
-   mounted from plain JavaScript (`new FortuneSheet(el, { data })`), with a
-   single-file `<script>` build.
-3. **Dropped TypeScript.** The engine (`packages/core`) was converted from
-   TS to **JavaScript with JSDoc types** — zero `.ts` files remain, but IDE
-   autocomplete still works via `@typedef`/`@param` annotations.
+1. **Removed React.** The upstream UI shell (`@fortune-sheet/react` — Workbook,
+   Sheet, SheetOverlay, Toolbar, dialogs, storybook) is gone.
+2. **Added a vanilla wrapper.** The engine is mounted from plain JavaScript:
+   `new FortuneSheet(el, { data })`.
+3. **Dropped TypeScript.** The engine was converted from TS to
+   **JavaScript with JSDoc types** — IDE autocomplete still works via the
+   `@typedef`/`@param` annotations, but there are zero `.ts` files.
+4. **Merged into one package.** Upstream's monorepo (`core` + `formula-parser`
+   + `react`) became a single npm package:
 
-```
-packages/
-├── core            @fortune-sheet/core            — the engine, converted to plain JS + JSDoc
-├── formula-parser  @fortune-sheet/formula-parser  — formula parser (already JS, from upstream)
-└── vanilla         @fortune-sheet/vanilla         — NEW: plain-JS UI shell
-```
+   ```
+   src/
+   ├── index.js            — public API (FortuneSheet class)
+   ├── store.js … events.js, sync.js, renderer.js, api.js, standalone.js
+   ├── core/               — the engine: canvas, data model, events, formulas
+   └── formula-parser/     — formula parser (from upstream)
+   ```
 
-## Quick start
+## Quick start (script tag)
 
 ```html
 <div id="sheet" style="position:absolute; inset:0"></div>
-<script src="packages/vanilla/dist/fortune-sheet.vanilla.min.js"></script>
+
+<script src="dist/fortune-sheet.vanilla.min.js"></script>
 <script>
   const sheet = new FortuneSheet(document.getElementById("sheet"), {
-    data: [{ name: "Sheet1", celldata: [{ r: 0, c: 0, v: { v: "hi" } }] }],
+    data: [
+      {
+        name: "Sheet1",
+        celldata: [
+          { r: 0, c: 0, v: { v: "hello", bl: 1 } },
+          { r: 0, c: 1, v: { v: 42, m: "42" } },
+          { r: 1, c: 1, v: { v: 84, f: "=B1*2", m: "84" } },
+        ],
+      },
+    ],
+    allowEdit: true,
   });
 </script>
 ```
 
-See [packages/vanilla/README.md](packages/vanilla/README.md) for the full API
-and [packages/vanilla/demo](packages/vanilla/demo) for a runnable demo.
-
-## How hard was "unreactifying" it?
-
-Not very — because the hard part was already vanilla:
-
-- `@fortune-sheet/core` + `@fortune-sheet/formula-parser` are pure TypeScript
-  (zero React runtime deps). All the real work — canvas painting, the data
-  model, mouse/keyboard/paste/copy handlers, formulas, undo/redo — lives
-  there. (There was even a stray unused `import React` in core's settings.ts.)
-- React was only the ~86-file UI shell: mount the canvas, wire DOM events to
-  core handlers, re-render the DOM overlays (selection boxes, cell editor,
-  scrollbars, tabs) when the immer-managed context changes.
-
-So the fork replaces that shell with ~6 small vanilla modules
-(`store.js`, `renderer.js`, `sync.js`, `events.js`, `api.js`, `index.js`).
-The engine handlers (`handleCellAreaMouseDown`, `handleGlobalKeyDown`,
-`handlePaste`, `handleGlobalWheel`, …) are called with the exact same
-arguments as before — just without React in between.
-
-The engine itself was then converted from TypeScript to **JavaScript + JSDoc**
-(`packages/core/convert-to-jsdoc.mjs` documents the conversion): tsc emitted
-clean JS, and every exported type/interface/function signature was turned
-into `@typedef` / `@param` / `@returns` comments. The whole repo is now pure
-JS — no `.ts` files, no TS toolchain needed at build time (esbuild bundles it
-directly).
-
-## Commands
+## Or via npm
 
 ```bash
-yarn install   # workspaces: core + formula-parser + vanilla
-yarn build     # esbuild bundles → packages/vanilla/dist
-yarn demo      # build + serve demo at http://localhost:8080
-node packages/vanilla/test/smoke.mjs   # playwright smoke test (9 checks)
+npm install fortune-sheet-vanilla
 ```
 
-## Status / missing pieces
+```js
+import { FortuneSheet } from "fortune-sheet-vanilla";
+const sheet = new FortuneSheet(document.getElementById("sheet"), { data });
+```
 
-Working: rendering, selection, editing, formulas, copy/paste, undo/redo,
-tabs (add/rename/switch), row/col header clicks, wheel scroll, resize,
-stat bar, zoom, full core API surface via `apiRef`.
+## What works
 
-Not ported (engine functions exist but their React UI was dropped): toolbar,
-formula bar, and dialogs (conditional formatting, data validation, custom
-sort, images, comments, …).
+- Canvas rendering (cells, headers, grid lines, frozen panes)
+- Mouse selection, drag-select, fill handle, move-cells drag
+- In-cell editing (double-click or just type), formulas with live recalculation
+- Keyboard navigation (arrows, Tab, Enter, F2, Delete, Ctrl+C/V/Z/Y)
+- Copy / paste (from Excel or other sheets too), undo / redo
+- Multiple sheets: tabs, add sheet (`+`), rename (double-click a tab)
+- Row/column headers with click-to-select, corner → select all
+- Wheel scrolling, scrollbars, window resize
+- Stat bar (count / sum / average / max / min of the selection)
+- The full engine API: `setCellValue`, `mergeCells`, `insertRowOrColumn`,
+  `deleteRowOrColumn`, `freeze`, `setSelection`, `getCellsByRange`, …
+  (see `sheet.apiRef`), plus zoom via `Ctrl + + / -`
+
+## API
+
+| method | description |
+| --- | --- |
+| `new FortuneSheet(container, options)` | mount the sheet |
+| `sheet.getData()` | full workbook data (expanded `data` matrices) |
+| `sheet.getSheetData()` | currently active sheet |
+| `sheet.setData(data)` | replace the workbook data |
+| `sheet.undo()` / `sheet.redo()` | undo / redo |
+| `sheet.apiRef.*` | the engine API (same as upstream's Workbook ref) |
+| `sheet.setContext(recipe, options)` | low-level immer producer access |
+| `sheet.destroy()` | unbind events and remove DOM |
+
+Options are the upstream `Settings` (`data`, `row`, `column`, `allowEdit`,
+`lang`, `rowHeaderWidth`, `columnHeaderHeight`, `generateSheetId`, `hooks`,
+`onChange`, `onOp`, …). Toolbar/formula-bar settings are accepted but ignored
+— this build renders its own minimal chrome.
+
+## Building & testing
+
+```bash
+yarn           # install
+yarn build     # bundles dist/index.mjs + dist/fortune-sheet.vanilla.min.js
+yarn demo      # build + serve the demo at http://localhost:8080
+yarn test      # headless-browser smoke test (10 checks)
+node -e "import('./src/index.js').then(m => console.log(m.FortuneSheet))"  # standalone Node import
+```
+
+The bundles inline `lodash`, `immer`, `dayjs`, `numeral`, `uuid`,
+`@formulajs/formulajs` and `tiny-emitter` — fully self-contained. The source
+itself is plain ESM and also works directly in Node.
+
+## Not (yet) ported
+
+The React toolbar and dialogs (font/border pickers, conditional formatting,
+data validation, custom sort, images, comments, …). The engine functions for
+all of those exist in `src/core` and are reachable through `apiRef` — only
+their React UI shells were dropped.
 
 ## License
 
 MIT — this fork inherits the upstream [MIT license](LICENSE). Upstream
-`ruilisi/fortune-sheet` is also MIT; the formula engine derives from
+`ruilisi/fortune-sheet` is MIT; the formula engine derives from
 [handsoncode/formula-parser](https://github.com/handsontable/formula-parser).
