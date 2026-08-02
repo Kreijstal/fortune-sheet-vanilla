@@ -43,7 +43,7 @@
     "immer": "^9.0.12",
     "numeral": "^2.0.6",
     "tiny-emitter": "^2.1.0",
-    "uuid": "^8.3.2",
+    "uuid": "^14.0.1",
     "lodash.camelcase": "4.3.0",
     "lodash.clonedeep": "4.5.0",
     "lodash.differenceby": "4.8.0",
