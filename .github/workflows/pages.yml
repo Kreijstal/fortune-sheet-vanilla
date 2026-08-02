@@ -20,7 +20,7 @@ jobs:
       - name: Pin esm.sh URL to this commit
         run: |
           SHORT="${GITHUB_SHA:0:7}"
-          sed -i -E "s|https://esm.sh/gh/Kreijstal/fortune-sheet-vanilla(@[a-f0-9]{7})?|https://esm.sh/gh/Kreijstal/fortune-sheet-vanilla|g" site/index.html|https://esm.sh/gh/Kreijstal/fortune-sheet-vanilla|https://esm.sh/gh/Kreijstal/fortune-sheet-vanilla@${SHORT}|g" site/index.html
+          sed -i -E "s|https://esm.sh/gh/Kreijstal/fortune-sheet-vanilla(@[a-f0-9]{7})?|https://esm.sh/gh/Kreijstal/fortune-sheet-vanilla@${SHORT}|g" site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
