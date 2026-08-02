@@ -1,5 +1,3 @@
-import isNil from 'lodash.isnil';
-import trim from 'lodash.trim';
 import {
   execfunction,
   getcellFormula,
@@ -22,7 +20,7 @@ export function setFormulaCellInfo(ctx, formulaCell, data) {
     formulaCell.id,
     data
   );
-  if (isNil(calc_funcStr)) {
+  if (calc_funcStr == null) {
     delete ctx.formulaCache.formulaCellInfoMap?.[key];
     return;
   }
@@ -41,8 +39,8 @@ export function setFormulaCellInfo(ctx, formulaCell, data) {
       formulaCell.id,
       null,
       (str_nb) => {
-        const range = getcellrange(ctx, trim(str_nb), formulaCell.id, data);
-        if (!isNil(range)) {
+        const range = getcellrange(ctx, str_nb.trim(), formulaCell.id, data);
+        if (range != null) {
           formulaDependency.push(range);
         }
       }
@@ -156,8 +154,8 @@ export function setFormulaCellInfo(ctx, formulaCell, data) {
       ) {
         continue;
       }
-      const range = getcellrange(ctx, trim(t), formulaCell.id, data);
-      if (isNil(range)) {
+      const range = getcellrange(ctx, t.trim(), formulaCell.id, data);
+      if (range == null) {
         continue;
       }
       formulaDependency.push(range);
@@ -229,7 +227,7 @@ export function getFormulaRunList(updateValueArray, formulaCellInfoMap) {
   const existsFormulaRunList = {};
   while (stack.length > 0) {
     const formulaObject = stack.pop();
-    if (isNil(formulaObject) || formulaObject.key in existsFormulaRunList) {
+    if (formulaObject == null || formulaObject.key in existsFormulaRunList) {
       continue;
     }
     if (formulaObject.color === 'b') {
@@ -241,7 +239,7 @@ export function getFormulaRunList(updateValueArray, formulaCellInfoMap) {
     const cacheStack = [];
     Object.keys(formulaObject.parents).forEach((parentKey) => {
       const parentFormulaObject = formulaCellInfoMap[parentKey];
-      if (!isNil(parentFormulaObject)) {
+      if (parentFormulaObject != null) {
         cacheStack.push(parentFormulaObject);
       }
     });

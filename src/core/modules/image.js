@@ -54,8 +54,7 @@ export function saveImage(ctx) {
  * @param {Context} ctx
  */
 export function removeActiveImage(ctx) {
-  ctx.insertedImgs = filter(
-    ctx.insertedImgs,
+  ctx.insertedImgs = ctx.insertedImgs.filter(
     (image) => image.id !== ctx.activeImg
   );
   ctx.activeImg = undefined;
@@ -183,7 +182,7 @@ export function onImageMoveEnd(ctx, globalCache) {
   if (!globalCache.image?.resizingSide) {
     globalCache.image = undefined;
     if (position) {
-      const img = find(ctx.insertedImgs, (v) => v.id === ctx.activeImg);
+      const img = ctx.insertedImgs.find((v) => v.id === ctx.activeImg);
       if (img) {
         img.left = position.left / ctx.zoomRatio;
         img.top = position.top / ctx.zoomRatio;
@@ -276,7 +275,7 @@ export function onImageResizeEnd(ctx, globalCache) {
     globalCache.image = undefined;
     const position = getImagePosition();
     if (position) {
-      const img = find(ctx.insertedImgs, (v) => v.id === ctx.activeImg);
+      const img = ctx.insertedImgs.find((v) => v.id === ctx.activeImg);
       if (img) {
         img.left = position.left / ctx.zoomRatio;
         img.top = position.top / ctx.zoomRatio;

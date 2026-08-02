@@ -1,6 +1,3 @@
-import forEach from 'lodash.foreach';
-import isNil from 'lodash.isnil';
-import isNumber from 'lodash.isnumber';
 import isPlainObject from 'lodash.isplainobject';
 import {
   delFunctionGroup,
@@ -25,7 +22,7 @@ import SSF from './../modules/ssf.js';
  * @returns {any}
  */
 export function getCellValue(ctx, row, column, options = {}) {
-  if (!isNumber(row) || !isNumber(column)) {
+  if (typeof row !== 'number' || typeof column !== 'number') {
     throw new Error('row or column cannot be null or undefined');
   }
   const sheet = getSheet(ctx, options);
@@ -62,7 +59,7 @@ export function getCellValue(ctx, row, column, options = {}) {
  * @param {CommonOptions} [options]
  */
 export function setCellValue(ctx, row, column, value, cellInput, options = {}) {
-  if (!isNumber(row) || !isNumber(column)) {
+  if (typeof row !== 'number' || typeof column !== 'number') {
     throw new Error('row or column cannot be null or undefined');
   }
   const sheet = getSheet(ctx, options);
@@ -125,7 +122,7 @@ export function setCellValue(ctx, row, column, value, cellInput, options = {}) {
       delFunctionGroup(ctx, row, column);
       setCellValueInternal(ctx, row, column, data, curv); // update text value
     }
-    forEach(value, (v, attr) => {
+    Object.entries(value).forEach(([attr, v]) => {
       if (attr in formatList) {
         updateFormatCell(ctx, data, attr, v, row, row, column, column); // change range format
       } else {
@@ -152,7 +149,7 @@ export function setCellValue(ctx, row, column, value, cellInput, options = {}) {
  * @param {CommonOptions} [options]
  */
 export function clearCell(ctx, row, column, options = {}) {
-  if (!isNumber(row) || !isNumber(column)) {
+  if (typeof row !== 'number' || typeof column !== 'number') {
     throw new Error('row or column cannot be null or undefined');
   }
   const sheet = getSheet(ctx, options);
@@ -176,7 +173,7 @@ export function clearCell(ctx, row, column, options = {}) {
  * @param {CommonOptions} [options]
  */
 export function setCellFormat(ctx, row, column, attr, value, options = {}) {
-  if (!isNumber(row) || !isNumber(column)) {
+  if (typeof row !== 'number' || typeof column !== 'number') {
     throw new Error('row or column cannot be null or undefined');
   }
   if (!attr) {
@@ -194,7 +191,7 @@ export function setCellFormat(ctx, row, column, attr, value, options = {}) {
     throw new Error(
       "'fa' and 't' should be present in value when attr is 'ct'"
     );
-  } else if (attr === 'ct' && !isNil(cellData.v)) {
+  } else if (attr === 'ct' && cellData.v != null) {
     cellData.m = SSF.format(value.fa, cellData.v); // auto generate mask
   }
   if (attr === 'bd') {

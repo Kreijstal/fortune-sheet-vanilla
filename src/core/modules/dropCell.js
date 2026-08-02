@@ -1,5 +1,4 @@
 import cloneDeep from 'lodash.clonedeep';
-import isUndefined from 'lodash.isundefined';
 import pick from 'lodash.pick';
 import dayjs from 'dayjs';
 import { getFlowdata } from './../context.js';
@@ -461,7 +460,7 @@ function fillCopy(data, len) {
   for (let i = 1; i <= len; i += 1) {
     const index = (i - 1) % data.length;
     const d = cloneDeep(data[index]);
-    if (!isUndefined(d)) {
+    if (d !== undefined) {
       applyData.push(d);
     }
   }

@@ -1,5 +1,3 @@
-import isNumber from 'lodash.isnumber';
-import sortBy from 'lodash.sortby';
 import {
   addSheet as addSheetInternal,
   deleteSheet as deleteSheetInternal,
@@ -75,9 +73,11 @@ export function setSheetOrder(ctx, orderList) {
     }
   });
   // re-order starting from 0
-  sortBy(ctx.luckysheetfile, ['order']).forEach((sheet, i) => {
-    sheet.order = i;
-  });
+  [...ctx.luckysheetfile]
+    .sort((a, b) => a.order - b.order)
+    .forEach((sheet, i) => {
+      sheet.order = i;
+    });
 }
 /**
  * @param {Context} ctx
@@ -92,14 +92,14 @@ export function setSheetOrder(ctx, orderList) {
  */
 export function scroll(ctx, scrollbarX, scrollbarY, options) {
   if (options.scrollLeft != null) {
-    if (!isNumber(options.scrollLeft)) {
+    if (typeof options.scrollLeft !== 'number') {
       throw INVALID_PARAMS;
     }
     if (scrollbarX) {
       scrollbarX.scrollLeft = options.scrollLeft;
     }
   } else if (options.targetColumn != null) {
-    if (!isNumber(options.targetColumn)) {
+    if (typeof options.targetColumn !== 'number') {
       throw INVALID_PARAMS;
     }
     const col_pre =
@@ -111,14 +111,14 @@ export function scroll(ctx, scrollbarX, scrollbarY, options) {
     }
   }
   if (options.scrollTop != null) {
-    if (!isNumber(options.scrollTop)) {
+    if (typeof options.scrollTop !== 'number') {
       throw INVALID_PARAMS;
     }
     if (scrollbarY) {
       scrollbarY.scrollTop = options.scrollTop;
     }
   } else if (options.targetRow != null) {
-    if (!isNumber(options.targetRow)) {
+    if (typeof options.targetRow !== 'number') {
       throw INVALID_PARAMS;
     }
     const row_pre =

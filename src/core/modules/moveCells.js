@@ -1,4 +1,3 @@
-import assign from 'lodash.assign';
 import cloneDeep from 'lodash.clonedeep';
 import last from 'lodash.last';
 import set from 'lodash.set';
@@ -58,7 +57,8 @@ export function onCellsMoveStart(
     row: [row_pre, row, row_index],
     column: [col_pre, col, col_index],
   } = getCellLocationByMouse(ctx, e, scrollbarX, scrollbarY, container);
-  const range = last(ctx.luckysheet_select_save);
+  const range =
+    ctx.luckysheet_select_save[ctx.luckysheet_select_save.length - 1];
   if (range == null) return;
   if (row_index < range.row[0]) {
     [row_index] = range.row;
@@ -420,7 +420,7 @@ export function onCellsMoveEnd(
         value = data[r][c];
       }
       if (value?.mc != null) {
-        const mc = assign({}, value.mc);
+        const mc = { ...value.mc };
         if ('rs' in value.mc) {
           set(offsetMC, `${mc.r}_${mc.c}`, [r + row_s, c + col_s]);
           value.mc.r = r + row_s;
@@ -490,7 +490,7 @@ export function onCellsMoveEnd(
   ctx.luckysheet_select_save = normalizeSelection(ctx, [last]);
   const sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
   if (sheetIndex != null) {
-    ctx.luckysheetfile[sheetIndex].config = assign({}, cfg);
+    ctx.luckysheetfile[sheetIndex].config = { ...cfg };
   }
   // const allParam = {
   //   cfg,

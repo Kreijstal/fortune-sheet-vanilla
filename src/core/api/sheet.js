@@ -1,9 +1,5 @@
 import cloneDeep from 'lodash.clonedeep';
-import forEach from 'lodash.foreach';
-import isNumber from 'lodash.isnumber';
-import isUndefined from 'lodash.isundefined';
 import maxBy from 'lodash.maxby';
-import times from 'lodash.times';
 import { v4 as uuidv4 } from 'uuid';
 import { dataToCelldata, getSheet } from './common.js';
 import { getSheetIndex } from './../utils/index.js';
@@ -41,7 +37,9 @@ export function initSheetData(draftCtx, index, newData) {
     lastColNum = Math.max(lastColNum, draftCtx.defaultcolumnNum);
   }
   if (lastRowNum && lastColNum) {
-    const expandedData = times(lastRowNum, () => times(lastColNum, () => null));
+    const expandedData = Array.from({ length: lastRowNum }, () =>
+      Array.from({ length: lastColNum }, () => null)
+    );
     celldata?.forEach((d) => {
       expandedData[d.r][d.c] = d.v;
     });
@@ -66,7 +64,7 @@ export function hideSheet(ctx, sheetId) {
   ctx.luckysheetfile[index].hide = 1;
   ctx.luckysheetfile[index].status = 0;
   const shownSheets = ctx.luckysheetfile.filter(
-    (sheet) => isUndefined(sheet.hide) || sheet?.hide !== 1
+    (sheet) => sheet.hide === undefined || sheet?.hide !== 1
   );
   ctx.currentSheetId = shownSheets[0].id;
 }
@@ -98,7 +96,7 @@ function generateCopySheetName(ctx, sheetId) {
       index = index || 2;
       const ed_i = fileName.indexOf(')', st_i + nameCopy.length);
       const num = fileName.substring(st_i + nameCopy.length, ed_i);
-      if (isNumber(num)) {
+      if (typeof num === 'number') {
         if (Number.parseInt(num, 10) >= index) {
           index = Number.parseInt(num, 10) + 1;
         }
@@ -183,7 +181,7 @@ export function calculateFormula(ctx, id, range) {
     calculateSheetFromula(ctx, id, range);
     return;
   }
-  forEach(ctx.luckysheetfile, (sheet_obj) => {
+  ctx.luckysheetfile.forEach((sheet_obj) => {
     calculateSheetFromula(ctx, sheet_obj.id, range);
   });
 }

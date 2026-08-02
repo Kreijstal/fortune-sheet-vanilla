@@ -187,7 +187,7 @@ export function goToLink(
     window.open(linkAddress);
   } else if (linkType === 'sheet') {
     let sheetId;
-    forEach(ctx.luckysheetfile, (f) => {
+    ctx.luckysheetfile.forEach((f) => {
       if (linkAddress === f.name) {
         sheetId = f.id;
       }

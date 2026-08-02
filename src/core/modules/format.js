@@ -1,5 +1,3 @@
-import isNil from 'lodash.isnil';
-import isString from 'lodash.isstring';
 import numeral from 'numeral';
 import { isRealNum, valueIsError, isdatetime } from './validation.js';
 import SSF from './ssf.js';
@@ -33,7 +31,7 @@ function parseDate(str, fixdate) {
   const d = new Date(str);
   // console.log(d);
   if (good_pd) {
-    if (!isNil(fixdate)) {
+    if (fixdate != null) {
       if (fixdate > 0)
         d.setTime(d.getTime() + d.getTimezoneOffset() * 60 * 1000);
       else if (fixdate < 0)
@@ -70,7 +68,7 @@ export function genarate(value) {
   let m = null;
   let ct = {};
   let v = value;
-  if (isNil(value)) {
+  if (value == null) {
     return null;
   }
   if (/^-?[0-9]{1,}[,][0-9]{3}(.[0-9]{1,2})?$/.test(value)) {

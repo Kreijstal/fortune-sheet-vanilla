@@ -1,5 +1,3 @@
-import last from 'lodash.last';
-import sortBy from 'lodash.sortby';
 /**
  * Imperative DOM sync: after every context change we update the DOM overlays
  * that React used to render declaratively (selection boxes, input box,
@@ -121,7 +119,7 @@ function syncSelectionLayer(store, overlay) {
   // focus box (the "active cell" marker)
   const focus = overlay.focusBox;
   if (selections.length > 0) {
-    const selection = last(selections);
+    const selection = selections[selections.length - 1];
     Object.assign(focus.style, {
       left: `${selection.left}px`,
       top: `${selection.top}px`,
@@ -313,7 +311,9 @@ export function renderTabs(store, overlay) {
   const ctx = store.ctx;
   const container = overlay.tabContainer;
   container.innerHTML = '';
-  const sorted = sortBy(ctx.luckysheetfile, (s) => Number(s.order));
+  const sorted = [...ctx.luckysheetfile].sort(
+    (a, b) => Number(a.order) - Number(b.order)
+  );
   sorted.forEach((sheet) => {
     if (sheet.hide === 1) return;
     container.appendChild(createTabItem(store, overlay, sheet));

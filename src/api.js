@@ -1,6 +1,4 @@
 import differenceBy from 'lodash.differenceby';
-import isUndefined from 'lodash.isundefined';
-import sortBy from 'lodash.sortby';
 /**
  * Public instance API. Ported from
  * @fortune-sheet/react/src/components/Workbook/api.ts (MIT).
@@ -63,12 +61,11 @@ export function generateAPIs(store, cellInput, scrollbarX, scrollbarY) {
             if (ctx_.currentSheetId === ops[0].id) {
               const shownSheets = ctx_.luckysheetfile.filter(
                 (sheet) =>
-                  (isUndefined(sheet.hide) || sheet?.hide !== 1) &&
+                  (sheet.hide === undefined || sheet?.hide !== 1) &&
                   sheet.id !== ops[0].id
               );
-              ctx_.currentSheetId = sortBy(
-                shownSheets,
-                (sheet) => sheet.order
+              ctx_.currentSheetId = [...shownSheets].sort(
+                (a, b) => a.order - b.order
               )[0].id;
             }
           }

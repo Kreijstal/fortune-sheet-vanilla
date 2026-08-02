@@ -1,5 +1,4 @@
 import cloneDeep from 'lodash.clonedeep';
-import isArray from 'lodash.isarray';
 import isPlainObject from 'lodash.isplainobject';
 import { getdatabyselection, getFlowdata, getRangetxt } from '../index.js';
 import { normalizeSelection, rangeValueToHtml } from './../modules/index.js';
@@ -154,7 +153,7 @@ export function setCellFormatByRange(ctx, attr, value, range, options = {}) {
   if (isPlainObject(range)) {
     range = [range];
   }
-  if (!isArray(range)) {
+  if (!Array.isArray(range)) {
     throw INVALID_PARAMS;
   }
   range.forEach((singleRange) => {

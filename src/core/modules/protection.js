@@ -1,4 +1,3 @@
-import isNil from 'lodash.isnil';
 import { getSheetByIndex } from './../utils/index.js';
 /**
  * @param {Context} ctx
@@ -9,18 +8,18 @@ import { getSheetByIndex } from './../utils/index.js';
  */
 export function checkCellIsLocked(ctx, r, c, sheetId) {
   const sheetFile = getSheetByIndex(ctx, sheetId);
-  if (isNil(sheetFile)) {
+  if (sheetFile == null) {
     return false;
   }
   const { data } = sheetFile;
   const cell = data?.[r]?.[c];
   // cell have lo attribute
-  if (!isNil(cell?.lo)) {
+  if (cell?.lo != null) {
     return !!cell?.lo;
   }
   // default locked status from sheet config
   const aut = sheetFile.config?.authority;
-  const sheetInEditable = isNil(aut) || isNil(aut.sheet) || aut.sheet === 0;
+  const sheetInEditable = aut == null || aut.sheet == null || aut.sheet === 0;
   return !sheetInEditable;
 }
 /**
@@ -34,21 +33,21 @@ export function checkProtectionSelectLockedOrUnLockedCells(ctx, r, c, sheetId) {
   //   const _locale = locale();
   //   const local_protection = _locale.protection;
   const sheetFile = getSheetByIndex(ctx, sheetId);
-  if (isNil(sheetFile)) {
+  if (sheetFile == null) {
     return true;
   }
-  if (isNil(sheetFile.config) || isNil(sheetFile.config.authority)) {
+  if (sheetFile.config == null || sheetFile.config.authority == null) {
     return true;
   }
   const aut = sheetFile.config.authority;
-  if (isNil(aut) || isNil(aut.sheet) || aut.sheet === 0) {
+  if (aut == null || aut.sheet == null || aut.sheet === 0) {
     return true;
   }
   const { data } = sheetFile;
   const cell = data?.[r]?.[c];
   if (cell && cell.lo === 0) {
     // lo为0的时候才是可编辑
-    if (aut.selectunLockedCells === 1 || isNil(aut.selectunLockedCells)) {
+    if (aut.selectunLockedCells === 1 || aut.selectunLockedCells == null) {
       return true;
     }
     return false;
@@ -64,13 +63,13 @@ export function checkProtectionSelectLockedOrUnLockedCells(ctx, r, c, sheetId) {
   //   ); // dont alert password model
   if (isAllEdit) {
     // unlocked
-    if (aut.selectunLockedCells === 1 || isNil(aut.selectunLockedCells)) {
+    if (aut.selectunLockedCells === 1 || aut.selectunLockedCells == null) {
       return true;
     }
     return false;
   }
   // locked
-  if (aut.selectLockedCells === 1 || isNil(aut.selectLockedCells)) {
+  if (aut.selectLockedCells === 1 || aut.selectLockedCells == null) {
     return true;
   }
   return false;
@@ -82,22 +81,22 @@ export function checkProtectionSelectLockedOrUnLockedCells(ctx, r, c, sheetId) {
  */
 export function checkProtectionAllSelected(ctx, sheetId) {
   const sheetFile = getSheetByIndex(ctx, sheetId);
-  if (isNil(sheetFile)) {
+  if (sheetFile == null) {
     return true;
   }
-  if (isNil(sheetFile.config) || isNil(sheetFile.config.authority)) {
+  if (sheetFile.config == null || sheetFile.config.authority == null) {
     return true;
   }
   const aut = sheetFile.config.authority;
-  if (isNil(aut) || isNil(aut.sheet) || aut.sheet === 0) {
+  if (aut == null || aut.sheet == null || aut.sheet === 0) {
     return true;
   }
   let selectunLockedCells = false;
-  if (aut.selectunLockedCells === 1 || isNil(aut.selectunLockedCells)) {
+  if (aut.selectunLockedCells === 1 || aut.selectunLockedCells == null) {
     selectunLockedCells = true;
   }
   let selectLockedCells = false;
-  if (aut.selectLockedCells === 1 || isNil(aut.selectLockedCells)) {
+  if (aut.selectLockedCells === 1 || aut.selectLockedCells == null) {
     selectLockedCells = true;
   }
   if (selectunLockedCells && selectLockedCells) {
@@ -112,18 +111,18 @@ export function checkProtectionAllSelected(ctx, sheetId) {
  */
 export function checkProtectionFormatCells(ctx) {
   const sheetFile = getSheetByIndex(ctx, ctx.currentSheetId);
-  if (isNil(sheetFile)) {
+  if (sheetFile == null) {
     return true;
   }
-  if (isNil(sheetFile.config) || isNil(sheetFile.config.authority)) {
+  if (sheetFile.config == null || sheetFile.config.authority == null) {
     return true;
   }
   const aut = sheetFile.config.authority;
-  if (isNil(aut) || isNil(aut.sheet) || aut.sheet === 0) {
+  if (aut == null || aut.sheet == null || aut.sheet === 0) {
     return true;
   }
   let ht = '';
-  if (!isNil(aut.hintText) && aut.hintText.length > 0) {
+  if (aut.hintText != null && aut.hintText.length > 0) {
     ht = aut.hintText;
   } else {
     ht = aut.defaultSheetHintText;

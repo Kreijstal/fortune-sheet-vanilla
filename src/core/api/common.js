@@ -1,5 +1,4 @@
 import maxBy from 'lodash.maxby';
-import times from 'lodash.times';
 import { getSheetIndex } from './../utils/index.js';
 import { SHEET_NOT_FOUND } from './errors.js';
 /**
@@ -56,7 +55,9 @@ export const celldataToData = (celldata, rowCount, colCount) => {
     lastColNum = Math.max(lastColNum, colCount);
   }
   if (lastRowNum && lastColNum) {
-    const expandedData = times(lastRowNum, () => times(lastColNum, () => null));
+    const expandedData = Array.from({ length: lastRowNum }, () =>
+      Array.from({ length: lastColNum }, () => null)
+    );
     celldata?.forEach((d) => {
       expandedData[d.r][d.c] = d.v;
     });

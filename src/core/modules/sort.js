@@ -1,4 +1,3 @@
-import clone from 'lodash.clone';
 import findIndex from 'lodash.findindex';
 import numeral from 'numeral';
 import { execfunction, functionCopy, update } from './index.js';
@@ -59,11 +58,11 @@ export function orderbydata(isAsc, index, data) {
     return 0;
   };
   const d = (x, y) => a(y, x);
-  const sortedData = clone(data);
+  const sortedData = data.slice();
   sortedData.sort(isAsc ? a : d);
   // calc row offsets
   const rowOffsets = sortedData.map((r, i) => {
-    const origIndex = findIndex(data, (origR) => origR === r);
+    const origIndex = data.findIndex((origR) => origR === r);
     return i - origIndex;
   });
   return { sortedData, rowOffsets };

@@ -1,8 +1,5 @@
-import indexOf from 'lodash.indexof';
 import isEmpty from 'lodash.isempty';
-import isNil from 'lodash.isnil';
 import kebabCase from 'lodash.kebabcase';
-import trim from 'lodash.trim';
 import { getCellValue, getFontStyleByCell } from './cell.js';
 import { selectTextContent, selectTextContentCross } from './cursor.js';
 /**
@@ -205,11 +202,11 @@ export function convertSpanToShareString(
  * @param {any} value
  */
 export function updateInlineStringFormatOutside(cell, key, value) {
-  if (isNil(cell.ct)) {
+  if (cell.ct == null) {
     return;
   }
   const { s } = cell.ct;
-  if (isNil(s)) {
+  if (s == null) {
     return;
   }
   for (let i = 0; i < s.length; i += 1) {
@@ -439,7 +436,9 @@ export function updateInlineStringFormat(ctx, cell, attr, value, cellInput) {
           cont += `<span style='${cssText}'>${right}</span>`;
         }
         if (startContainer.parentElement?.tagName === 'SPAN') {
-          spanIndex = indexOf($textEditor.querySelectorAll('span'), span);
+          spanIndex = Array.from($textEditor.querySelectorAll('span')).indexOf(
+            span
+          );
           span.outerHTML = cont;
         } else {
           spanIndex = 0;
@@ -463,8 +462,8 @@ export function updateInlineStringFormat(ctx, cell, attr, value, cellInput) {
         const startSpan = startContainer.parentNode;
         const endSpan = endContainer.parentNode;
         const allSpans = $textEditor.querySelectorAll('span');
-        const startSpanIndex = indexOf(allSpans, startSpan);
-        const endSpanIndex = indexOf(allSpans, endSpan);
+        const startSpanIndex = allSpans.indexOf(startSpan);
+        const endSpanIndex = allSpans.indexOf(endSpan);
         const startContent = startSpan?.innerHTML || '';
         const endContent = endSpan?.innerHTML || '';
         let sleft = '';

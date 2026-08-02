@@ -1,9 +1,4 @@
-import every from 'lodash.every';
-import filter from 'lodash.filter';
-import forEach from 'lodash.foreach';
 import isEqual from 'lodash.isequal';
-import isNil from 'lodash.isnil';
-import isNumber from 'lodash.isnumber';
 import partition from 'lodash.partition';
 import { getSheetIndex } from './index.js';
 import { getFlowdata } from './../context.js';
@@ -87,8 +82,7 @@ function additionalCellOps(ctx, insertRowColOp) {
  * @returns {Array<Patch>}
  */
 export function filterPatch(patches) {
-  return filter(
-    patches,
+  return patches.filter(
     (p) =>
       p.path[0] === 'luckysheetfile' && p.path[2] !== 'luckysheet_select_save'
   );
@@ -136,7 +130,7 @@ export function patchToOp(ctx, patches, options, undo = false) {
       value: p.value,
       path: p.path,
     };
-    if (p.path[0] === 'luckysheetfile' && isNumber(p.path[1])) {
+    if (p.path[0] === 'luckysheetfile' && typeof p.path[1] === 'number') {
       const id = ctx.luckysheetfile[p.path[1]].id;
       op.id = id;
       op.path = p.path.slice(2);
@@ -147,10 +141,10 @@ export function patchToOp(ctx, patches, options, undo = false) {
     }
     return op;
   });
-  every(ops, (p) => {
+  ops.every((p) => {
     if (
       p.op === 'replace' &&
-      !isNil(p.value?.hl) &&
+      p.value?.hl != null &&
       p.path.length === 3 &&
       p.path[0] === 'data'
     ) {
@@ -251,7 +245,7 @@ export function patchToOp(ctx, patches, options, undo = false) {
         const sheetsRight = ctx.luckysheetfile.filter(
           (sheet) => sheet?.order >= order
         );
-        forEach(sheetsRight, (sheet) => {
+        sheetsRight.forEach((sheet) => {
           ops.push({
             id: sheet.id,
             op: 'replace',
@@ -293,7 +287,7 @@ export function patchToOp(ctx, patches, options, undo = false) {
         (sheet) =>
           sheet?.order >= order && sheet.id !== options.deleteSheetOp?.id
       );
-      forEach(sheetsRight, (sheet) => {
+      sheetsRight.forEach((sheet) => {
         ops.push({
           id: sheet.id,
           op: 'replace',
@@ -316,7 +310,7 @@ export function patchToOp(ctx, patches, options, undo = false) {
         const sheetsRight = ctx.luckysheetfile.filter(
           (sheet) => sheet?.order >= order
         );
-        forEach(sheetsRight, (sheet) => {
+        sheetsRight.forEach((sheet) => {
           ops.push({
             id: sheet.id,
             op: 'replace',

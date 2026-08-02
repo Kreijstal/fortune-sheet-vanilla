@@ -1,11 +1,4 @@
-import forEach from 'lodash.foreach';
-import indexOf from 'lodash.indexof';
 import isEmpty from 'lodash.isempty';
-import isNil from 'lodash.isnil';
-import isString from 'lodash.isstring';
-import last from 'lodash.last';
-import startsWith from 'lodash.startswith';
-import trim from 'lodash.trim';
 import { Parser, ERROR_REF } from '../../formula-parser/index.js';
 import { getFlowdata } from './../context.js';
 import {
@@ -60,7 +53,9 @@ const LABEL_EXTRACT_REGEXP = new RegExp(
  * @returns {boolean}
  */
 export function isFormula(value) {
-  return isString(value) && value.slice(0, 1) === '=' && value.length > 1;
+  return (
+    typeof value === 'string' && value.slice(0, 1) === '=' && value.length > 1
+  );
 }
 // FormulaCache is defined as class to avoid being frozen by immer
 /**
@@ -145,7 +140,7 @@ export class FormulaCache {
   updateFormulaCache(ctx, history, type, data) {
     function requestUpdate(value) {
       if (value instanceof Object) {
-        if (!isNil(value.r) && !isNil(value.c)) {
+        if (value.r != null && value.c != null) {
           setFormulaCellInfo(
             ctx,
             {
@@ -239,10 +234,10 @@ export function iscelldata(txt) {
   return false;
 }
 function addToCellIndexList(ctx, txt, infoObj) {
-  if (isNil(txt) || txt.length === 0 || isNil(infoObj)) {
+  if (txt == null || txt.length === 0 || infoObj == null) {
     return;
   }
-  if (isNil(ctx.formulaCache.cellTextToIndexList)) {
+  if (ctx.formulaCache.cellTextToIndexList == null) {
     ctx.formulaCache.cellTextToIndexList = {};
   }
   if (txt.indexOf('!') > -1) {
@@ -260,7 +255,7 @@ function addToCellIndexList(ctx, txt, infoObj) {
  * @returns {FormulaDependency | null}
  */
 export function getcellrange(ctx, txt, formulaId, data) {
-  if (isNil(txt) || txt.length === 0) {
+  if (txt == null || txt.length === 0) {
     return null;
   }
   const flowdata = data || getFlowdata(ctx, formulaId);
@@ -286,7 +281,7 @@ export function getcellrange(ctx, txt, formulaId, data) {
       .replace(/^'|'$/g, '')
       .replace(/\\'/g, "'")
       .replace(/''/g, "'");
-    forEach(luckysheetfile, (f) => {
+    luckysheetfile.forEach((f) => {
       if (sheettxt === f.name) {
         sheetId = f.id;
         sheetdata = f.data;
@@ -296,14 +291,14 @@ export function getcellrange(ctx, txt, formulaId, data) {
     });
   } else {
     let i = formulaId;
-    if (isNil(i)) {
+    if (i == null) {
       i = ctx.currentSheetId;
     }
     if (`${txt}_${i}` in ctx.formulaCache.cellTextToIndexList) {
       return ctx.formulaCache.cellTextToIndexList[`${txt}_${i}`];
     }
     const index = getSheetIndex(ctx, i);
-    if (isNil(index)) {
+    if (index == null) {
       return null;
     }
     sheettxt = luckysheetfile[index].name;
@@ -311,7 +306,7 @@ export function getcellrange(ctx, txt, formulaId, data) {
     sheetdata = flowdata;
     rangetxt = txt;
   }
-  if (isNil(sheetdata)) {
+  if (sheetdata == null) {
     return null;
   }
   if (rangetxt.indexOf(':') === -1) {
@@ -397,7 +392,7 @@ function checkSpecialFunctionRange(
   ) {
     if (function_str.substring(0, 20) === 'luckysheet_function.') {
       let funcName = function_str.split('.')[1];
-      if (!isNil(funcName)) {
+      if (funcName != null) {
         funcName = funcName.toUpperCase();
         if (
           funcName !== 'INDIRECT' &&
@@ -414,7 +409,7 @@ function checkSpecialFunctionRange(
         .split(',')
         [function_str.split(',').length - 1].split("'")[1]
         .split("'")[0];
-      const str_nb = trim(str);
+      const str_nb = str.trim();
       // console.log(function_str, tempFunc,str, this.iscelldata(str_nb),this.isFunctionRangeSave,r,c);
       if (iscelldata(str_nb)) {
         if (typeof cellRangeFunction === 'function') {
@@ -479,7 +474,7 @@ export function isFunctionRange(
         str = str.toUpperCase();
         if (str.indexOf(':') > -1) {
           const funcArray = str.split(':');
-          function_str += `luckysheet_getSpecialReference(true,'${trim(funcArray[0]).replace(/'/g, "\\'")}', luckysheet_function.${funcArray[1]}.f(#lucky#`;
+          function_str += `luckysheet_getSpecialReference(true,'${funcArray[0].trim().replace(/'/g, "\\'")}', luckysheet_function.${funcArray[1]}.f(#lucky#`;
         } else {
           function_str += `luckysheet_function.${str}.f(`;
         }
@@ -611,11 +606,11 @@ export function isFunctionRange(
       }
       if (s + s_next in operatorjson) {
         if (bracket.length === 0) {
-          if (trim(str).length > 0) {
+          if (str.trim().length > 0) {
             cal2.unshift(
               isFunctionRange(
                 ctx,
-                trim(str),
+                str.trim(),
                 r,
                 c,
                 id,
@@ -623,12 +618,12 @@ export function isFunctionRange(
                 cellRangeFunction
               )
             );
-          } else if (trim(function_str).length > 0) {
-            cal2.unshift(trim(function_str));
+          } else if (function_str.trim().length > 0) {
+            cal2.unshift(function_str.trim());
           }
           if (cal1[0] in operatorjson) {
             let stackCeilPri = op[cal1[0]];
-            while (cal1.length > 0 && !isNil(stackCeilPri)) {
+            while (cal1.length > 0 && stackCeilPri != null) {
               cal2.unshift(cal1.shift());
               stackCeilPri = op[cal1[0]];
             }
@@ -642,11 +637,11 @@ export function isFunctionRange(
         i += 1;
       } else {
         if (bracket.length === 0) {
-          if (trim(str).length > 0) {
+          if (str.trim().length > 0) {
             cal2.unshift(
               isFunctionRange(
                 ctx,
-                trim(str),
+                str.trim(),
                 r,
                 c,
                 id,
@@ -654,18 +649,18 @@ export function isFunctionRange(
                 cellRangeFunction
               )
             );
-          } else if (trim(function_str).length > 0) {
-            cal2.unshift(trim(function_str));
+          } else if (function_str.trim().length > 0) {
+            cal2.unshift(function_str.trim());
           }
           if (cal1[0] in operatorjson) {
             let stackCeilPri = op[cal1[0]];
-            stackCeilPri = isNil(stackCeilPri) ? 1000 : stackCeilPri;
+            stackCeilPri = stackCeilPri == null ? 1000 : stackCeilPri;
             let sPri = op[s];
-            sPri = isNil(sPri) ? 1000 : sPri;
+            sPri = sPri == null ? 1000 : sPri;
             while (cal1.length > 0 && sPri >= stackCeilPri) {
               cal2.unshift(cal1.shift());
               stackCeilPri = op[cal1[0]];
-              stackCeilPri = isNil(stackCeilPri) ? 1000 : stackCeilPri;
+              stackCeilPri = stackCeilPri == null ? 1000 : stackCeilPri;
             }
           }
           cal1.unshift(s);
@@ -677,14 +672,14 @@ export function isFunctionRange(
       }
     } else {
       if (matchConfig.dquote === 0 && matchConfig.squote === 0) {
-        str += trim(s);
+        str += s.trim();
       } else {
         str += s;
       }
     }
     if (i === funcstack.length - 1) {
       let endstr = '';
-      let str_nb = trim(str).replace(/'/g, "\\'");
+      let str_nb = str.trim().replace(/'/g, "\\'");
       if (iscelldata(str_nb) && str_nb.substring(0, 1) !== ':') {
         // endstr = "luckysheet_getcelldata('" + trim(str) + "')";
         endstr = `luckysheet_getcelldata('${str_nb}')`;
@@ -694,7 +689,7 @@ export function isFunctionRange(
           endstr = `luckysheet_getSpecialReference(false,${function_str},'${str_nb}')`;
         }
       } else {
-        str = trim(str);
+        str = str.trim();
         const regx = /{.*?}/;
         if (
           regx.test(str) &&
@@ -756,10 +751,10 @@ export function getAllFunctionGroup(ctx) {
     const file = luckysheetfile[i];
     let { calcChain } = file;
     let { dynamicArray_compute } = file;
-    if (isNil(calcChain)) {
+    if (calcChain == null) {
       calcChain = [];
     }
-    if (isNil(dynamicArray_compute)) {
+    if (dynamicArray_compute == null) {
       dynamicArray_compute = [];
     }
     ret = ret.concat(calcChain);
@@ -781,12 +776,12 @@ export function getAllFunctionGroup(ctx) {
  * @param {string} [id]
  */
 export function delFunctionGroup(ctx, r, c, id) {
-  if (isNil(id)) {
+  if (id == null) {
     id = ctx.currentSheetId;
   }
   const file = ctx.luckysheetfile[getSheetIndex(ctx, id)];
   const { calcChain } = file;
-  if (!isNil(calcChain)) {
+  if (calcChain != null) {
     let modified = false;
     const calcChainClone = calcChain.slice();
     for (let i = 0; i < calcChainClone.length; i += 1) {
@@ -806,12 +801,12 @@ export function delFunctionGroup(ctx, r, c, id) {
     }
   }
   const { dynamicArray } = file;
-  if (!isNil(dynamicArray)) {
+  if (dynamicArray != null) {
     let modified = false;
     const dynamicArrayClone = dynamicArray.slice();
     for (let i = 0; i < dynamicArrayClone.length; i += 1) {
       const calc = dynamicArrayClone[i];
-      if (calc.r === r && calc.c === c && (isNil(calc.id) || calc.id === id)) {
+      if (calc.r === r && calc.c === c && (calc.id == null || calc.id === id)) {
         dynamicArrayClone.splice(i, 1);
         modified = true;
         // server.saveParam("ac", index, null, {
@@ -833,26 +828,26 @@ function checkBracketNum(fp) {
   const bra_tr_txt = fp.match(/(['"])(?:(?!\1).)*?\1/g);
   let bra_l_len = 0;
   let bra_r_len = 0;
-  if (!isNil(bra_l)) {
+  if (bra_l != null) {
     bra_l_len += bra_l.length;
   }
-  if (!isNil(bra_r)) {
+  if (bra_r != null) {
     bra_r_len += bra_r.length;
   }
   let bra_tl_len = 0;
   let bra_tr_len = 0;
-  if (!isNil(bra_tl_txt)) {
+  if (bra_tl_txt != null) {
     for (let i = 0; i < bra_tl_txt.length; i += 1) {
       const bra_tl = bra_tl_txt[i].match(/\(/g);
-      if (!isNil(bra_tl)) {
+      if (bra_tl != null) {
         bra_tl_len += bra_tl.length;
       }
     }
   }
-  if (!isNil(bra_tr_txt)) {
+  if (bra_tr_txt != null) {
     for (let i = 0; i < bra_tr_txt.length; i += 1) {
       const bra_tr = bra_tr_txt[i].match(/\)/g);
-      if (!isNil(bra_tr)) {
+      if (bra_tr != null) {
         bra_tr_len += bra_tr.length;
       }
     }
@@ -872,7 +867,7 @@ function checkBracketNum(fp) {
  * @param {Set<string>} [calcChainSet]
  */
 export function insertUpdateFunctionGroup(ctx, r, c, id, calcChainSet) {
-  if (isNil(id)) {
+  if (id == null) {
     id = ctx.currentSheetId;
   }
   // let func = getcellFormula(ctx, r, c, id);
@@ -882,12 +877,12 @@ export function insertUpdateFunctionGroup(ctx, r, c, id, calcChainSet) {
   // }
   const { luckysheetfile } = ctx;
   const idx = getSheetIndex(ctx, id);
-  if (isNil(idx)) {
+  if (idx == null) {
     return;
   }
   const file = luckysheetfile[idx];
   let { calcChain } = file;
-  if (isNil(calcChain)) {
+  if (calcChain == null) {
     calcChain = [];
   }
   if (calcChainSet) {
@@ -944,7 +939,7 @@ export function execfunction(
   if (!checkBracketNum(txt)) {
     txt += ')';
   }
-  if (isNil(id)) {
+  if (id == null) {
     id = ctx.currentSheetId;
   }
   ctx.calculateSheetId = id;
@@ -958,18 +953,18 @@ export function execfunction(
   // https://github.com/ruilisi/fortune-sheet/issues/551
   if (
     Object.prototype.toString.call(result) === '[object Date]' &&
-    !isNil(result)
+    result != null
   ) {
     result = result.toString();
   }
-  if (!isNil(r) && !isNil(c)) {
+  if (r != null && c != null) {
     if (isrefresh) {
       // eslint-disable-next-line no-use-before-define
       execFunctionGroup(
         ctx,
         r,
         c,
-        isNil(formulaError) ? result : formulaError,
+        formulaError == null ? result : formulaError,
         id
       );
     }
@@ -992,12 +987,12 @@ export function execfunction(
     }
     */
   // console.log(result, txt);
-  return [true, isNil(formulaError) ? result : formulaError, txt];
+  return [true, formulaError == null ? result : formulaError, txt];
 }
 function insertUpdateDynamicArray(ctx, dynamicArrayItem) {
   const { r, c } = dynamicArrayItem;
   let { id } = dynamicArrayItem;
-  if (isNil(id)) {
+  if (id == null) {
     id = ctx.currentSheetId;
   }
   const { luckysheetfile } = ctx;
@@ -1005,7 +1000,7 @@ function insertUpdateDynamicArray(ctx, dynamicArrayItem) {
   if (idx == null) return [];
   const file = luckysheetfile[idx];
   let { dynamicArray } = file;
-  if (isNil(dynamicArray)) {
+  if (dynamicArray == null) {
     dynamicArray = [];
   }
   for (let i = 0; i < dynamicArray.length; i += 1) {
@@ -1034,11 +1029,11 @@ export function groupValuesRefresh(ctx) {
       if (idx == null) continue;
       const file = luckysheetfile[idx];
       const { data } = file;
-      if (isNil(data)) {
+      if (data == null) {
         continue;
       }
       const updateValue = {};
-      if (!isNil(item.spe)) {
+      if (item.spe != null) {
         if (item.spe.type === 'sparklines') {
           updateValue.spl = item.spe.data;
         } else if (item.spe.type === 'dynamicArrayItem') {
@@ -1063,7 +1058,7 @@ export function groupValuesRefresh(ctx) {
  * @param {CellMatrix} [data]
  */
 export function setFormulaCellInfoMap(ctx, calcChains, data) {
-  if (isNil(calcChains)) return;
+  if (calcChains == null) return;
   for (let i = 0; i < calcChains.length; i += 1) {
     const formulaCell = calcChains[i];
     setFormulaCellInfo(ctx, formulaCell, data);
@@ -1088,16 +1083,16 @@ export function execFunctionGroup(
   isForce = false
 ) {
   // 0. null checks
-  if (isNil(data)) {
+  if (data == null) {
     data = getFlowdata(ctx);
   }
-  if (isNil(ctx.formulaCache.execFunctionGlobalData)) {
+  if (ctx.formulaCache.execFunctionGlobalData == null) {
     ctx.formulaCache.execFunctionGlobalData = {};
   }
-  if (isNil(id)) {
+  if (id == null) {
     id = ctx.currentSheetId;
   }
-  if (!isNil(value)) {
+  if (value != null) {
     const cellCache = [[{ v: undefined }]];
     setCellValue(ctx, 0, 0, cellCache, value);
     [
@@ -1112,7 +1107,7 @@ export function execFunctionGroup(
   const calcChains = getAllFunctionGroup(ctx);
   // 2. Store the cells involved in the modification
   const updateValueObjects = {};
-  if (isNil(ctx.formulaCache.execFunctionExist)) {
+  if (ctx.formulaCache.execFunctionExist == null) {
     const key = `r${origin_r}c${origin_c}i${id}`;
     updateValueObjects[key] = 1;
   } else {
@@ -1181,7 +1176,7 @@ function findrangeindex(ctx, v, vp) {
     const i = pfri[0];
     const p = vp_a[i];
     const n = v_a[i];
-    if (isNil(p)) {
+    if (p == null) {
       if (vp_a.length <= i) {
         pfri = [vp_a.length - 1, vp_a.length - 1];
       } else if (v_a.length <= i) {
@@ -1191,8 +1186,8 @@ function findrangeindex(ctx, v, vp) {
     }
     if (p.length === n.length) {
       if (
-        !isNil(vp_a[i + 1]) &&
-        !isNil(v_a[i + 1]) &&
+        vp_a[i + 1] != null &&
+        v_a[i + 1] != null &&
         vp_a[i + 1].length < v_a[i + 1].length
       ) {
         pfri[0] += 1;
@@ -1202,8 +1197,8 @@ function findrangeindex(ctx, v, vp) {
     }
     if (p.length > n.length) {
       if (
-        !isNil(p) &&
-        !isNil(v_a[i + 1]) &&
+        p != null &&
+        v_a[i + 1] != null &&
         v_a[i + 1].substring(0, 1) === '"' &&
         (p.indexOf('{') > -1 || p.indexOf('}') > -1)
       ) {
@@ -1224,7 +1219,7 @@ function findrangeindex(ctx, v, vp) {
     const i = pfri[0];
     const p = vp_a[i];
     const n = v_a[i];
-    if (isNil(n)) {
+    if (n == null) {
       if (v_a[i - 1].indexOf('{') > -1) {
         pfri[0] -= 1;
         const start = v_a[i - 1].search('{');
@@ -1235,7 +1230,7 @@ function findrangeindex(ctx, v, vp) {
       }
     } else if (p.length === n.length) {
       if (
-        !isNil(v_a[i + 1]) &&
+        v_a[i + 1] != null &&
         (v_a[i + 1].substring(0, 1) === '"' ||
           v_a[i + 1].substring(0, 1) === '{' ||
           v_a[i + 1].substring(0, 1) === '}')
@@ -1243,17 +1238,17 @@ function findrangeindex(ctx, v, vp) {
         pfri[0] += 1;
         pfri[1] = 1;
       } else if (
-        !isNil(p) &&
+        p != null &&
         p.length > 2 &&
         p.substring(0, 1) === '"' &&
         p.substring(p.length - 1, 1) === '"'
       ) {
         // pfri[1] = n.length-1;
-      } else if (!isNil(v_a[i]) && v_a[i] === '")') {
+      } else if (v_a[i] != null && v_a[i] === '")') {
         pfri[1] = 1;
-      } else if (!isNil(v_a[i]) && v_a[i] === '"}') {
+      } else if (v_a[i] != null && v_a[i] === '"}') {
         pfri[1] = 1;
-      } else if (!isNil(v_a[i]) && v_a[i] === '{)') {
+      } else if (v_a[i] != null && v_a[i] === '{)') {
         pfri[1] = 1;
       } else {
         pfri[1] = n.length;
@@ -1261,7 +1256,7 @@ function findrangeindex(ctx, v, vp) {
       return pfri;
     } else if (p.length > n.length) {
       if (
-        !isNil(v_a[i + 1]) &&
+        v_a[i + 1] != null &&
         (v_a[i + 1].substring(0, 1) === '"' ||
           v_a[i + 1].substring(0, 1) === '{' ||
           v_a[i + 1].substring(0, 1) === '}')
@@ -1280,9 +1275,9 @@ function findrangeindex(ctx, v, vp) {
     const i = pfri[0];
     const p = vp_a[i];
     const n = v_a[i];
-    if (isNil(p)) {
+    if (p == null) {
       pfri[0] = v_a.length - 1;
-      if (!isNil(n)) {
+      if (n != null) {
         pfri[1] = n.length;
       } else {
         pfri[1] = 1;
@@ -1296,7 +1291,7 @@ function findrangeindex(ctx, v, vp) {
       ) {
         pfri[1] = n.length;
       } else if (
-        !isNil(v_a[i + 1]) &&
+        v_a[i + 1] != null &&
         v_a[i + 1].substring(0, 1) === '"' &&
         (v_a[i + 1].substring(0, 1) === '{' ||
           v_a[i + 1].substring(0, 1) === '}')
@@ -1304,7 +1299,7 @@ function findrangeindex(ctx, v, vp) {
         pfri[0] += 1;
         pfri[1] = 1;
       } else if (
-        !isNil(n) &&
+        n != null &&
         n.substring(0, 1) === '"' &&
         n.substring(n.length - 1, 1) === '"' &&
         p.substring(0, 1) === '"' &&
@@ -1312,7 +1307,7 @@ function findrangeindex(ctx, v, vp) {
       ) {
         pfri[1] = n.length;
       } else if (
-        !isNil(n) &&
+        n != null &&
         n.substring(0, 1) === '{' &&
         n.substring(n.length - 1, 1) === '}' &&
         p.substring(0, 1) === '{' &&
@@ -1329,20 +1324,20 @@ function findrangeindex(ctx, v, vp) {
       }
       return pfri;
     } else if (p.length > n.length) {
-      if (!isNil(p) && p.substring(0, 1) === '"') {
+      if (p != null && p.substring(0, 1) === '"') {
         pfri[1] = n.length;
-      } else if (isNil(v_a[i + 1]) && /{.*?}/.test(v_a[i + 1])) {
+      } else if (v_a[i + 1] == null && /{.*?}/.test(v_a[i + 1])) {
         pfri[0] += 1;
         pfri[1] = v_a[i + 1].length;
       } else if (
-        !isNil(p) &&
+        p != null &&
         v_a[i + 1].substring(0, 1) === '"' &&
         (p.indexOf('{') > -1 || p.indexOf('}') > -1)
       ) {
         pfri[0] += 1;
         pfri[1] = 1;
-      } else if (!isNil(p) && (p.indexOf('{') > -1 || p.indexOf('}') > -1)) {
-      } else if (!isNil(p) && !startsWith(p[0], '=') && startsWith(n, '=')) {
+      } else if (p != null && (p.indexOf('{') > -1 || p.indexOf('}') > -1)) {
+      } else if (p != null && !p[0].startsWith('=') && n.startsWith('=')) {
         return [vlen - 1, v_a[vlen - 1].length];
       } else {
         pfri[0] = pfri[0] + vlen - vplen - 1;
@@ -1438,7 +1433,7 @@ function functionRange(ctx, obj, v, vp) {
     const currSelection = window.getSelection();
     if (!currSelection) return;
     const fri = findrangeindex(ctx, v, vp);
-    if (isNil(fri)) {
+    if (fri == null) {
       currSelection.selectAllChildren(obj);
       currSelection.collapseToEnd();
     } else {
@@ -1475,7 +1470,7 @@ function searchFunction(ctx, searchtxt) {
     if (n === searchtxt) {
       f.unshift(item);
       result_i += 1;
-    } else if (startsWith(n, searchtxt)) {
+    } else if (n.startsWith(searchtxt)) {
       s.unshift(item);
       result_i += 1;
     } else if (n.indexOf(searchtxt) > -1) {
@@ -1515,10 +1510,10 @@ export function getrangeseleciton() {
     anchorNode.parentNode?.nodeName?.toLowerCase() === 'span' &&
     anchorOffset !== 0
   ) {
-    let txt = trim(anchorNode.textContent || '');
+    let txt = (anchorNode.textContent || '').trim();
     if (txt.length === 0 && anchorNode.parentNode.previousSibling) {
       const ahr = anchorNode.parentNode.previousSibling;
-      txt = trim(ahr.textContent || '');
+      txt = (ahr.textContent || '').trim();
       return ahr;
     }
     return anchorNode.parentNode;
@@ -1528,13 +1523,13 @@ export function getrangeseleciton() {
     anchorElement.id === 'luckysheet-rich-text-editor' ||
     anchorElement.id === 'luckysheet-functionbox-cell'
   ) {
-    let txt = trim(last(anchorElement.querySelectorAll('span'))?.innerText);
-    if (txt.length === 0 && anchorElement.querySelectorAll('span').length > 1) {
-      const ahr = anchorElement.querySelectorAll('span');
-      txt = trim(ahr[ahr.length - 2].innerText);
-      return ahr?.[0];
+    const spans = anchorElement.querySelectorAll('span');
+    let txt = (spans[spans.length - 1]?.innerText || '').trim();
+    if (txt.length === 0 && spans.length > 1) {
+      txt = (spans[spans.length - 2].innerText || '').trim();
+      return spans[0];
     }
-    return last(anchorElement.querySelectorAll('span'));
+    return spans[spans.length - 1];
   }
   if (
     anchorNode?.parentElement?.id === 'luckysheet-rich-text-editor' ||
@@ -1604,10 +1599,9 @@ function helpFunctionExe($editer, currSelection, ctx) {
   }
   const $prev = currSelection;
   const $span = $editer.querySelectorAll('span');
-  const currentIndex = indexOf(
-    currSelection.parentNode?.childNodes,
-    currSelection
-  );
+  const currentIndex = Array.from(
+    currSelection.parentNode?.childNodes ?? []
+  ).indexOf(currSelection);
   let i = currentIndex;
   if ($prev == null) {
     return null;
@@ -1624,7 +1618,7 @@ function helpFunctionExe($editer, currSelection, ctx) {
       $cur = $span[i];
       if (
         $cur.classList.contains('luckysheet-formula-text-func') ||
-        trim($cur.textContent || '').toUpperCase() in
+        ($cur.textContent || '').trim().toUpperCase() in
           ctx.formulaCache.functionlistMap
       ) {
         funcName = $cur.textContent;
@@ -1672,7 +1666,7 @@ export function rangeHightlightselected(ctx, $editor) {
   //   0
   // ) {
   if (!currSelection) return;
-  const currText = trim(currSelection.textContent || '');
+  const currText = (currSelection.textContent || '').trim();
   if (currText?.match(/^[a-zA-Z_]+$/)) {
     searchFunction(ctx, currText.toUpperCase());
     ctx.functionHint = null;
@@ -1827,7 +1821,7 @@ function functionHTML(txt) {
         !/[^0-9]/.test(s_next) &&
         s === '-' &&
         (s_pre === '(' ||
-          isNil(s_pre) ||
+          s_pre == null ||
           s_pre === ',' ||
           s_pre === ' ' ||
           s_pre in operatorjson)
@@ -1846,7 +1840,7 @@ function functionHTML(txt) {
     }
     if (i === funcstack.length - 1) {
       // function_str += str;
-      if (iscelldata(trim(str))) {
+      if (iscelldata(str.trim())) {
         const rangeIndex =
           rangeIndexes.length > functionHTMLIndex
             ? rangeIndexes[functionHTMLIndex]
@@ -1857,7 +1851,7 @@ function functionHTML(txt) {
         function_str += `${str}</span>`;
       } else if (str.indexOf('</span>') === -1 && str.length > 0) {
         const regx = /{.*?}/;
-        if (regx.test(trim(str))) {
+        if (regx.test(str.trim())) {
           const arraytxt = regx.exec(str)[0];
           const arraystart = str.search(regx);
           let alltxt = '';
@@ -1951,10 +1945,9 @@ export function handleFormulaInput(
           ];
       } else {
         ctx.formulaCache.functionRangeIndex = [
-          indexOf(
-            currSelection.anchorNode?.parentNode?.parentNode?.childNodes,
-            currSelection.anchorNode?.parentNode
-          ),
+          Array.from(
+            currSelection.anchorNode?.parentNode?.parentNode?.childNodes ?? []
+          ).indexOf(currSelection.anchorNode?.parentNode),
           currSelection.anchorOffset,
         ];
       }
@@ -1979,13 +1972,13 @@ export function handleFormulaInput(
       ctx.formulaCache.rangedrag_row_start = false;
       rangeHightlightselected(ctx, $editor);
     }
-  } else if (startsWith(value1txt, '=') && !startsWith(value, '=')) {
+  } else if (value1txt.startsWith('=') && !value.startsWith('=')) {
     if ($copyTo) $copyTo.innerHTML = value;
     $editor.innerHTML = escapeHTMLTag(value);
-  } else if (!startsWith(value1txt, '=')) {
+  } else if (!value1txt.startsWith('=')) {
     if (!$copyTo) return;
     if ($copyTo.id === 'luckysheet-rich-text-editor') {
-      if (!startsWith($copyTo.innerHTML, '<span')) {
+      if (!$copyTo.innerHTML.startsWith('<span')) {
         $copyTo.innerHTML = escapeHTMLTag(value);
       }
     } else {
@@ -2192,11 +2185,11 @@ export function israngeseleciton(ctx, istooltip) {
     anchor?.parentNode?.nodeName.toLowerCase() === 'span' &&
     anchorOffset !== 0
   ) {
-    let txt = trim(anchor.textContent);
+    let txt = anchor.textContent.trim();
     let lasttxt = '';
     if (txt.length === 0 && anchor.parentNode.previousSibling) {
       const ahr = anchor.parentNode.previousSibling;
-      txt = trim(ahr.textContent || '');
+      txt = (ahr.textContent || '').trim();
       lasttxt = txt.substring(txt.length - 1, 1);
       ctx.formulaCache.rangeSetValueTo = anchor.parentNode;
     } else {
@@ -2218,15 +2211,13 @@ export function israngeseleciton(ctx, istooltip) {
     anchorElement.id === 'luckysheet-rich-text-editor' ||
     anchorElement.id === 'luckysheet-functionbox-cell'
   ) {
-    let txt = trim(last(anchorElement.querySelectorAll('span'))?.innerText);
-    ctx.formulaCache.rangeSetValueTo = last(
-      anchorElement.querySelectorAll('span')
-    );
-    if (txt.length === 0 && anchorElement.querySelectorAll('span').length > 1) {
-      const ahr = anchorElement.querySelectorAll('span');
-      txt = trim(ahr[ahr.length - 2].innerText);
-      txt = trim(ahr[ahr.length - 2].innerText);
-      ctx.formulaCache.rangeSetValueTo = ahr;
+    const spans = anchorElement.querySelectorAll('span');
+    let txt = (spans[spans.length - 1]?.innerText || '').trim();
+    ctx.formulaCache.rangeSetValueTo = spans[spans.length - 1];
+    if (txt.length === 0 && spans.length > 1) {
+      txt = (spans[spans.length - 2].innerText || '').trim();
+      txt = (spans[spans.length - 2].innerText || '').trim();
+      ctx.formulaCache.rangeSetValueTo = spans;
     }
     const lasttxt = txt.substring(txt.length - 1, 1);
     if (
@@ -2251,7 +2242,7 @@ export function israngeseleciton(ctx, istooltip) {
     if (!anchor) return false;
     if (anchor.previousSibling?.textContent == null) return false;
     if (anchor.previousSibling) {
-      const txt = trim(anchor.previousSibling.textContent);
+      const txt = anchor.previousSibling.textContent.trim();
       const lasttxt = txt.substring(txt.length - 1, 1);
       ctx.formulaCache.rangeSetValueTo = anchor.previousSibling;
       if (
@@ -2374,9 +2365,9 @@ export function functionStrChange(txt, type, rc, orient, stindex, step) {
       str += s;
     }
     if (i === funcstack.length - 1) {
-      if (iscelldata(trim(str))) {
+      if (iscelldata(str.trim())) {
         function_str += functionStrChange_range(
-          trim(str),
+          str.trim(),
           type,
           rc,
           orient,
@@ -2384,7 +2375,7 @@ export function functionStrChange(txt, type, rc, orient, stindex, step) {
           step
         );
       } else {
-        function_str += trim(str);
+        function_str += str.trim();
       }
     }
     i += 1;
@@ -3125,18 +3116,18 @@ export function functionCopy(ctx, txt, mode, step) {
       str += s;
     }
     if (i === funcstack.length - 1) {
-      if (iscelldata(trim(str))) {
+      if (iscelldata(str.trim())) {
         if (mode === 'down') {
-          function_str += downparam(trim(str), step);
+          function_str += downparam(str.trim(), step);
         } else if (mode === 'up') {
-          function_str += upparam(trim(str), step);
+          function_str += upparam(str.trim(), step);
         } else if (mode === 'left') {
-          function_str += leftparam(trim(str), step);
+          function_str += leftparam(str.trim(), step);
         } else if (mode === 'right') {
-          function_str += rightparam(trim(str), step);
+          function_str += rightparam(str.trim(), step);
         }
       } else {
-        function_str += trim(str);
+        function_str += str.trim();
       }
     }
     i += 1;

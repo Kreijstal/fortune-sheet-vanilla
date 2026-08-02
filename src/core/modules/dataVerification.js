@@ -1,4 +1,3 @@
-import isNil from 'lodash.isnil';
 import {
   colLocationByIndex,
   diff,
@@ -39,7 +38,7 @@ export function dataRangeSelection(ctx, cache, rangT, type, value) {
     const range = getRangeByTxt(ctx, rangT);
     const r = range[0]?.row;
     const c = range[0]?.column;
-    if (isNil(r) || isNil(c)) return;
+    if (r == null || c == null) return;
     const row_pre = rowLocationByIndex(r[0], ctx.visibledatarow)[0];
     const row = rowLocationByIndex(r[1], ctx.visibledatarow)[1];
     const col_pre = colLocationByIndex(c[0], ctx.visibledatacolumn)[0];
@@ -825,7 +824,8 @@ export function confirmMessage(ctx, generalDialog, dataVerification) {
   let stc = range[range.length - 1]?.column[0];
   let edc = range[range.length - 1]?.column[1];
   const d = getFlowdata(ctx);
-  if (!d || isNil(str) || isNil(edr) || isNil(stc) || isNil(edc)) return false;
+  if (!d || str == null || edr == null || stc == null || edc == null)
+    return false;
   if (str < 0) {
     str = 0;
   }
