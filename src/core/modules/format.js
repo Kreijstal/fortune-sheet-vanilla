@@ -1,5 +1,5 @@
 import numeral from 'numeral';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { isRealNum, valueIsError, isdatetime } from './validation.js';
 import SSF from './ssf.js';
 import { getCellValue } from './cell.js';

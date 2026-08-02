@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { getSheetByIndex } from './../utils/index.js';
 /**
  * @param {Context} ctx

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { locale } from './../locale/index.js';
 import { checkCellIsLocked } from './../modules/index.js';
 export * from './patch.js';

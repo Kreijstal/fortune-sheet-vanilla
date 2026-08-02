@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { getFlowdata } from './../context.js';
 import { getCellValue, setCellValue } from './cell.js';
 // 生成二维数组

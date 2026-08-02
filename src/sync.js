@@ -5,7 +5,7 @@
  *
  * Ported from @fortune-sheet/react SheetOverlay / SheetTab / InputBox (MIT).
  */
-import _ from 'lodash';
+import _ from 'lodash-es';
 import {
   getSheetIndex,
   getFlowdata,

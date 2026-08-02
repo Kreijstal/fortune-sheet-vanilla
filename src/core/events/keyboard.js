@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { hideCRCount, removeActiveImage } from '../index.js';
 import { getFlowdata } from './../context.js';
 import { updateCell, cancelNormalSelected } from './../modules/cell.js';

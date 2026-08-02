@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import dayjs from 'dayjs';
 import { getFlowdata } from './../context.js';
 import { colLocation, rowLocation } from './location.js';

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import {
   addSheet as addSheetInternal,
   deleteSheet as deleteSheetInternal,

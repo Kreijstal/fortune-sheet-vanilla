@@ -5,7 +5,7 @@
  *
  * Logic ported from @fortune-sheet/react/src/components/Workbook/index.tsx (MIT).
  */
-import _ from 'lodash';
+import _ from 'lodash-es';
 import {
   applyPatches,
   enablePatches,

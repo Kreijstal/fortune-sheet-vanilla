@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { hasChinaword } from './text.js';
 /**
  * @type {{

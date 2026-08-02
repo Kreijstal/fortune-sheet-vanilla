@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { mergeCells } from './merge.js';
 import { getFlowdata } from './../context.js';
 import { getSheetIndex, isAllowEdit } from './../utils/index.js';

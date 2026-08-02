@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { isdatatypemulti } from './index.js';
 import { locale } from './../locale/index.js';
 import { normalizedCellAttr } from './cell.js';

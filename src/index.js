@@ -9,7 +9,7 @@
  *
  * MIT license, same as the upstream project.
  */
-import _ from 'lodash';
+import _ from 'lodash-es';
 import {
   getSheetIndex,
   handleFormulaInput,

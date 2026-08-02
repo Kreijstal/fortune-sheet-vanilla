@@ -2,7 +2,7 @@
  * Public instance API. Ported from
  * @fortune-sheet/react/src/components/Workbook/api.ts (MIT).
  */
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { applyPatches } from 'immer';
 import {
   addSheet,

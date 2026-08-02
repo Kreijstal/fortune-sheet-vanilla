@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { getCellValue, getFontStyleByCell } from './cell.js';
 import { selectTextContent, selectTextContentCross } from './cursor.js';
 /**

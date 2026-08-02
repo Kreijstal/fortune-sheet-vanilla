@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { getFlowdata } from './../context.js';
 import { normalizeSelection } from './selection.js';
 /**

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { v4 as uuidv4 } from 'uuid';
 import { initSheetData } from './../api/sheet.js';
 import { locale } from './../locale/index.js';

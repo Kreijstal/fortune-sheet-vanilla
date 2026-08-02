@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { FormulaCache } from './modules/index.js';
 import { normalizeSelection } from './modules/selection.js';
 import { getSheetIndex } from './utils/index.js';

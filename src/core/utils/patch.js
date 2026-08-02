@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { getSheetIndex } from './index.js';
 import { getFlowdata } from './../context.js';
 const addtionalMergeOps = (ops, id) => {

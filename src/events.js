@@ -3,7 +3,7 @@
  * @fortune-sheet/react Workbook (keydown/paste), Sheet (wheel/resize) and
  * SheetOverlay (mouse/touch) components (MIT).
  */
-import _ from 'lodash';
+import _ from 'lodash-es';
 import {
   handleGlobalWheel,
   handleCellAreaMouseDown,

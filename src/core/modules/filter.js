@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { locale } from './../locale/index.js';
 import { getFlowdata } from './../context.js';
 import { getSheetIndex, isAllowEdit, rgbToHex } from './../utils/index.js';

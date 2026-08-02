@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { getdatabyselection } from './cell.js';
 import { getFlowdata } from './../context.js';
 import {

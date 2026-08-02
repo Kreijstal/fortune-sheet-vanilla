@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { getSheetIndex } from './../utils/index.js';
 import { getcellFormula } from './cell.js';
 import { functionStrChange } from './formula.js';

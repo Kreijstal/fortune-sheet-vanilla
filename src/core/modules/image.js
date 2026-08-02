@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { mergeBorder } from './index.js';
 import { getFlowdata } from './../context.js';
 import { getSheetIndex } from './../utils/index.js';

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { getFlowdata } from './../context.js';
 import { getSheetIndex } from './../utils/index.js';
 // 获取表格边框数据计算值

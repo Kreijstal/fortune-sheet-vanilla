@@ -1,5 +1,5 @@
 import numeral from 'numeral';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { execfunction, functionCopy, update } from './index.js';
 import {
   diff,

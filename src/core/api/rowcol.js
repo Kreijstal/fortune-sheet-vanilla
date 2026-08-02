@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { deleteRowCol, insertRowCol } from './../modules/index.js';
 import { getSheet } from './common.js';
 import { INVALID_PARAMS } from './errors.js';

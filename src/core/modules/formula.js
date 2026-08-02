@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { Parser, ERROR_REF } from '../../formula-parser/index.js';
 import { getFlowdata } from './../context.js';
 import {

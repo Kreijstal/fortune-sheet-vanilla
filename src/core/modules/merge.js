@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { getSheetIndex } from './../utils/index.js';
 import { isInlineStringCT } from './inline-string.js';
 /**

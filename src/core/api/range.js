@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { getdatabyselection, getFlowdata, getRangetxt } from '../index.js';
 import { normalizeSelection, rangeValueToHtml } from './../modules/index.js';
 import { setCellFormat, setCellValue } from './cell.js';
