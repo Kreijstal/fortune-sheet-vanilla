@@ -1,6 +1,14 @@
-import * as formulajs from '@formulajs/formulajs';
+import * as formulajsNs from '@formulajs/formulajs';
 import SUPPORTED_FORMULAS from './../../supported-formulas.js';
 import { ERROR_NAME } from './../../error.js';
+
+// same interop handling as supported-formulas.js: esm.sh / Node put the
+// ~450 functions on `.default`, bundlers expose them as named exports.
+const formulajs =
+  formulajsNs.default &&
+  Object.keys(formulajsNs.default).length >= Object.keys(formulajsNs).length
+    ? formulajsNs.default
+    : formulajsNs;
 
 export const SYMBOL = SUPPORTED_FORMULAS;
 
