@@ -15,6 +15,8 @@ import {
   handleFormulaInput,
   updateCell,
   addSheet,
+  cancelNormalSelected,
+  moveHighlightCell,
 } from './core/index.js';
 import cssText from './style.js';
 import { Store } from './store.js';
@@ -318,6 +320,16 @@ export class FortuneSheet {
     editor.addEventListener('keydown', (e) => {
       lastKeyCode = e.keyCode;
       preText = editor.innerText;
+      // cancel editing on Escape (core's handleGlobalKeyDown early-returns for
+      // Escape while a cell is being edited, so the editor must handle it —
+      // same as the React InputBox did)
+      if (e.key === 'Escape' && this.store.ctx.luckysheetCellUpdate.length > 0) {
+        this.store.setContext((draftCtx) => {
+          cancelNormalSelected(draftCtx);
+          moveHighlightCell(draftCtx, 'down', 0, 'rangeOfSelect');
+        });
+        e.preventDefault();
+      }
     });
     editor.addEventListener('input', () => {
       const fxInput = this.store.refs.fxInput.current;

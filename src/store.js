@@ -35,6 +35,24 @@ const triggerGroupValuesRefresh = (ctx) => {
   }
 };
 
+/**
+ * Sheets created at runtime (addSheet, ops) have no `data` matrix until it is
+ * expanded — every core handler (mouse/keyboard/canvas) calls getFlowdata()
+ * and bails on undefined data, making the new sheet unresponsive. Fill the
+ * declared row x column grid with nulls, like the init-time expansion.
+ */
+function ensureSheetData(ctx) {
+  for (const sheet of ctx.luckysheetfile) {
+    if (!Array.isArray(sheet.data)) {
+      const r = sheet.row || ctx.defaultrowNum;
+      const c = sheet.column || ctx.defaultcolumnNum;
+      sheet.data = Array.from({ length: r }, () =>
+        Array.from({ length: c }, () => null)
+      );
+    }
+  }
+}
+
 const concatProducer =
   (...producers) =>
   (ctx) => {
@@ -298,7 +316,7 @@ export class Store {
     const prev = this.ctx;
     const [result, patches, inversePatches] = produceWithPatches(
       this.ctx,
-      concatProducer(recipe, triggerGroupValuesRefresh)
+      concatProducer(recipe, ensureSheetData, triggerGroupValuesRefresh)
     );
     if (patches.length > 0 && !options.noHistory) {
       if (options.logPatch) {
