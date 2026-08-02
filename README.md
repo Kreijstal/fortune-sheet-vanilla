@@ -76,6 +76,20 @@ import { FortuneSheet } from "fortune-sheet-vanilla";
 const sheet = new FortuneSheet(document.getElementById("sheet"), { data });
 ```
 
+## Or via esm.sh (no install)
+
+The repo is served by [esm.sh](https://esm.sh) directly from GitHub, so you
+can import it in any browser ESM module with zero setup:
+
+```js
+import { FortuneSheet } from "https://esm.sh/gh/Kreijstal/fortune-sheet-vanilla";
+```
+
+Run `node test/esmsh.mjs` to verify compatibility (network + pushed commit
+required). Note: the CJS `@formulajs/formulajs` package is served by esm.sh
+with its ~450 formula functions on the namespace's `.default` — the parser
+handles both that shape and bundler-style named exports.
+
 ## What the package exposes
 
 The main entry re-exports **all three original packages**, so nothing is hidden:

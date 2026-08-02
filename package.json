@@ -35,7 +35,8 @@
     "build": "node build.mjs",
     "demo": "node build.mjs && npx -y serve demo -l 8080",
     "test": "node test/exports.mjs && node test/smoke.mjs",
-    "fix-imports": "node scripts/fix-imports.mjs"
+    "fix-imports": "node scripts/fix-imports.mjs",
+    "test:esmsh": "node test/esmsh.mjs"
   },
   "dependencies": {
     "@formulajs/formulajs": "^2.9.3",
