@@ -1,4 +1,6 @@
-import _ from 'lodash-es';
+import assign from 'lodash.assign';
+import set from 'lodash.set';
+import size from 'lodash.size';
 import { getFlowdata } from './../context.js';
 import { locale } from './../locale/index.js';
 import {
@@ -60,7 +62,7 @@ export function getSearchIndexArr(
               if (caseCheck) {
                 if (searchText === value) {
                   if (!(`${r}_${c}` in obj)) {
-                    _.set(obj, `${r}_${c}`, 0);
+                    set(obj, `${r}_${c}`, 0);
                     arr.push({ r, c });
                   }
                 }
@@ -68,7 +70,7 @@ export function getSearchIndexArr(
                 const txt = searchText.toLowerCase();
                 if (txt === value.toLowerCase()) {
                   if (!(`${r}_${c}` in obj)) {
-                    _.set(obj, `${r}_${c}`, 0);
+                    set(obj, `${r}_${c}`, 0);
                     arr.push({ r, c });
                   }
                 }
@@ -84,7 +86,7 @@ export function getSearchIndexArr(
               }
               if (reg.test(value)) {
                 if (!(`${r}_${c}` in obj)) {
-                  _.set(obj, `${r}_${c}`, 0);
+                  set(obj, `${r}_${c}`, 0);
                   arr.push({ r, c });
                 }
               }
@@ -92,14 +94,14 @@ export function getSearchIndexArr(
               if (caseCheck) {
                 if (~value.indexOf(searchText)) {
                   if (!(`${r}_${c}` in obj)) {
-                    _.set(obj, `${r}_${c}`, 0);
+                    set(obj, `${r}_${c}`, 0);
                     arr.push({ r, c });
                   }
                 }
               } else {
                 if (~value.toLowerCase().indexOf(searchText.toLowerCase())) {
                   if (!(`${r}_${c}` in obj)) {
-                    _.set(obj, `${r}_${c}`, 0);
+                    set(obj, `${r}_${c}`, 0);
                     arr.push({ r, c });
                   }
                 }
@@ -130,7 +132,7 @@ export function searchNext(ctx, searchText, checkModes) {
   }
   let range;
   if (
-    _.size(ctx.luckysheet_select_save) === 0 ||
+    size(ctx.luckysheet_select_save) === 0 ||
     (ctx.luckysheet_select_save?.length === 1 &&
       ctx.luckysheet_select_save[0].row[0] ===
         ctx.luckysheet_select_save[0].row[1] &&
@@ -146,7 +148,7 @@ export function searchNext(ctx, searchText, checkModes) {
       },
     ];
   } else {
-    range = _.assign([], ctx.luckysheet_select_save);
+    range = assign([], ctx.luckysheet_select_save);
   }
   const searchIndexArr = getSearchIndexArr(
     searchText,
@@ -159,14 +161,14 @@ export function searchNext(ctx, searchText, checkModes) {
   }
   let count = 0;
   if (
-    _.size(ctx.luckysheet_select_save) === 0 ||
+    size(ctx.luckysheet_select_save) === 0 ||
     (ctx.luckysheet_select_save?.length === 1 &&
       ctx.luckysheet_select_save[0].row[0] ===
         ctx.luckysheet_select_save[0].row[1] &&
       ctx.luckysheet_select_save[0].column[0] ===
         ctx.luckysheet_select_save[0].column[1])
   ) {
-    if (_.size(ctx.luckysheet_select_save) === 0) {
+    if (size(ctx.luckysheet_select_save) === 0) {
       count = 0;
     } else {
       for (let i = 0; i < searchIndexArr.length; i += 1) {
@@ -245,7 +247,7 @@ export function searchAll(ctx, searchText, checkModes) {
   }
   let range;
   if (
-    _.size(ctx.luckysheet_select_save) === 0 ||
+    size(ctx.luckysheet_select_save) === 0 ||
     (ctx.luckysheet_select_save?.length === 1 &&
       ctx.luckysheet_select_save[0].row[0] ===
         ctx.luckysheet_select_save[0].row[1] &&
@@ -259,7 +261,7 @@ export function searchAll(ctx, searchText, checkModes) {
       },
     ];
   } else {
-    range = _.assign([], ctx.luckysheet_select_save);
+    range = assign([], ctx.luckysheet_select_save);
   }
   const searchIndexArr = getSearchIndexArr(
     searchText,
@@ -327,7 +329,7 @@ export function onSearchDialogMoveStart(globalCache, e, container) {
   left -= rect.left;
   top -= rect.top;
   const initialPosition = { left, top, width, height };
-  _.set(globalCache, 'searchDialog.moveProps', {
+  set(globalCache, 'searchDialog.moveProps', {
     cursorMoveStartPosition: {
       x: e.pageX,
       y: e.pageY,
@@ -356,7 +358,7 @@ export function onSearchDialogMove(globalCache, e) {
  * @param {GlobalCache} globalCache
  */
 export function onSearchDialogMoveEnd(globalCache) {
-  _.set(globalCache, 'searchDialog.moveProps', undefined);
+  set(globalCache, 'searchDialog.moveProps', undefined);
 }
 /**
  * @param {Context} ctx
@@ -381,7 +383,7 @@ export function replace(ctx, searchText, replaceText, checkModes) {
   }
   let range;
   if (
-    _.size(ctx.luckysheet_select_save) === 0 ||
+    size(ctx.luckysheet_select_save) === 0 ||
     (ctx.luckysheet_select_save?.length === 1 &&
       ctx.luckysheet_select_save[0].row[0] ===
         ctx.luckysheet_select_save[0].row[1] &&
@@ -395,7 +397,7 @@ export function replace(ctx, searchText, replaceText, checkModes) {
       },
     ];
   } else {
-    range = _.assign([], ctx.luckysheet_select_save);
+    range = assign([], ctx.luckysheet_select_save);
   }
   const searchIndexArr = getSearchIndexArr(
     searchText,
@@ -480,7 +482,7 @@ export function replaceAll(ctx, searchText, replaceText, checkModes) {
   }
   let range;
   if (
-    _.size(ctx.luckysheet_select_save) === 0 ||
+    size(ctx.luckysheet_select_save) === 0 ||
     (ctx.luckysheet_select_save?.length === 1 &&
       ctx.luckysheet_select_save[0].row[0] ===
         ctx.luckysheet_select_save[0].row[1] &&
@@ -494,7 +496,7 @@ export function replaceAll(ctx, searchText, replaceText, checkModes) {
       },
     ];
   } else {
-    range = _.assign([], ctx.luckysheet_select_save);
+    range = assign([], ctx.luckysheet_select_save);
   }
   const searchIndexArr = getSearchIndexArr(
     searchText,

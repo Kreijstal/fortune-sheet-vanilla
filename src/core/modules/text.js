@@ -1,4 +1,6 @@
-import _ from 'lodash-es';
+import isEmpty from 'lodash.isempty';
+import isNil from 'lodash.isnil';
+import isPlainObject from 'lodash.isplainobject';
 import { isdatatypemulti } from './index.js';
 import { locale } from './../locale/index.js';
 import { normalizedCellAttr } from './cell.js';
@@ -56,10 +58,10 @@ export function defaultFont(defaultFontSize) {
  * @returns {string}
  */
 export function getFontSet(format, defaultFontSize, ctx) {
-  if (_.isPlainObject(format)) {
+  if (isPlainObject(format)) {
     const fontAttr = [];
     // font-style
-    if (format.it === '0' || format.it === 0 || _.isNil(format.it)) {
+    if (format.it === '0' || format.it === 0 || isNil(format.it)) {
       fontAttr.push('normal');
     } else {
       fontAttr.push('italic');
@@ -67,7 +69,7 @@ export function getFontSet(format, defaultFontSize, ctx) {
     // font-variant
     fontAttr.push('normal');
     // font-weight
-    if (format.bl === '0' || format.bl === 0 || _.isNil(format.bl)) {
+    if (format.bl === '0' || format.bl === 0 || isNil(format.bl)) {
       fontAttr.push('normal');
     } else {
       fontAttr.push('bold');
@@ -214,7 +216,7 @@ export function getMeasureText(value, renderCtx, sheetCtx, fontset) {
  */
 export function isSupportBoundingBox(ctx) {
   const measureText = ctx.measureText('田');
-  if (_.isNil(measureText.actualBoundingBoxAscent)) {
+  if (isNil(measureText.actualBoundingBoxAscent)) {
     return false;
   }
   return true;
@@ -235,7 +237,7 @@ export function drawLineInfo(wordGroup, cancelLine, underLine, option) {
   if (wordGroup.wrap === true) {
     return;
   }
-  if (wordGroup.inline === true && !_.isNil(wordGroup.style)) {
+  if (wordGroup.inline === true && !isNil(wordGroup.style)) {
     cancelLine = wordGroup.style.cl;
     underLine = wordGroup.style.un;
   }
@@ -331,7 +333,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
   const tr = normalizedCellAttr(cell, 'tr'); // rotate
   let rt = normalizedCellAttr(cell, 'rt'); // rotate angle
   let isRotateUp = 1;
-  if (_.isNil(rt)) {
+  if (isNil(rt)) {
     if (tr === '0') {
       rt = 0;
     } else if (tr === '1') {
@@ -343,7 +345,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
     } else if (tr === '5') {
       rt = 180;
     }
-    if (_.isNil(rt)) {
+    if (isNil(rt)) {
       rt = 0;
     }
   }
@@ -440,13 +442,13 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
     fontSize = normalizedCellAttr(cell, 'fs');
     if (cell instanceof Object) {
       value = cell.m;
-      if (_.isNil(value)) {
+      if (isNil(value)) {
         value = cell.v;
       }
     } else {
       value = cell;
     }
-    if (_.isEmpty(value)) {
+    if (isEmpty(value)) {
       return null;
     }
   }
@@ -469,7 +471,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
           value1 = 'M';
           showValue = '';
           if (
-            !_.isNil(preShareCell) &&
+            !isNil(preShareCell) &&
             preShareCell.wrap !== true &&
             i < inlineStringArr.length - 1
           ) {
@@ -497,7 +499,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
         if (tb === '2' && !shareCell.wrap) {
           if (
             textH_all_cache > cellHeight &&
-            !_.isNil(textH_all_Column[colIndex])
+            !isNil(textH_all_Column[colIndex])
           ) {
             // textW_all += textW;
             // textH_all = Math.max(textH_all,textH_all_cache);
@@ -510,7 +512,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
         if (i === inlineStringArr.length - 1) {
           textH_all_ColumnHeight.push(textH_all_cache);
         }
-        if (_.isNil(textH_all_Column[colIndex])) {
+        if (isNil(textH_all_Column[colIndex])) {
           textH_all_Column[colIndex] = [];
         }
         const item = {
@@ -553,7 +555,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
         if (tb === '2') {
           if (
             textH_all_cache > cellHeight &&
-            !_.isNil(textH_all_Column[colIndex])
+            !isNil(textH_all_Column[colIndex])
           ) {
             // textW_all += textW;
             // textH_all = Math.max(textH_all,textH_all_cache);
@@ -565,7 +567,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
         if (i === vArr.length - 1) {
           textH_all_ColumnHeight.push(textH_all_cache);
         }
-        if (_.isNil(textH_all_Column[colIndex])) {
+        if (isNil(textH_all_Column[colIndex])) {
           textH_all_Column[colIndex] = [];
         }
         textH_all_Column[colIndex].push({
@@ -704,7 +706,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
                 sheetCtx,
                 sc.fontset
               );
-              if (_.isNil(text_all_split[splitIndex])) {
+              if (isNil(text_all_split[splitIndex])) {
                 text_all_split[splitIndex] = [];
               }
               text_all_split[splitIndex].push({
@@ -732,7 +734,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
           let textHeight = 0;
           for (let s = 0; s < shareCells.length; s += 1) {
             const sc = shareCells[s];
-            if (_.isNil(sc.measureText)) {
+            if (isNil(sc.measureText)) {
               sc.measureText = getMeasureText(
                 sc.v,
                 renderCtx,
@@ -763,11 +765,11 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
             // console.log("all",anchor, i , str);
             if (
               height + space_height > cellHeight &&
-              !_.isNil(text_all_split[splitIndex]) &&
+              !isNil(text_all_split[splitIndex]) &&
               tb === '2'
             ) {
               // console.log("cut",anchor, i , str);
-              if (!_.isNil(spaceOrTwoByteIndex) && spaceOrTwoByteIndex < i) {
+              if (!isNil(spaceOrTwoByteIndex) && spaceOrTwoByteIndex < i) {
                 for (let s = 0; s < spaceOrTwoByteIndex - anchor; s += 1) {
                   const sc = shareCells[s];
                   text_all_split[splitIndex].push({
@@ -814,7 +816,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
               }
             } else if (i === inlineStringArr.length) {
               // console.log("last",anchor, i , str);
-              if (_.isNil(text_all_split[splitIndex])) {
+              if (isNil(text_all_split[splitIndex])) {
                 text_all_split[splitIndex] = [];
               }
               for (let s = 0; s < shareCells.length; s += 1) {
@@ -837,7 +839,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
               }
               break;
             } else {
-              if (_.isNil(text_all_split[splitIndex])) {
+              if (isNil(text_all_split[splitIndex])) {
                 text_all_split[splitIndex] = [];
               }
               i += 1;
@@ -846,10 +848,10 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
             // plain
             if (
               width + space_width > cellWidth &&
-              !_.isNil(text_all_split[splitIndex]) &&
+              !isNil(text_all_split[splitIndex]) &&
               tb === '2'
             ) {
-              if (!_.isNil(spaceOrTwoByteIndex) && spaceOrTwoByteIndex < i) {
+              if (!isNil(spaceOrTwoByteIndex) && spaceOrTwoByteIndex < i) {
                 for (let s = 0; s < spaceOrTwoByteIndex - anchor; s += 1) {
                   const sc = shareCells[s];
                   text_all_split[splitIndex].push({
@@ -895,7 +897,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
                 splitIndex += 1;
               }
             } else if (i === inlineStringArr.length) {
-              if (_.isNil(text_all_split[splitIndex])) {
+              if (isNil(text_all_split[splitIndex])) {
                 text_all_split[splitIndex] = [];
               }
               for (let s = 0; s < shareCells.length; s += 1) {
@@ -918,7 +920,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
               }
               break;
             } else {
-              if (_.isNil(text_all_split[splitIndex])) {
+              if (isNil(text_all_split[splitIndex])) {
                 text_all_split[splitIndex] = [];
               }
               i += 1;
@@ -959,10 +961,10 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
             // console.log("all",anchor, i , str);
             if (
               height + space_height > cellHeight &&
-              !_.isNil(text_all_split[splitIndex])
+              !isNil(text_all_split[splitIndex])
             ) {
               // console.log("cut",anchor, i , str);
-              if (!_.isNil(spaceOrTwoByte) && spaceOrTwoByte.index < i) {
+              if (!isNil(spaceOrTwoByte) && spaceOrTwoByte.index < i) {
                 anchor = spaceOrTwoByte.index;
                 i = spaceOrTwoByte.index + 1;
                 text_all_split[splitIndex].push({
@@ -999,7 +1001,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
               }
             } else if (i === value.length) {
               // console.log("last",anchor, i , str);
-              if (_.isNil(text_all_split[splitIndex])) {
+              if (isNil(text_all_split[splitIndex])) {
                 text_all_split[splitIndex] = [];
               }
               text_all_split[splitIndex].push({
@@ -1016,7 +1018,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
               });
               break;
             } else {
-              if (_.isNil(text_all_split[splitIndex])) {
+              if (isNil(text_all_split[splitIndex])) {
                 text_all_split[splitIndex] = [];
               }
               i += 1;
@@ -1025,10 +1027,10 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
             // plain
             if (
               width + space_width > cellWidth &&
-              !_.isNil(text_all_split[splitIndex])
+              !isNil(text_all_split[splitIndex])
             ) {
               // console.log(spaceOrTwoByte, i, anchor);
-              if (!_.isNil(spaceOrTwoByte) && spaceOrTwoByte.index < i) {
+              if (!isNil(spaceOrTwoByte) && spaceOrTwoByte.index < i) {
                 anchor = spaceOrTwoByte.index;
                 i = spaceOrTwoByte.index + 1;
                 text_all_split[splitIndex].push({
@@ -1067,7 +1069,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
                 if (parsedTextHeight >= cellHeight) break;
               }
             } else if (i === value.length) {
-              if (_.isNil(text_all_split[splitIndex])) {
+              if (isNil(text_all_split[splitIndex])) {
                 text_all_split[splitIndex] = [];
               }
               text_all_split[splitIndex].push({
@@ -1084,7 +1086,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
               });
               break;
             } else {
-              if (_.isNil(text_all_split[splitIndex])) {
+              if (isNil(text_all_split[splitIndex])) {
                 text_all_split[splitIndex] = [];
               }
               i += 1;
@@ -1103,7 +1105,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
       if (splitLen === 0) return textContent;
       for (let j = 0; j < splitLen; j += 1) {
         const splitLists = text_all_split[j];
-        if (_.isNil(splitLists)) {
+        if (isNil(splitLists)) {
           continue;
         }
         let sWidth = 0;
@@ -1189,7 +1191,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
         renderCtx.textAlign = 'end';
         for (let j = 0; j < splitLen; j += 1) {
           const splitLists = text_all_split[j];
-          if (_.isNil(splitLists)) {
+          if (isNil(splitLists)) {
             continue;
           }
           const size = split_all_size[j];
@@ -1313,7 +1315,7 @@ export function getCellTextInfo(cell, renderCtx, sheetCtx, option, ctx) {
       } else {
         for (let j = 0; j < splitLen; j += 1) {
           const splitLists = text_all_split[j];
-          if (_.isNil(splitLists)) {
+          if (isNil(splitLists)) {
             continue;
           }
           const size = split_all_size[j];

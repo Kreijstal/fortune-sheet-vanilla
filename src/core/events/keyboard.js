@@ -1,4 +1,8 @@
-import _ from 'lodash-es';
+import clone from 'lodash.clone';
+import cloneDeep from 'lodash.clonedeep';
+import includes from 'lodash.includes';
+import isEmpty from 'lodash.isempty';
+import isNil from 'lodash.isnil';
 import { hideCRCount, removeActiveImage } from '../index.js';
 import { getFlowdata } from './../context.js';
 import { updateCell, cancelNormalSelected } from './../modules/cell.js';
@@ -31,7 +35,7 @@ export function handleGlobalEnter(ctx, cellInput, e, canvas) {
   if ((e.altKey || e.metaKey) && ctx.luckysheetCellUpdate.length > 0) {
     const last =
       ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1];
-    if (last && !_.isNil(last.row_focus) && !_.isNil(last.column_focus)) {
+    if (last && !isNil(last.row_focus) && !isNil(last.column_focus)) {
       // const row_index = last.row_focus;
       // const col_index = last.column_focus;
       // enterKeyControll(flowdata?.[row_index]?.[col_index]);
@@ -48,7 +52,7 @@ export function handleGlobalEnter(ctx, cellInput, e, canvas) {
     //     )
     //   );
     // } else {
-    const lastCellUpdate = _.clone(ctx.luckysheetCellUpdate);
+    const lastCellUpdate = clone(ctx.luckysheetCellUpdate);
     updateCell(
       ctx,
       ctx.luckysheetCellUpdate[0],
@@ -117,9 +121,9 @@ function moveToEdge(
   let c = colDelta === 0 ? curr : selectedLimit;
   while (r >= 0 && c >= 0 && (colDelta === 0 ? r : c) < maxRowCol - 1) {
     if (
-      !_.isNil(sheetData?.[r]?.[c]?.v) &&
-      (_.isNil(sheetData?.[r - rowDelta]?.[c - colDelta]?.v) ||
-        _.isNil(sheetData?.[r + rowDelta]?.[c + colDelta]?.v))
+      !isNil(sheetData?.[r]?.[c]?.v) &&
+      (isNil(sheetData?.[r - rowDelta]?.[c - colDelta]?.v) ||
+        isNil(sheetData?.[r + rowDelta]?.[c + colDelta]?.v))
     ) {
       break;
     } else {
@@ -132,7 +136,7 @@ function moveToEdge(
 function handleControlPlusArrowKey(ctx, e, shiftPressed) {
   if (ctx.luckysheetCellUpdate.length > 0) return;
   const idx = getSheetIndex(ctx, ctx.currentSheetId);
-  if (_.isNil(idx)) return;
+  if (isNil(idx)) return;
   const file = ctx.luckysheetfile[idx];
   if (!file || !file.row || !file.column) return;
   const maxRow = file.row;
@@ -143,7 +147,7 @@ function handleControlPlusArrowKey(ctx, e, shiftPressed) {
   if (!last) return;
   const currR = last.row_focus;
   const currC = last.column_focus;
-  if (_.isNil(currR) || _.isNil(currC)) return;
+  if (isNil(currR) || isNil(currC)) return;
   const startR = last.row[0];
   const endR = last.row[1];
   const startC = last.column[0];
@@ -272,14 +276,14 @@ export function handleWithCtrlOrMetaKey(
   const flowdata = getFlowdata(ctx);
   if (!flowdata) return;
   if (e.shiftKey) {
-    ctx.luckysheet_shiftpositon = _.cloneDeep(
+    ctx.luckysheet_shiftpositon = cloneDeep(
       ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1]
     );
     ctx.luckysheet_shiftkeydown = true;
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
       // Ctrl + Shift + 方向键  调整选区
       handleControlPlusArrowKey(ctx, e, true);
-    } else if (_.includes([';', '"', ':', "'"], e.key)) {
+    } else if (includes([';', '"', ':', "'"], e.key)) {
       const last =
         ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1];
       if (!last) return;
@@ -352,7 +356,7 @@ export function handleWithCtrlOrMetaKey(
       cancelPaintModel(ctx);
     }
     const selection = ctx.luckysheet_select_save;
-    if (!selection || _.isEmpty(selection)) {
+    if (!selection || isEmpty(selection)) {
       return;
     }
     // 复制范围内包含部分合并单元格，提示
@@ -561,7 +565,7 @@ function handleShiftWithArrowKey(ctx, e) {
   ) {
     return;
   }
-  ctx.luckysheet_shiftpositon = _.cloneDeep(
+  ctx.luckysheet_shiftpositon = cloneDeep(
     ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1]
   );
   ctx.luckysheet_shiftkeydown = true;
@@ -646,7 +650,7 @@ export function handleGlobalKeyDown(
   ctx.luckysheet_select_status = false;
   const kcode = e.keyCode;
   const kstr = e.key;
-  if (!_.isEmpty(ctx.contextMenu) || ctx.filterContextMenu) {
+  if (!isEmpty(ctx.contextMenu) || ctx.filterContextMenu) {
     return;
   }
   if (kstr === 'Escape' && !!ctx.luckysheet_selection_range) {
@@ -849,7 +853,7 @@ export function handleGlobalKeyDown(
       if (!allowEdit) return;
       if (
         String.fromCharCode(kcode) != null &&
-        !_.isEmpty(ctx.luckysheet_select_save) && // $("#luckysheet-cell-selected").is(":visible") &&
+        !isEmpty(ctx.luckysheet_select_save) && // $("#luckysheet-cell-selected").is(":visible") &&
         kstr !== 'CapsLock' &&
         kstr !== 'Win' &&
         kcode !== 18

@@ -1,4 +1,5 @@
-import _ from 'lodash-es';
+import maxBy from 'lodash.maxby';
+import times from 'lodash.times';
 import { getSheetIndex } from './../utils/index.js';
 import { SHEET_NOT_FOUND } from './errors.js';
 /**
@@ -46,8 +47,8 @@ export declare function getSheetWithLatestCelldata(ctx: Context, options?: Commo
     celldata: CellWithRowAndCol>}
  */
 export const celldataToData = (celldata, rowCount, colCount) => {
-  const lastRow = _.maxBy(celldata, 'r');
-  const lastCol = _.maxBy(celldata, 'c');
+  const lastRow = maxBy(celldata, 'r');
+  const lastCol = maxBy(celldata, 'c');
   let lastRowNum = (lastRow?.r ?? 0) + 1;
   let lastColNum = (lastCol?.c ?? 0) + 1;
   if (rowCount != null && colCount != null && rowCount > 0 && colCount > 0) {
@@ -55,9 +56,7 @@ export const celldataToData = (celldata, rowCount, colCount) => {
     lastColNum = Math.max(lastColNum, colCount);
   }
   if (lastRowNum && lastColNum) {
-    const expandedData = _.times(lastRowNum, () =>
-      _.times(lastColNum, () => null)
-    );
+    const expandedData = times(lastRowNum, () => times(lastColNum, () => null));
     celldata?.forEach((d) => {
       expandedData[d.r][d.c] = d.v;
     });

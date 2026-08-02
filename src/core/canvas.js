@@ -1,4 +1,8 @@
-import _ from 'lodash-es';
+import forEach from 'lodash.foreach';
+import isEmpty from 'lodash.isempty';
+import isNil from 'lodash.isnil';
+import isPlainObject from 'lodash.isplainobject';
+import sortedIndex from 'lodash.sortedindex';
 import { getFlowdata } from './context.js';
 import { getRealCellValue, normalizedAttr } from './modules/cell.js';
 import {
@@ -111,10 +115,10 @@ export class Canvas {
     this.cellOverflowMapCache = {};
   }
   drawRowHeader(scrollHeight, drawHeight, offsetTop) {
-    if (_.isNil(drawHeight)) {
+    if (isNil(drawHeight)) {
       [, drawHeight] = this.sheetCtx.luckysheetTableContentHW;
     }
-    if (_.isNil(offsetTop)) {
+    if (isNil(offsetTop)) {
       offsetTop = this.sheetCtx.columnHeaderHeight;
     }
     const renderCtx = this.canvasElement.getContext('2d');
@@ -135,8 +139,8 @@ export class Canvas {
     renderCtx.fillStyle = defaultStyle.fillStyle;
     let dataset_row_st;
     let dataset_row_ed;
-    dataset_row_st = _.sortedIndex(this.sheetCtx.visibledatarow, scrollHeight);
-    dataset_row_ed = _.sortedIndex(
+    dataset_row_st = sortedIndex(this.sheetCtx.visibledatarow, scrollHeight);
+    dataset_row_ed = sortedIndex(
       this.sheetCtx.visibledatarow,
       scrollHeight + drawHeight
     );
@@ -297,11 +301,8 @@ export class Canvas {
     renderCtx.fillStyle = defaultStyle.fillStyle;
     let dataset_col_st;
     let dataset_col_ed;
-    dataset_col_st = _.sortedIndex(
-      this.sheetCtx.visibledatacolumn,
-      scrollWidth
-    );
-    dataset_col_ed = _.sortedIndex(
+    dataset_col_st = sortedIndex(this.sheetCtx.visibledatacolumn, scrollWidth);
+    dataset_col_ed = sortedIndex(
       this.sheetCtx.visibledatacolumn,
       scrollWidth + drawWidth
     );
@@ -453,7 +454,7 @@ export class Canvas {
     clear,
   }) {
     const flowdata = getFlowdata(this.sheetCtx);
-    if (_.isNil(flowdata)) {
+    if (isNil(flowdata)) {
       return;
     }
     clearTimeout(this.measureTextCacheTimeOut);
@@ -478,7 +479,7 @@ export class Canvas {
     }
     // //表格canvas
     // let renderCtx = null;
-    // if (_.isNil(mycanvas)) {
+    // if (isNil(mycanvas)) {
     //   renderCtx = $("#renderCtx")
     //     .get(0)
     //     .getContext("2d");
@@ -515,8 +516,8 @@ export class Canvas {
     let rowEnd;
     let colStart;
     let colEnd;
-    rowStart = _.sortedIndex(this.sheetCtx.visibledatarow, scrollHeight);
-    rowEnd = _.sortedIndex(
+    rowStart = sortedIndex(this.sheetCtx.visibledatarow, scrollHeight);
+    rowEnd = sortedIndex(
       this.sheetCtx.visibledatarow,
       scrollHeight + drawHeight
     );
@@ -531,8 +532,8 @@ export class Canvas {
     if (rowEnd >= this.sheetCtx.visibledatarow.length) {
       rowEnd = this.sheetCtx.visibledatarow.length - 1;
     }
-    colStart = _.sortedIndex(this.sheetCtx.visibledatacolumn, scrollWidth);
-    colEnd = _.sortedIndex(
+    colStart = sortedIndex(this.sheetCtx.visibledatacolumn, scrollWidth);
+    colEnd = sortedIndex(
       this.sheetCtx.visibledatacolumn,
       scrollWidth + drawWidth
     );
@@ -607,7 +608,7 @@ export class Canvas {
             } else {
               const key = `r${value.mc.r}c${value.mc.c}`;
               const margeMain = cellupdate[mergeCache[key]];
-              if (_.isNil(margeMain)) {
+              if (isNil(margeMain)) {
                 mergeCache[key] = cellupdate.length;
                 cellupdate.push({
                   r,
@@ -678,10 +679,10 @@ export class Canvas {
       const { startX } = item;
       const { endY } = item;
       const { endX } = item;
-      if (_.isNil(flowdata[r])) {
+      if (isNil(flowdata[r])) {
         continue;
       }
-      if (_.isNil(flowdata[r][c])) {
+      if (isNil(flowdata[r][c])) {
         // 空单元格
         this.nullCellRender(
           r,
@@ -712,7 +713,7 @@ export class Canvas {
         } else {
           value = getRealCellValue(r, c, flowdata);
         }
-        if (_.isNil(value) || value.toString().length === 0) {
+        if (isNil(value) || value.toString().length === 0) {
           this.nullCellRender(
             r,
             c,
@@ -813,7 +814,7 @@ export class Canvas {
         this.sheetCtx.visibledatarow[r + mainCell.mc.rs - 1] - scrollHeight;
       endX =
         this.sheetCtx.visibledatacolumn[c + mainCell.mc.cs - 1] - scrollWidth;
-      if (_.isNil(value) || value.toString().length === 0) {
+      if (isNil(value) || value.toString().length === 0) {
         this.nullCellRender(
           r,
           c,
@@ -1247,7 +1248,7 @@ export class Canvas {
       return map;
     }
     for (let r = rowStart; r <= rowEnd; r += 1) {
-      if (_.isNil(data[r])) {
+      if (isNil(data[r])) {
         continue;
       }
       if (this.cellOverflowMapCache[r]) {
@@ -1262,8 +1263,8 @@ export class Canvas {
         }
         if (
           cell &&
-          (!_.isEmpty(cell.v) || isInlineStringCell(cell)) &&
-          _.isNil(cell.mc) &&
+          (!isEmpty(cell.v) || isInlineStringCell(cell)) &&
+          isNil(cell.mc) &&
           cell.tb === '1'
         ) {
           // 水平对齐
@@ -1353,7 +1354,7 @@ export class Canvas {
               stc,
               edc,
             };
-            if (_.isNil(map[r])) {
+            if (isNil(map[r])) {
               map[r] = {};
             }
             map[r][c] = item;
@@ -1400,7 +1401,7 @@ export class Canvas {
     //   // 交替颜色
     //   fillStyle = checksAF[1];
     // }
-    if (!_.isNil(checksCF) && !_.isNil(checksCF.cellColor)) {
+    if (!isNil(checksCF) && !isNil(checksCF.cellColor)) {
       // 条件格式
       fillStyle = checksCF.cellColor;
     }
@@ -1449,7 +1450,7 @@ export class Canvas {
       const verticalAlignPos = endY + offsetTop - 2;
       renderCtx.textBaseline = 'bottom';
       renderCtx.fillText(
-        _.isNil(value) ? '' : value,
+        isNil(value) ? '' : value,
         horizonAlignPos,
         verticalAlignPos
       );
@@ -1477,10 +1478,10 @@ export class Canvas {
     // 此单元格 为 溢出单元格渲染范围最后一列，绘制溢出单元格内容
     if (
       cellOverflow_colInObj.colLast &&
-      !_.isNil(cellOverflow_colInObj.rowIndex) &&
-      !_.isNil(cellOverflow_colInObj.colIndex) &&
-      !_.isNil(cellOverflow_colInObj.stc) &&
-      !_.isNil(cellOverflow_colInObj.edc)
+      !isNil(cellOverflow_colInObj.rowIndex) &&
+      !isNil(cellOverflow_colInObj.colIndex) &&
+      !isNil(cellOverflow_colInObj.stc) &&
+      !isNil(cellOverflow_colInObj.edc)
     ) {
       this.cellOverflowRender(
         cellOverflow_colInObj.rowIndex,
@@ -1590,7 +1591,7 @@ export class Canvas {
     //   // 若单元格有交替颜色 背景颜色
     //   fillStyle = checksAF[1];
     // }
-    if (!_.isNil(checksCF) && !_.isNil(checksCF.cellColor)) {
+    if (!isNil(checksCF) && !isNil(checksCF.cellColor)) {
       // 若单元格有条件格式 背景颜色
       fillStyle = checksCF.cellColor;
     }
@@ -1679,10 +1680,10 @@ export class Canvas {
       // 此单元格 为 溢出单元格渲染范围最后一列，绘制溢出单元格内容
       if (
         cellOverflow_colInObj.colLast &&
-        !_.isNil(cellOverflow_colInObj.rowIndex) &&
-        !_.isNil(cellOverflow_colInObj.colIndex) &&
-        !_.isNil(cellOverflow_colInObj.stc) &&
-        !_.isNil(cellOverflow_colInObj.edc)
+        !isNil(cellOverflow_colInObj.rowIndex) &&
+        !isNil(cellOverflow_colInObj.colIndex) &&
+        !isNil(cellOverflow_colInObj.stc) &&
+        !isNil(cellOverflow_colInObj.edc)
       ) {
         this.cellOverflowRender(
           cellOverflow_colInObj.rowIndex,
@@ -1760,7 +1761,7 @@ export class Canvas {
       // 文本
       renderCtx.fillStyle = normalizedAttr(flowdata, r, c, 'fc');
       renderCtx.fillText(
-        _.isNil(value) ? '' : value,
+        isNil(value) ? '' : value,
         horizonAlignPos + 14,
         verticalAlignPos_text
       );
@@ -2108,7 +2109,7 @@ export class Canvas {
     }
     // 追溯单元格是 非空单元格或合并单元格 则追溯终止
     const cell = data[r][traceC];
-    if (cell && (!_.isEmpty(cell.v) || cell.mc)) {
+    if (cell && (!isEmpty(cell.v) || cell.mc)) {
       return {
         success: false,
         r,
@@ -2190,8 +2191,8 @@ export class Canvas {
     let colIndex; // 溢出单元格 列下标
     let stc;
     let edc;
-    _.forEach(map, (row, rkey) => {
-      _.forEach(row, (mapItem, ckey) => {
+    forEach(map, (row, rkey) => {
+      forEach(row, (mapItem, ckey) => {
         rowIndex = Number(rkey);
         colIndex = Number(ckey);
         stc = mapItem.stc;
@@ -2257,7 +2258,7 @@ export class Canvas {
         ctx.font = word.style;
       }
       // 暂时未排查到word.content第一次会是object，先做下判断来渲染，后续找到问题再复原
-      const txt = _.isPlainObject(word.content) ? word.content.m : word.content;
+      const txt = isPlainObject(word.content) ? word.content.m : word.content;
       ctx.fillText(
         txt,
         (pos_x + word.left) / this.sheetCtx.zoomRatio,

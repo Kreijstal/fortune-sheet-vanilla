@@ -1,4 +1,8 @@
-import _ from 'lodash-es';
+import forEach from 'lodash.foreach';
+import isArray from 'lodash.isarray';
+import isNumber from 'lodash.isnumber';
+import isPlainObject from 'lodash.isplainobject';
+import isUndefined from 'lodash.isundefined';
 import { deleteRowCol, insertRowCol } from './../modules/index.js';
 import { getSheet } from './common.js';
 import { INVALID_PARAMS } from './errors.js';
@@ -46,8 +50,8 @@ export function insertRowOrColumn(
 ) {
   if (
     !['row', 'column'].includes(type) ||
-    !_.isNumber(index) ||
-    !_.isNumber(count) ||
+    !isNumber(index) ||
+    !isNumber(count) ||
     !['lefttop', 'rightbottom'].includes(direction)
   ) {
     throw INVALID_PARAMS;
@@ -73,11 +77,7 @@ export function insertRowOrColumn(
  * @param {CommonOptions} [options]
  */
 export function deleteRowOrColumn(ctx, type, start, end, options = {}) {
-  if (
-    !['row', 'column'].includes(type) ||
-    !_.isNumber(start) ||
-    !_.isNumber(end)
-  ) {
+  if (!['row', 'column'].includes(type) || !isNumber(start) || !isNumber(end)) {
     throw INVALID_PARAMS;
   }
   const sheet = getSheet(ctx, options);
@@ -192,7 +192,7 @@ export function showRowOrColumn(ctx, rowColInfo, type) {
  * @param {boolean} [custom]
  */
 export function setRowHeight(ctx, rowInfo, options = {}, custom = false) {
-  if (!_.isPlainObject(rowInfo)) {
+  if (!isPlainObject(rowInfo)) {
     throw INVALID_PARAMS;
   }
   const sheet = getSheet(ctx, options);
@@ -200,11 +200,11 @@ export function setRowHeight(ctx, rowInfo, options = {}, custom = false) {
   if (cfg.rowlen == null) {
     cfg.rowlen = {};
   }
-  _.forEach(rowInfo, (len, r) => {
+  forEach(rowInfo, (len, r) => {
     if (Number(r) >= 0) {
       if (Number(len) >= 0) {
         cfg.rowlen[Number(r)] = Number(len);
-        if (custom && _.isUndefined(cfg.customHeight)) {
+        if (custom && isUndefined(cfg.customHeight)) {
           cfg.customHeight = { [r]: 1 };
         } else if (custom) {
           cfg.customHeight[r] = 1;
@@ -225,7 +225,7 @@ export function setRowHeight(ctx, rowInfo, options = {}, custom = false) {
  * @param {boolean} [custom]
  */
 export function setColumnWidth(ctx, columnInfo, options = {}, custom = false) {
-  if (!_.isPlainObject(columnInfo)) {
+  if (!isPlainObject(columnInfo)) {
     throw INVALID_PARAMS;
   }
   const sheet = getSheet(ctx, options);
@@ -233,11 +233,11 @@ export function setColumnWidth(ctx, columnInfo, options = {}, custom = false) {
   if (cfg.columnlen == null) {
     cfg.columnlen = {};
   }
-  _.forEach(columnInfo, (len, c) => {
+  forEach(columnInfo, (len, c) => {
     if (Number(c) >= 0) {
       if (Number(len) >= 0) {
         cfg.columnlen[Number(c)] = Number(len);
-        if (custom && _.isUndefined(cfg.customWidth)) {
+        if (custom && isUndefined(cfg.customWidth)) {
           cfg.customWidth = { [c]: 1 };
         } else if (custom) {
           cfg.customWidth[c] = 1;
@@ -258,7 +258,7 @@ export function setColumnWidth(ctx, columnInfo, options = {}, custom = false) {
  * @returns {Record<number, number>}
  */
 export function getRowHeight(ctx, rows, options = {}) {
-  if (!_.isArray(rows) || rows.length === 0) {
+  if (!isArray(rows) || rows.length === 0) {
     throw INVALID_PARAMS;
   }
   const sheet = getSheet(ctx, options);
@@ -280,7 +280,7 @@ export function getRowHeight(ctx, rows, options = {}) {
  * @returns {Record<number, number>}
  */
 export function getColumnWidth(ctx, columns, options = {}) {
-  if (!_.isArray(columns) || columns.length === 0) {
+  if (!isArray(columns) || columns.length === 0) {
     throw INVALID_PARAMS;
   }
   const sheet = getSheet(ctx, options);

@@ -1,4 +1,4 @@
-import _ from 'lodash-es';
+import sortedIndex from 'lodash.sortedindex';
 import {
   colLocationByIndex,
   getSheetIndex,
@@ -38,7 +38,7 @@ function frozenTofreezen(ctx, cache, sheetId) {
   // transform to freezen
   if (type === 'rangeRow' || type === 'rangeBoth') {
     const scrollTop = 0;
-    let row_st = _.sortedIndex(ctx.visibledatarow, scrollTop);
+    let row_st = sortedIndex(ctx.visibledatarow, scrollTop);
     const { row_focus } = range;
     if (row_focus > row_st) {
       row_st = row_focus;
@@ -62,7 +62,7 @@ function frozenTofreezen(ctx, cache, sheetId) {
   }
   if (type === 'rangeColumn' || type === 'rangeBoth') {
     const scrollLeft = 0;
-    let col_st = _.sortedIndex(ctx.visibledatacolumn, scrollLeft);
+    let col_st = sortedIndex(ctx.visibledatacolumn, scrollLeft);
     const { column_focus } = range;
     if (column_focus > col_st) {
       col_st = column_focus;
@@ -120,7 +120,7 @@ export function scrollToFrozenRowCol(ctx, freeze) {
   const freezenhorizontaldata = freeze?.horizontal?.freezenhorizontaldata;
   if (freezenverticaldata != null && column != null) {
     let freezen_colindex = freezenverticaldata[1];
-    const offset = _.sortedIndex(freezenverticaldata[3], ctx.scrollLeft);
+    const offset = sortedIndex(freezenverticaldata[3], ctx.scrollLeft);
     const top = freezenverticaldata[4];
     freezen_colindex += offset;
     if (column >= ctx.visibledatacolumn.length) {
@@ -140,7 +140,7 @@ export function scrollToFrozenRowCol(ctx, freeze) {
   }
   if (freezenhorizontaldata != null && row != null) {
     let freezen_rowindex = freezenhorizontaldata[1];
-    const offset = _.sortedIndex(freezenhorizontaldata[3], ctx.scrollTop);
+    const offset = sortedIndex(freezenhorizontaldata[3], ctx.scrollTop);
     const left = freezenhorizontaldata[4];
     freezen_rowindex += offset;
     if (row >= ctx.visibledatarow.length) {

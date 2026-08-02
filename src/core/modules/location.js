@@ -1,4 +1,4 @@
-import _ from 'lodash-es';
+import sortedIndex from 'lodash.sortedindex';
 /**
  * @param {number} x
  * @param {number} y
@@ -37,7 +37,7 @@ export function rowLocationByIndex(row_index, visibleRow) {
  * @returns {Array<number>}
  */
 export function rowLocation(y, visibleRow) {
-  let row_index = _.sortedIndex(visibleRow, y);
+  let row_index = sortedIndex(visibleRow, y);
   if (row_index >= visibleRow.length && y > 0) {
     row_index = visibleRow.length - 1;
   } else if (row_index === -1 && y <= 0) {
@@ -67,7 +67,7 @@ export function colLocationByIndex(col_index, visibleCol) {
  * @returns {Array<number>}
  */
 export function colLocation(x, visibleCol) {
-  let col_index = _.sortedIndex(visibleCol, x);
+  let col_index = sortedIndex(visibleCol, x);
   if (col_index >= visibleCol.length && x > 0) {
     col_index = visibleCol.length - 1;
   } else if (col_index === -1 && x <= 0) {

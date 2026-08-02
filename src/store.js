@@ -1,3 +1,12 @@
+import assign from 'lodash.assign';
+import cloneDeep from 'lodash.clonedeep';
+import forEach from 'lodash.foreach';
+import indexOf from 'lodash.indexof';
+import isEmpty from 'lodash.isempty';
+import isNil from 'lodash.isnil';
+import isNull from 'lodash.isnull';
+import maxBy from 'lodash.maxby';
+import times from 'lodash.times';
 /**
  * Vanilla store: replicates the state management that the React `Workbook`
  * component used to do, minus React. Holds the single immer-managed `Context`
@@ -5,7 +14,6 @@
  *
  * Logic ported from @fortune-sheet/react/src/components/Workbook/index.tsx (MIT).
  */
-import _ from 'lodash-es';
 import {
   applyPatches,
   enablePatches,
@@ -55,7 +63,7 @@ export class Store {
       scrollbarY: { current: null },
     };
     this.ctx = defaultContext(this.refs);
-    this.settings = _.assign(_.cloneDeep(defaultSettings), settings);
+    this.settings = assign(cloneDeep(defaultSettings), settings);
     this.initialized = false;
   }
 
@@ -69,7 +77,7 @@ export class Store {
         draftCtx.defaultcolumnNum = mergedSettings.column;
         draftCtx.defaultrowNum = mergedSettings.row;
         draftCtx.defaultFontSize = mergedSettings.defaultFontSize;
-        if (_.isEmpty(draftCtx.luckysheetfile)) {
+        if (isEmpty(draftCtx.luckysheetfile)) {
           const newData = produce(originalData, (draftData) => {
             ensureSheetIndex(draftData, mergedSettings.generateSheetId);
           });
@@ -91,7 +99,7 @@ export class Store {
         draftCtx.lang = mergedSettings.lang;
         draftCtx.allowEdit = mergedSettings.allowEdit;
         draftCtx.hooks = mergedSettings.hooks;
-        if (_.isEmpty(draftCtx.currentSheetId)) {
+        if (isEmpty(draftCtx.currentSheetId)) {
           initSheetIndex(draftCtx);
         }
         let sheetIdx = getSheetIndex(draftCtx, draftCtx.currentSheetId);
@@ -108,24 +116,24 @@ export class Store {
 
         let { data } = sheet;
         // expand cell data
-        if (_.isEmpty(data)) {
+        if (isEmpty(data)) {
           const temp = this.initSheetData(draftCtx, sheet, sheetIdx);
-          if (!_.isNull(temp)) {
+          if (!isNull(temp)) {
             data = temp;
           }
         }
 
         if (
-          _.isEmpty(draftCtx.luckysheet_select_save) &&
-          !_.isEmpty(sheet.luckysheet_select_save)
+          isEmpty(draftCtx.luckysheet_select_save) &&
+          !isEmpty(sheet.luckysheet_select_save)
         ) {
           draftCtx.luckysheet_select_save = sheet.luckysheet_select_save;
         }
         if (draftCtx.luckysheet_select_save?.length === 0) {
           if (
             data?.[0]?.[0]?.mc &&
-            !_.isNil(data?.[0]?.[0]?.mc?.rs) &&
-            !_.isNil(data?.[0]?.[0]?.mc?.cs)
+            !isNil(data?.[0]?.[0]?.mc?.rs) &&
+            !isNil(data?.[0]?.[0]?.mc?.cs)
           ) {
             draftCtx.luckysheet_select_save = [
               {
@@ -143,35 +151,35 @@ export class Store {
           }
         }
 
-        draftCtx.config = _.isNil(sheet.config) ? {} : sheet.config;
+        draftCtx.config = isNil(sheet.config) ? {} : sheet.config;
         draftCtx.insertedImgs = sheet.images;
         draftCtx.currency = mergedSettings.currency || '¥';
 
-        draftCtx.zoomRatio = _.isNil(sheet.zoomRatio) ? 1 : sheet.zoomRatio;
+        draftCtx.zoomRatio = isNil(sheet.zoomRatio) ? 1 : sheet.zoomRatio;
         draftCtx.rowHeaderWidth =
           mergedSettings.rowHeaderWidth * draftCtx.zoomRatio;
         draftCtx.columnHeaderHeight =
           mergedSettings.columnHeaderHeight * draftCtx.zoomRatio;
 
-        if (!_.isNil(sheet.defaultRowHeight)) {
+        if (!isNil(sheet.defaultRowHeight)) {
           draftCtx.defaultrowlen = Number(sheet.defaultRowHeight);
         } else {
           draftCtx.defaultrowlen = mergedSettings.defaultRowHeight;
         }
 
-        if (!_.isNil(sheet.addRows)) {
+        if (!isNil(sheet.addRows)) {
           draftCtx.addDefaultRows = Number(sheet.addRows);
         } else {
           draftCtx.addDefaultRows = mergedSettings.addRows;
         }
 
-        if (!_.isNil(sheet.defaultColWidth)) {
+        if (!isNil(sheet.defaultColWidth)) {
           draftCtx.defaultcollen = Number(sheet.defaultColWidth);
         } else {
           draftCtx.defaultcollen = mergedSettings.defaultColWidth;
         }
 
-        if (!_.isNil(sheet.showGridLines)) {
+        if (!isNil(sheet.showGridLines)) {
           const { showGridLines } = sheet;
           if (showGridLines === 0 || showGridLines === false) {
             draftCtx.showGridLines = false;
@@ -181,7 +189,7 @@ export class Store {
         } else {
           draftCtx.showGridLines = true;
         }
-        if (_.isNil(mergedSettings.lang)) {
+        if (isNil(mergedSettings.lang)) {
           const lang =
             (navigator.languages && navigator.languages[0]) || // chromium
             navigator.language || // 剩余浏览器
@@ -195,8 +203,8 @@ export class Store {
 
   initSheetData(draftCtx, newData, index) {
     const { celldata, row, column } = newData;
-    const lastRow = _.maxBy(celldata, 'r');
-    const lastCol = _.maxBy(celldata, 'c');
+    const lastRow = maxBy(celldata, 'r');
+    const lastCol = maxBy(celldata, 'c');
     let lastRowNum = (lastRow?.r ?? 0) + 1;
     let lastColNum = (lastCol?.c ?? 0) + 1;
     if (row != null && column != null && row > 0 && column > 0) {
@@ -207,8 +215,8 @@ export class Store {
       lastColNum = Math.max(lastColNum, draftCtx.defaultcolumnNum);
     }
     if (lastRowNum && lastColNum) {
-      const expandedData = _.times(lastRowNum, () =>
-        _.times(lastColNum, () => null)
+      const expandedData = times(lastRowNum, () =>
+        times(lastColNum, () => null)
       );
       celldata?.forEach((d) => {
         expandedData[d.r][d.c] = d.v;
@@ -254,14 +262,14 @@ export class Store {
       (undo) =>
         undo.options?.deleteSheetOp ||
         undo.options?.id === undefined ||
-        _.indexOf(sheetsId, undo.options?.id) !== -1 ||
-        _.indexOf(sheetDeletedByMe, undo.options?.id) !== -1
+        indexOf(sheetsId, undo.options?.id) !== -1 ||
+        indexOf(sheetDeletedByMe, undo.options?.id) !== -1
     );
     if (ctxBefore.luckysheetfile.length > ctx.luckysheetfile.length) {
       const sheetDeleted = ctxBefore.luckysheetfile
         .filter(
           (oneSheet) =>
-            _.indexOf(
+            indexOf(
               ctx.luckysheetfile.map((item) => item.id),
               oneSheet.id
             ) === -1
@@ -317,7 +325,7 @@ export class Store {
             options.deletedSheet = {
               id: options.deleteSheetOp.id,
               index,
-              value: _.cloneDeep(this.ctx.luckysheetfile[index]),
+              value: cloneDeep(this.ctx.luckysheetfile[index]),
             };
             options.deletedSheet.value.celldata = this.dataToCelldata(
               options.deletedSheet.value.data
@@ -367,7 +375,7 @@ export class Store {
               sheet?.order >= order &&
               sheet.id !== history?.options?.deleteSheetOp?.id
           );
-          _.forEach(sheetsRight, (sheet) => {
+          forEach(sheetsRight, (sheet) => {
             history.inversePatches.push({
               op: 'replace',
               path: ['luckysheetfile', getSheetIndex(ctx_, sheet.id), 'order'],
@@ -386,7 +394,7 @@ export class Store {
           inversedOptions.addSheet = {
             id: history.options.addSheet.id,
             index,
-            value: _.cloneDeep(ctx_.luckysheetfile[index]),
+            value: cloneDeep(ctx_.luckysheetfile[index]),
           };
           inversedOptions.addSheet.value.celldata = this.dataToCelldata(
             inversedOptions.addSheet.value?.data

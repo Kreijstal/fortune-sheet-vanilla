@@ -1,4 +1,5 @@
-import _ from 'lodash-es';
+import isEmpty from 'lodash.isempty';
+import isNil from 'lodash.isnil';
 import {
   cancelPaintModel,
   checkCF,
@@ -20,7 +21,7 @@ export function handleCopy(ctx) {
     cancelPaintModel(ctx);
   }
   const selection = ctx.luckysheet_select_save;
-  if (!selection || _.isEmpty(selection)) {
+  if (!selection || isEmpty(selection)) {
     return;
   }
   // 复制范围内包含部分合并单元格，提示
@@ -50,9 +51,9 @@ export function handleCopy(ctx) {
     ctx.luckysheetfile[getSheetIndex(ctx, ctx.currentSheetId)]
       .luckysheet_conditionformat_save;
   if (
-    !_.isNil(ctx.luckysheet_select_save) &&
+    !isNil(ctx.luckysheet_select_save) &&
     ctx.luckysheet_select_save.length > 1 &&
-    !_.isNil(cdformat) &&
+    !isNil(cdformat) &&
     cdformat.length > 0
   ) {
     let hasCF = false;
@@ -70,7 +71,7 @@ export function handleCopy(ctx) {
           break;
         }
         for (let c = c1; c <= c2; c += 1) {
-          if (!_.isNil(checkCF(r, c, cf_compute))) {
+          if (!isNil(checkCF(r, c, cf_compute))) {
             hasCF = true;
             break;
           }

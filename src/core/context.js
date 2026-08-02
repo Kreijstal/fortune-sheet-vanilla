@@ -1,4 +1,6 @@
-import _ from 'lodash-es';
+import isNil from 'lodash.isnil';
+import isUndefined from 'lodash.isundefined';
+import sortBy from 'lodash.sortby';
 import { FormulaCache } from './modules/index.js';
 import { normalizeSelection } from './modules/selection.js';
 import { getSheetIndex } from './utils/index.js';
@@ -275,7 +277,7 @@ export function defaultContext(refs) {
 export function getFlowdata(ctx, id) {
   if (!ctx) return null;
   const i = getSheetIndex(ctx, id || ctx.currentSheetId);
-  if (_.isNil(i)) {
+  if (isNil(i)) {
     return null;
   }
   return ctx.luckysheetfile?.[i]?.data;
@@ -387,9 +389,9 @@ export function ensureSheetIndex(data, generateSheetId) {
 export function initSheetIndex(ctx) {
   // get current sheet
   const shownSheets = ctx.luckysheetfile.filter(
-    (singleSheet) => _.isUndefined(singleSheet.hide) || singleSheet.hide !== 1
+    (singleSheet) => isUndefined(singleSheet.hide) || singleSheet.hide !== 1
   );
-  ctx.currentSheetId = _.sortBy(shownSheets, (sheet) => sheet.order)[0].id;
+  ctx.currentSheetId = sortBy(shownSheets, (sheet) => sheet.order)[0].id;
   for (let i = 0; i < ctx.luckysheetfile.length; i += 1) {
     if (
       ctx.luckysheetfile[i].status === 1 &&

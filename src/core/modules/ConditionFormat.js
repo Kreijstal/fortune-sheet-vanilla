@@ -1,4 +1,6 @@
-import _ from 'lodash-es';
+import forEach from 'lodash.foreach';
+import isNaN from 'lodash.isnan';
+import isNil from 'lodash.isnil';
 import { getFlowdata } from './../context.js';
 import { getSheetIndex } from './../utils/index.js';
 import { getCellValue, getRangeByTxt } from './cell.js';
@@ -76,7 +78,7 @@ export function setConditionRules(
       const c2 = rangeArr[0]?.column[1];
       if (r1 === r2 && c1 === c2) {
         const d = getFlowdata(ctx);
-        if (!d || _.isNil(r1) || _.isNil(c1)) return;
+        if (!d || isNil(r1) || isNil(c1)) return;
         v = getCellValue(r1, c1, d);
         conditionRange.push({
           row: rangeArr?.[0]?.row,
@@ -87,7 +89,7 @@ export function setConditionRules(
         ctx.warnDialog = conditionformat.onlySingleCell;
       }
     } else if (rangeArr.length === 0) {
-      if (_.isNaN(v) || v === '') {
+      if (isNaN(v) || v === '') {
         ctx.warnDialog = conditionformat.conditionValueCanOnly;
         return;
       }
@@ -109,7 +111,7 @@ export function setConditionRules(
       const c2 = rangeArr1[0]?.column[1];
       if (r1 === r2 && c1 === c2) {
         const d = getFlowdata(ctx);
-        if (!d || _.isNil(r1) || _.isNil(c1)) return;
+        if (!d || isNil(r1) || isNil(c1)) return;
         v1 = getCellValue(r1, c1, d);
         conditionRange.push({
           row: rangeArr1?.[0]?.row,
@@ -121,7 +123,7 @@ export function setConditionRules(
         return;
       }
     } else if (rangeArr1.length === 0) {
-      if (_.isNaN(v1) || v1 === '') {
+      if (isNaN(v1) || v1 === '') {
         ctx.warnDialog = conditionformat.conditionValueCanOnly;
         return;
       }
@@ -139,7 +141,7 @@ export function setConditionRules(
       const c2 = rangeArr2[0]?.column[1];
       if (r1 === r2 && c1 === c2) {
         const d = getFlowdata(ctx);
-        if (!d || _.isNil(r1) || _.isNil(c1)) return;
+        if (!d || isNil(r1) || isNil(c1)) return;
         v2 = getCellValue(r1, c1, d);
         conditionRange.push({
           row: rangeArr2?.[0]?.row,
@@ -150,7 +152,7 @@ export function setConditionRules(
         return;
       }
     } else if (rangeArr2.length === 0) {
-      if (_.isNaN(v2) || v2 === '') {
+      if (isNaN(v2) || v2 === '') {
         ctx.warnDialog = conditionformat.conditionValueCanOnly;
       } else {
         conditionValue.push(v2);
@@ -252,7 +254,7 @@ export function getColorGradation(color1, color2, value1, value2, value) {
  * @returns {any}
  */
 export function compute(ctx, ruleArr, d) {
-  if (_.isNil(ruleArr)) {
+  if (isNil(ruleArr)) {
     ruleArr = [];
   }
   // 条件计算存储
@@ -271,27 +273,27 @@ export function compute(ctx, ruleArr, d) {
               c <= cellrange[s].column[1];
               c += 1
             ) {
-              if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+              if (isNil(d[r]) || isNil(d[r][c])) {
                 continue;
               }
               const cell = d[r][c];
               if (
-                !_.isNil(cell) &&
-                !_.isNil(cell.ct) &&
+                !isNil(cell) &&
+                !isNil(cell.ct) &&
                 cell.ct.t === 'n' &&
-                _.isNil(cell.v)
+                isNil(cell.v)
               ) {
-                if (_.isNil(max) || parseInt(`${cell.v}`, 10) > max) {
+                if (isNil(max) || parseInt(`${cell.v}`, 10) > max) {
                   max = parseInt(`${cell.v}`, 10);
                 }
-                if (_.isNil(min) || parseInt(`${cell.v}`, 10) < min) {
+                if (isNil(min) || parseInt(`${cell.v}`, 10) < min) {
                   min = parseInt(`${cell.v}`, 10);
                 }
               }
             }
           }
         }
-        if (!_.isNil(max) && !_.isNil(min)) {
+        if (!isNil(max) && !isNil(min)) {
           if (min < 0) {
             // 选区范围内有负数
             const plusLen = Math.round((max / (max - min)) * 10) / 10; // 正数所占比
@@ -308,15 +310,15 @@ export function compute(ctx, ruleArr, d) {
                   c <= cellrange[s].column[1];
                   c += 1
                 ) {
-                  if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+                  if (isNil(d[r]) || isNil(d[r][c])) {
                     continue;
                   }
                   const cell = d[r][c];
                   if (
-                    !_.isNil(cell) &&
-                    !_.isNil(cell.ct) &&
+                    !isNil(cell) &&
+                    !isNil(cell.ct) &&
                     cell.ct.t === 'n' &&
-                    !_.isNil(cell.v)
+                    !isNil(cell.v)
                   ) {
                     if (parseInt(`${cell.v}`, 10) < 0) {
                       // 负数
@@ -386,15 +388,15 @@ export function compute(ctx, ruleArr, d) {
                   c <= cellrange[s].column[1];
                   c += 1
                 ) {
-                  if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+                  if (isNil(d[r]) || isNil(d[r][c])) {
                     continue;
                   }
                   const cell = d[r][c];
                   if (
-                    !_.isNil(cell) &&
-                    !_.isNil(cell.ct) &&
+                    !isNil(cell) &&
+                    !isNil(cell.ct) &&
                     cell.ct.t === 'n' &&
-                    !_.isNil(cell.v)
+                    !isNil(cell.v)
                   ) {
                     let valueLen;
                     if (max === 0) {
@@ -440,29 +442,29 @@ export function compute(ctx, ruleArr, d) {
               c <= cellrange[s].column[1];
               c += 1
             ) {
-              if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+              if (isNil(d[r]) || isNil(d[r][c])) {
                 continue;
               }
               const cell = d[r][c];
               if (
-                !_.isNil(cell) &&
-                !_.isNil(cell.ct) &&
+                !isNil(cell) &&
+                !isNil(cell.ct) &&
                 cell.ct.t === 'n' &&
-                !_.isNil(cell.v)
+                !isNil(cell.v)
               ) {
                 count += 1;
                 sum += parseInt(`${cell.v}`, 10);
-                if (_.isNil(max) || parseInt(`${cell.v}`, 10) > max) {
+                if (isNil(max) || parseInt(`${cell.v}`, 10) > max) {
                   max = parseInt(`${cell.v}`, 10);
                 }
-                if (_.isNil(min) || parseInt(`${cell.v}`, 10) < min) {
+                if (isNil(min) || parseInt(`${cell.v}`, 10) < min) {
                   min = parseInt(`${cell.v}`, 10);
                 }
               }
             }
           }
         }
-        if (!_.isNil(max) && !_.isNil(min)) {
+        if (!isNil(max) && !isNil(min)) {
           if (format.length === 3) {
             // 三色色阶
             const avg = Math.floor(sum / count);
@@ -477,15 +479,15 @@ export function compute(ctx, ruleArr, d) {
                   c <= cellrange[s].column[1];
                   c += 1
                 ) {
-                  if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+                  if (isNil(d[r]) || isNil(d[r][c])) {
                     continue;
                   }
                   const cell = d[r][c];
                   if (
-                    !_.isNil(cell) &&
-                    !_.isNil(cell.ct) &&
+                    !isNil(cell) &&
+                    !isNil(cell.ct) &&
                     cell.ct.t === 'n' &&
-                    !_.isNil(cell.v)
+                    !isNil(cell.v)
                   ) {
                     if (parseInt(`${cell.v}`, 10) === min) {
                       if (`${r}_${c}` in computeMap) {
@@ -571,15 +573,15 @@ export function compute(ctx, ruleArr, d) {
                   c <= cellrange[s].column[1];
                   c += 1
                 ) {
-                  if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+                  if (isNil(d[r]) || isNil(d[r][c])) {
                     continue;
                   }
                   const cell = d[r][c];
                   if (
-                    !_.isNil(cell) &&
-                    !_.isNil(cell.ct) &&
+                    !isNil(cell) &&
+                    !isNil(cell.ct) &&
                     cell.ct.t === 'n' &&
-                    !_.isNil(cell.v)
+                    !isNil(cell.v)
                   ) {
                     if (parseInt(`${cell.v}`, 10) === min) {
                       if (`${r}_${c}` in computeMap) {
@@ -651,12 +653,12 @@ export function compute(ctx, ruleArr, d) {
                 c <= cellrange[s].column[1];
                 c += 1
               ) {
-                if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+                if (isNil(d[r]) || isNil(d[r][c])) {
                   continue;
                 }
                 // 单元格值
                 const cell = d[r][c];
-                if (_.isNil(cell) || _.isNil(cell.v) || isRealNull(cell.v)) {
+                if (isNil(cell) || isNil(cell.v) || isRealNull(cell.v)) {
                   continue;
                 }
                 // 符合条件
@@ -734,12 +736,12 @@ export function compute(ctx, ruleArr, d) {
                 c <= cellrange[s].column[1];
                 c += 1
               ) {
-                if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+                if (isNil(d[r]) || isNil(d[r][c])) {
                   continue;
                 }
                 // 单元格值
                 const cell = d[r][c];
-                if (_.isNil(cell) || _.isNil(cell.v) || isRealNull(cell.v)) {
+                if (isNil(cell) || isNil(cell.v) || isRealNull(cell.v)) {
                   continue;
                 }
                 // 符合条件
@@ -782,13 +784,13 @@ export function compute(ctx, ruleArr, d) {
                 c <= cellrange[s].column[1];
                 c += 1
               ) {
-                if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+                if (isNil(d[r]) || isNil(d[r][c])) {
                   continue;
                 }
                 // 单元格值类型为日期类型
                 if (
-                  !_.isNil(d[r][c]) &&
-                  !_.isNil(d[r][c].ct) &&
+                  !isNil(d[r][c]) &&
+                  !isNil(d[r][c].ct) &&
                   d[r][c].ct.t === 'd'
                 ) {
                   // 单元格值
@@ -831,7 +833,7 @@ export function compute(ctx, ruleArr, d) {
             // 循环应用范围计算
             if (conditionValue0 === '0') {
               // 重复值
-              _.forEach(dmap, (x) => {
+              forEach(dmap, (x) => {
                 if (x.length > 1) {
                   for (let j = 0; j < x.length; j += 1) {
                     if (`${x[j].r}_${x[j].c}` in computeMap) {
@@ -848,7 +850,7 @@ export function compute(ctx, ruleArr, d) {
               });
             } else if (conditionValue0 === '1') {
               // 唯一值
-              _.forEach(dmap, (x) => {
+              forEach(dmap, (x) => {
                 if (x.length === 1) {
                   if (`${x[0].r}_${x[0].c}` in computeMap) {
                     computeMap[`${x[0].r}_${x[0].c}`].textColor = textColor;
@@ -882,13 +884,13 @@ export function compute(ctx, ruleArr, d) {
                 c <= cellrange[s].column[1];
                 c += 1
               ) {
-                if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+                if (isNil(d[r]) || isNil(d[r][c])) {
                   continue;
                 }
                 // 单元格值类型为数字类型
                 if (
-                  !_.isNil(d[r][c]) &&
-                  !_.isNil(d[r][c].ct) &&
+                  !isNil(d[r][c]) &&
+                  !isNil(d[r][c].ct) &&
                   d[r][c].ct.t === 'n'
                 ) {
                   dArr.push(getCellValue(r, c, d));
@@ -941,13 +943,13 @@ export function compute(ctx, ruleArr, d) {
                   c <= cellrange[s].column[1];
                   c += 1
                 ) {
-                  if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+                  if (isNil(d[r]) || isNil(d[r][c])) {
                     continue;
                   }
                   // 单元格值
                   const cellVal = getCellValue(r, c, d);
                   // 符合条件
-                  if (!_.isNil(cArr) && cArr.indexOf(cellVal) !== -1) {
+                  if (!isNil(cArr) && cArr.indexOf(cellVal) !== -1) {
                     if (`${r}_${c}` in computeMap) {
                       computeMap[`${r}_${c}`].textColor = textColor;
                       computeMap[`${r}_${c}`].cellColor = cellColor;
@@ -983,7 +985,7 @@ export function compute(ctx, ruleArr, d) {
                     c <= cellrange[s].column[1];
                     c += 1
                   ) {
-                    if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+                    if (isNil(d[r]) || isNil(d[r][c])) {
                       continue;
                     }
                     // 单元格值
@@ -1014,7 +1016,7 @@ export function compute(ctx, ruleArr, d) {
                     c <= cellrange[s].column[1];
                     c += 1
                   ) {
-                    if (_.isNil(d[r]) || _.isNil(d[r][c])) {
+                    if (isNil(d[r]) || isNil(d[r][c])) {
                       continue;
                     }
                     // 单元格值
@@ -1089,7 +1091,7 @@ export function getComputeMap(ctx) {
   const index = getSheetIndex(ctx, ctx.currentSheetId);
   const ruleArr = ctx.luckysheetfile[index].luckysheet_conditionformat_save;
   const { data } = ctx.luckysheetfile[index];
-  if (_.isNil(data)) return null;
+  if (isNil(data)) return null;
   const computeMap = compute(ctx, ruleArr, data);
   return computeMap;
 }
@@ -1100,7 +1102,7 @@ export function getComputeMap(ctx) {
  * @returns {any}
  */
 export function checkCF(r, c, computeMap) {
-  if (!_.isNil(computeMap) && `${r}_${c}` in computeMap) {
+  if (!isNil(computeMap) && `${r}_${c}` in computeMap) {
     return computeMap[`${r}_${c}`];
   }
   return null;

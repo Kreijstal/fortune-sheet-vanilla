@@ -1,4 +1,4 @@
-import _ from 'lodash-es';
+import isNil from 'lodash.isnil';
 import { getSheetByIndex } from './../utils/index.js';
 /**
  * @param {Context} ctx
@@ -9,18 +9,18 @@ import { getSheetByIndex } from './../utils/index.js';
  */
 export function checkCellIsLocked(ctx, r, c, sheetId) {
   const sheetFile = getSheetByIndex(ctx, sheetId);
-  if (_.isNil(sheetFile)) {
+  if (isNil(sheetFile)) {
     return false;
   }
   const { data } = sheetFile;
   const cell = data?.[r]?.[c];
   // cell have lo attribute
-  if (!_.isNil(cell?.lo)) {
+  if (!isNil(cell?.lo)) {
     return !!cell?.lo;
   }
   // default locked status from sheet config
   const aut = sheetFile.config?.authority;
-  const sheetInEditable = _.isNil(aut) || _.isNil(aut.sheet) || aut.sheet === 0;
+  const sheetInEditable = isNil(aut) || isNil(aut.sheet) || aut.sheet === 0;
   return !sheetInEditable;
 }
 /**
@@ -34,21 +34,21 @@ export function checkProtectionSelectLockedOrUnLockedCells(ctx, r, c, sheetId) {
   //   const _locale = locale();
   //   const local_protection = _locale.protection;
   const sheetFile = getSheetByIndex(ctx, sheetId);
-  if (_.isNil(sheetFile)) {
+  if (isNil(sheetFile)) {
     return true;
   }
-  if (_.isNil(sheetFile.config) || _.isNil(sheetFile.config.authority)) {
+  if (isNil(sheetFile.config) || isNil(sheetFile.config.authority)) {
     return true;
   }
   const aut = sheetFile.config.authority;
-  if (_.isNil(aut) || _.isNil(aut.sheet) || aut.sheet === 0) {
+  if (isNil(aut) || isNil(aut.sheet) || aut.sheet === 0) {
     return true;
   }
   const { data } = sheetFile;
   const cell = data?.[r]?.[c];
   if (cell && cell.lo === 0) {
     // lo为0的时候才是可编辑
-    if (aut.selectunLockedCells === 1 || _.isNil(aut.selectunLockedCells)) {
+    if (aut.selectunLockedCells === 1 || isNil(aut.selectunLockedCells)) {
       return true;
     }
     return false;
@@ -64,13 +64,13 @@ export function checkProtectionSelectLockedOrUnLockedCells(ctx, r, c, sheetId) {
   //   ); // dont alert password model
   if (isAllEdit) {
     // unlocked
-    if (aut.selectunLockedCells === 1 || _.isNil(aut.selectunLockedCells)) {
+    if (aut.selectunLockedCells === 1 || isNil(aut.selectunLockedCells)) {
       return true;
     }
     return false;
   }
   // locked
-  if (aut.selectLockedCells === 1 || _.isNil(aut.selectLockedCells)) {
+  if (aut.selectLockedCells === 1 || isNil(aut.selectLockedCells)) {
     return true;
   }
   return false;
@@ -82,22 +82,22 @@ export function checkProtectionSelectLockedOrUnLockedCells(ctx, r, c, sheetId) {
  */
 export function checkProtectionAllSelected(ctx, sheetId) {
   const sheetFile = getSheetByIndex(ctx, sheetId);
-  if (_.isNil(sheetFile)) {
+  if (isNil(sheetFile)) {
     return true;
   }
-  if (_.isNil(sheetFile.config) || _.isNil(sheetFile.config.authority)) {
+  if (isNil(sheetFile.config) || isNil(sheetFile.config.authority)) {
     return true;
   }
   const aut = sheetFile.config.authority;
-  if (_.isNil(aut) || _.isNil(aut.sheet) || aut.sheet === 0) {
+  if (isNil(aut) || isNil(aut.sheet) || aut.sheet === 0) {
     return true;
   }
   let selectunLockedCells = false;
-  if (aut.selectunLockedCells === 1 || _.isNil(aut.selectunLockedCells)) {
+  if (aut.selectunLockedCells === 1 || isNil(aut.selectunLockedCells)) {
     selectunLockedCells = true;
   }
   let selectLockedCells = false;
-  if (aut.selectLockedCells === 1 || _.isNil(aut.selectLockedCells)) {
+  if (aut.selectLockedCells === 1 || isNil(aut.selectLockedCells)) {
     selectLockedCells = true;
   }
   if (selectunLockedCells && selectLockedCells) {
@@ -112,18 +112,18 @@ export function checkProtectionAllSelected(ctx, sheetId) {
  */
 export function checkProtectionFormatCells(ctx) {
   const sheetFile = getSheetByIndex(ctx, ctx.currentSheetId);
-  if (_.isNil(sheetFile)) {
+  if (isNil(sheetFile)) {
     return true;
   }
-  if (_.isNil(sheetFile.config) || _.isNil(sheetFile.config.authority)) {
+  if (isNil(sheetFile.config) || isNil(sheetFile.config.authority)) {
     return true;
   }
   const aut = sheetFile.config.authority;
-  if (_.isNil(aut) || _.isNil(aut.sheet) || aut.sheet === 0) {
+  if (isNil(aut) || isNil(aut.sheet) || aut.sheet === 0) {
     return true;
   }
   let ht = '';
-  if (!_.isNil(aut.hintText) && aut.hintText.length > 0) {
+  if (!isNil(aut.hintText) && aut.hintText.length > 0) {
     ht = aut.hintText;
   } else {
     ht = aut.defaultSheetHintText;

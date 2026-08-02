@@ -1,5 +1,6 @@
+import clone from 'lodash.clone';
+import findIndex from 'lodash.findindex';
 import numeral from 'numeral';
-import _ from 'lodash-es';
 import { execfunction, functionCopy, update } from './index.js';
 import {
   diff,
@@ -58,11 +59,11 @@ export function orderbydata(isAsc, index, data) {
     return 0;
   };
   const d = (x, y) => a(y, x);
-  const sortedData = _.clone(data);
+  const sortedData = clone(data);
   sortedData.sort(isAsc ? a : d);
   // calc row offsets
   const rowOffsets = sortedData.map((r, i) => {
-    const origIndex = _.findIndex(data, (origR) => origR === r);
+    const origIndex = findIndex(data, (origR) => origR === r);
     return i - origIndex;
   });
   return { sortedData, rowOffsets };
@@ -110,7 +111,7 @@ export function sortDataRange(
   }
   // let allParam = {};
   // if (ctx.config.rowlen != null) {
-  //   let cfg = _.assign({}, ctx.config);
+  //   let cfg = assign({}, ctx.config);
   //   cfg = rowlenByRange(d, str, edr, cfg);
   //   allParam = {
   //     cfg,

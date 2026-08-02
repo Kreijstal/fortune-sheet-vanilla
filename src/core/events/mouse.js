@@ -1,4 +1,12 @@
-import _ from 'lodash-es';
+import cloneDeep from 'lodash.clonedeep';
+import indexOf from 'lodash.indexof';
+import isEmpty from 'lodash.isempty';
+import isNil from 'lodash.isnil';
+import last from 'lodash.last';
+import set from 'lodash.set';
+import some from 'lodash.some';
+import sortedIndex from 'lodash.sortedindex';
+import uniq from 'lodash.uniq';
 import { getFlowdata } from './../context.js';
 import {
   cancelActiveImgItem,
@@ -99,7 +107,7 @@ export function handleGlobalWheel(ctx, e, cache, scrollbarX, scrollbarY) {
   if (cache.visibleColumnsUnique != null) {
     visibledatacolumn_c = cache.visibleColumnsUnique;
   } else {
-    visibledatacolumn_c = _.uniq(visibledatacolumn_c);
+    visibledatacolumn_c = uniq(visibledatacolumn_c);
     cache.visibleColumnsUnique = visibledatacolumn_c;
   }
   // }
@@ -107,13 +115,13 @@ export function handleGlobalWheel(ctx, e, cache, scrollbarX, scrollbarY) {
   if (cache.visibleRowsUnique != null) {
     visibledatarow_c = cache.visibleRowsUnique;
   } else {
-    visibledatarow_c = _.uniq(visibledatarow_c);
+    visibledatarow_c = uniq(visibledatarow_c);
     cache.visibleRowsUnique = visibledatarow_c;
   }
   // }
   // visibledatacolumn_c = ArrayUnique(visibledatacolumn_c);
   // visibledatarow_c = ArrayUnique(visibledatarow_c);
-  const row_st = _.sortedIndex(visibledatarow_c, scrollTop) + 1;
+  const row_st = sortedIndex(visibledatarow_c, scrollTop) + 1;
   // if (luckysheetFreezen.freezenhorizontaldata != null) {
   //   row_st = luckysheet_searcharray(
   //     visibledatarow_c,
@@ -287,7 +295,7 @@ export function handleCellAreaMouseDown(
   if (e.button === 2) {
     // $("#luckysheet-dataVerification-showHintBox").hide();
     // 如果右键在选区内, 停止mousedown处理
-    const isInSelection = _.some(
+    const isInSelection = some(
       ctx.luckysheet_select_save,
       (obj_s) =>
         obj_s.row != null &&
@@ -426,7 +434,7 @@ export function handleCellAreaMouseDown(
         ctx.formulaCache.func_selectedrange = last;
       } else if (
         e.ctrlKey &&
-        _.last(cellInput.querySelectorAll('span'))?.innerText !== ','
+        last(cellInput.querySelectorAll('span'))?.innerText !== ','
       ) {
         // 按住ctrl 选择选区时  先处理上一个选区
         let vText = cellInput.innerText;
@@ -446,7 +454,7 @@ export function handleCellAreaMouseDown(
             const currSelection = window.getSelection();
             if (currSelection == null) return;
             ctx.formulaCache.functionRangeIndex = [
-              _.indexOf(
+              indexOf(
                 currSelection.anchorNode?.parentNode?.parentNode?.childNodes,
                 currSelection.anchorNode?.parentNode
               ),
@@ -1255,8 +1263,8 @@ export function handleCellAreaDoubleClick(
   // 检查当前坐标和焦点坐标是否一致，如果不一致那么进行修正
   const { column_focus, row_focus } = ctx.luckysheet_select_save[0];
   if (
-    !_.isNil(column_focus) &&
-    !_.isNil(row_focus) &&
+    !isNil(column_focus) &&
+    !isNil(row_focus) &&
     (column_focus !== col_index || row_focus !== row_index)
   ) {
     row_index = row_focus;
@@ -1301,7 +1309,7 @@ export function handleContextMenu(
   //   "#luckysheet-cols-rows-handleincell .luckysheet-menuseparator"
   // ).style.display = "block";
   // 如果全部按钮都隐藏，则整个菜单容器也要隐藏
-  if (_.isEmpty(cellContextMenu)) {
+  if (isEmpty(cellContextMenu)) {
     return;
   }
   // relative to the workbook container
@@ -1317,7 +1325,7 @@ export function handleContextMenu(
   // select current cell when clicking the right button
   e.preventDefault();
   if (area === 'cell') {
-    _.set(ctx.contextMenu, 'headerMenu', undefined);
+    set(ctx.contextMenu, 'headerMenu', undefined);
     const rect = container.getBoundingClientRect();
     const mouseX = e.pageX - rect.left - window.scrollX;
     const mouseY = e.pageY - rect.top - window.scrollY;
@@ -1339,7 +1347,7 @@ export function handleContextMenu(
     const col_pre = col_location[0];
     const col_index = col_location[2];
     // 如果右键点击在选区内则不做选区处理
-    const isInSelection = _.some(
+    const isInSelection = some(
       ctx.luckysheet_select_save,
       (obj_s) =>
         obj_s.row != null &&
@@ -1452,7 +1460,7 @@ export function handleContextMenu(
       },
     ];
   } else if (area === 'rowHeader') {
-    _.set(ctx.contextMenu, 'headerMenu', 'row');
+    set(ctx.contextMenu, 'headerMenu', 'row');
     const rect = container.getBoundingClientRect();
     const mouseY = e.pageY - rect.top - window.scrollY;
     const _selected_y = mouseY + ctx.scrollTop;
@@ -1468,7 +1476,7 @@ export function handleContextMenu(
     const row_pre = row_location[0];
     const row_index = row_location[2];
     // 如果右键点击在选区内则不做选区处理
-    const isInSelection = _.some(
+    const isInSelection = some(
       ctx.luckysheet_select_save,
       (obj_s) =>
         obj_s.row != null &&
@@ -1503,7 +1511,7 @@ export function handleContextMenu(
       row_select: true,
     });
   } else if (area === 'columnHeader') {
-    _.set(ctx.contextMenu, 'headerMenu', 'column');
+    set(ctx.contextMenu, 'headerMenu', 'column');
     const rect = container.getBoundingClientRect();
     const mouseX = e.pageX - rect.left - window.scrollX;
     const _selected_x = mouseX + ctx.scrollLeft;
@@ -1522,7 +1530,7 @@ export function handleContextMenu(
     const col_pre = col_location[0];
     const col_index = col_location[2];
     // 如果右键点击在选区内则不做选区处理
-    const isInSelection = _.some(
+    const isInSelection = some(
       ctx.luckysheet_select_save,
       (obj_s) =>
         obj_s.row != null &&
@@ -1633,17 +1641,17 @@ function mouseRender(
       ctx.luckysheet_select_status = false;
       return;
     }
-    const last = _.cloneDeep(
+    const last = cloneDeep(
       ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1]
     );
     if (
       !last ||
-      _.isNil(last.left) ||
-      _.isNil(last.top) ||
-      _.isNil(last.height) ||
-      _.isNil(last.width) ||
-      _.isNil(last.row_focus) ||
-      _.isNil(last.column_focus)
+      isNil(last.left) ||
+      isNil(last.top) ||
+      isNil(last.height) ||
+      isNil(last.width) ||
+      isNil(last.row_focus) ||
+      isNil(last.column_focus)
     ) {
       return;
     }
@@ -4144,7 +4152,7 @@ export function handleRowHeaderMouseDown(
   if (e.button === 2) {
     // 如果右键在选区内, 停止mousedown处理
     const flowdata = getFlowdata(ctx);
-    const isInSelection = _.some(
+    const isInSelection = some(
       ctx.luckysheet_select_save,
       (obj_s) =>
         obj_s.row != null &&
@@ -4160,7 +4168,7 @@ export function handleRowHeaderMouseDown(
   let rowseleted = [row_index, row_index];
   ctx.luckysheet_scroll_status = true;
   // 公式相关
-  if (!_.isEmpty(ctx.luckysheetCellUpdate)) {
+  if (!isEmpty(ctx.luckysheetCellUpdate)) {
     if (
       ctx.formulaCache.rangestart ||
       ctx.formulaCache.rangedrag_column_start ||
@@ -4247,7 +4255,7 @@ export function handleRowHeaderMouseDown(
         ctx.formulaCache.func_selectedrange = last;
       } else if (
         e.ctrlKey &&
-        _.last(cellInput.querySelectorAll('span'))?.innerText !== ','
+        last(cellInput.querySelectorAll('span'))?.innerText !== ','
       ) {
         // 按住ctrl 选择选区时  先处理上一个选区
         let vText = `${cellInput.innerText},`;
@@ -4258,7 +4266,7 @@ export function handleRowHeaderMouseDown(
             const currSelection = window.getSelection();
             if (currSelection == null) return;
             ctx.formulaCache.functionRangeIndex = [
-              _.indexOf(
+              indexOf(
                 currSelection.anchorNode?.parentNode?.parentNode?.childNodes,
                 currSelection.anchorNode?.parentNode
               ),
@@ -4410,14 +4418,14 @@ export function handleRowHeaderMouseDown(
   if (ctx.luckysheet_rows_selected_status) {
     if (e.shiftKey) {
       // 按住shift点击行索引选取范围
-      const last = _.cloneDeep(
+      const last = cloneDeep(
         ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1]
       ); // 选区最后一个
       if (
         !last ||
-        _.isNil(last.top) ||
-        _.isNil(last.height) ||
-        _.isNil(last.row_focus)
+        isNil(last.top) ||
+        isNil(last.height) ||
+        isNil(last.row_focus)
       ) {
         return;
       }
@@ -4546,7 +4554,7 @@ export function handleColumnHeaderMouseDown(
   // mousedown是右键
   if (e.button === 2) {
     const flowdata = getFlowdata(ctx);
-    const isInSelection = _.some(
+    const isInSelection = some(
       ctx.luckysheet_select_save,
       (obj_s) =>
         obj_s.column != null &&
@@ -4562,7 +4570,7 @@ export function handleColumnHeaderMouseDown(
   let columnseleted = [col_index, col_index];
   ctx.luckysheet_scroll_status = true;
   // 公式相关
-  if (!_.isEmpty(ctx.luckysheetCellUpdate)) {
+  if (!isEmpty(ctx.luckysheetCellUpdate)) {
     if (
       ctx.formulaCache.rangestart ||
       ctx.formulaCache.rangedrag_column_start ||
@@ -4644,7 +4652,7 @@ export function handleColumnHeaderMouseDown(
         ctx.formulaCache.func_selectedrange = last;
       } else if (
         e.ctrlKey &&
-        _.last(cellInput.querySelectorAll('span'))?.innerText !== ','
+        last(cellInput.querySelectorAll('span'))?.innerText !== ','
       ) {
         // 按住ctrl 选择选区时  先处理上一个选区
         let vText = `${cellInput.innerText},`;
@@ -4655,7 +4663,7 @@ export function handleColumnHeaderMouseDown(
             const currSelection = window.getSelection();
             if (currSelection == null) return;
             ctx.formulaCache.functionRangeIndex = [
-              _.indexOf(
+              indexOf(
                 currSelection.anchorNode?.parentNode?.parentNode?.childNodes,
                 currSelection.anchorNode?.parentNode
               ),
@@ -4786,7 +4794,7 @@ export function handleColumnHeaderMouseDown(
   if (ctx.luckysheet_cols_selected_status) {
     if (e.shiftKey) {
       // 按住shift点击列索引选取范围
-      const last = _.cloneDeep(
+      const last = cloneDeep(
         ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1]
       ); // 选区最后一个
       let _left = 0;
@@ -4794,9 +4802,9 @@ export function handleColumnHeaderMouseDown(
       let _columnseleted = [];
       if (
         !last ||
-        _.isNil(last.left) ||
-        _.isNil(last.width) ||
-        _.isNil(last.column_focus)
+        isNil(last.left) ||
+        isNil(last.width) ||
+        isNil(last.column_focus)
       ) {
         return;
       }

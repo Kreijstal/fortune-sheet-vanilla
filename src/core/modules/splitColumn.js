@@ -1,4 +1,5 @@
-import _ from 'lodash-es';
+import isNull from 'lodash.isnull';
+import isUndefined from 'lodash.isundefined';
 import { getFlowdata } from './../context.js';
 import { getCellValue, setCellValue } from './cell.js';
 // 生成二维数组
@@ -105,19 +106,19 @@ export function getDataArr(regStr, ctx) {
   const r2 = ctx.luckysheet_select_save[0].row[1];
   const c = ctx.luckysheet_select_save[0].column[0];
   const data = getFlowdata(ctx);
-  if (!_.isNull(regStr) && regStr !== '') {
+  if (!isNull(regStr) && regStr !== '') {
     const reg = new RegExp(regStr, 'g');
     const dataArr = [];
     for (let r = r1; r <= r2; r += 1) {
       let rowArr = [];
       const cell = data[r][c];
       let value;
-      if (!_.isNull(cell) && !_.isNull(cell.m)) {
+      if (!isNull(cell) && !isNull(cell.m)) {
         value = cell.m;
       } else {
         value = getCellValue(r, c, data);
       }
-      if (_.isNull(value) || _.isUndefined(value)) {
+      if (isNull(value) || isUndefined(value)) {
         value = '';
       }
       rowArr = value.toString().split(reg);
@@ -143,12 +144,12 @@ export function getDataArr(regStr, ctx) {
       const rowArr = [];
       const cell = data[r][c];
       let value;
-      if (!_.isNull(cell) && !_.isNull(cell.m)) {
+      if (!isNull(cell) && !isNull(cell.m)) {
         value = cell.m;
       } else {
         value = getCellValue(r, c, data);
       }
-      if (_.isNull(value)) {
+      if (isNull(value)) {
         value = '';
       }
       rowArr.push(value);

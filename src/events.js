@@ -1,9 +1,9 @@
+import isEmpty from 'lodash.isempty';
 /**
  * DOM event wiring. Ported from
  * @fortune-sheet/react Workbook (keydown/paste), Sheet (wheel/resize) and
  * SheetOverlay (mouse/touch) components (MIT).
  */
-import _ from 'lodash-es';
 import {
   handleGlobalWheel,
   handleCellAreaMouseDown,
@@ -60,7 +60,7 @@ export function bindEvents(store, overlay, dom, onResize) {
           fxInput(),
           canvasCtx()
         );
-        if (!_.isEmpty(draftCtx.luckysheet_select_save?.[0]) && cellInput()) {
+        if (!isEmpty(draftCtx.luckysheet_select_save?.[0]) && cellInput()) {
           setTimeout(() => {
             cellInput()?.focus();
           });

@@ -1,4 +1,5 @@
-import _ from 'lodash-es';
+import cloneDeep from 'lodash.clonedeep';
+import isEmpty from 'lodash.isempty';
 import { getSheetIndex } from './../utils/index.js';
 import { isInlineStringCT } from './inline-string.js';
 /**
@@ -43,10 +44,10 @@ export function mergeCells(ctx, sheetId, ranges, type) {
             if ('rs' in cell.mc) {
               delete cell.mc;
               delete cfg.merge[`${mc_r}_${mc_c}`];
-              fv[`${mc_r}_${mc_c}`] = _.cloneDeep(cell) || {};
+              fv[`${mc_r}_${mc_c}`] = cloneDeep(cell) || {};
             } else {
               // let cell_clone = fv[mc_r + "_" + mc_c];
-              const cell_clone = _.cloneDeep(fv[`${mc_r}_${mc_c}`]);
+              const cell_clone = cloneDeep(fv[`${mc_r}_${mc_c}`]);
               delete cell_clone.v;
               delete cell_clone.m;
               delete cell_clone.ct;
@@ -97,10 +98,10 @@ export function mergeCells(ctx, sheetId, ranges, type) {
               if ('rs' in cell.mc) {
                 delete cell.mc;
                 delete cfg.merge[`${mc_r}_${mc_c}`];
-                fv[`${mc_r}_${mc_c}`] = _.cloneDeep(cell) || {};
+                fv[`${mc_r}_${mc_c}`] = cloneDeep(cell) || {};
               } else {
                 // let cell_clone = fv[mc_r + "_" + mc_c];
-                const cell_clone = _.cloneDeep(fv[`${mc_r}_${mc_c}`]);
+                const cell_clone = cloneDeep(fv[`${mc_r}_${mc_c}`]);
                 delete cell_clone.v;
                 delete cell_clone.m;
                 delete cell_clone.ct;
@@ -131,11 +132,11 @@ export function mergeCells(ctx, sheetId, ranges, type) {
               if (
                 cell != null &&
                 (isInlineStringCT(cell.ct) ||
-                  !_.isEmpty(cell.v) ||
+                  !isEmpty(cell.v) ||
                   cell.f != null) &&
                 !isfirst
               ) {
-                fv = _.cloneDeep(cell) || {};
+                fv = cloneDeep(cell) || {};
                 isfirst = true;
               }
               d[r][c] = { mc: { r: r1, c: c1 } };
@@ -159,10 +160,10 @@ export function mergeCells(ctx, sheetId, ranges, type) {
               const cell = d[r][c];
               if (
                 cell != null &&
-                (!_.isEmpty(cell.v) || cell.f != null) &&
+                (!isEmpty(cell.v) || cell.f != null) &&
                 !isfirst
               ) {
-                fv = _.cloneDeep(cell) || {};
+                fv = cloneDeep(cell) || {};
                 isfirst = true;
               }
               d[r][c] = { mc: { r: r1, c } };
@@ -186,10 +187,10 @@ export function mergeCells(ctx, sheetId, ranges, type) {
               const cell = d[r][c];
               if (
                 cell != null &&
-                (!_.isEmpty(cell.v) || cell.f != null) &&
+                (!isEmpty(cell.v) || cell.f != null) &&
                 !isfirst
               ) {
-                fv = _.cloneDeep(cell) || {};
+                fv = cloneDeep(cell) || {};
                 isfirst = true;
               }
               d[r][c] = { mc: { r, c: c1 } };

@@ -1,4 +1,10 @@
-import _ from 'lodash-es';
+import every from 'lodash.every';
+import filter from 'lodash.filter';
+import forEach from 'lodash.foreach';
+import isEqual from 'lodash.isequal';
+import isNil from 'lodash.isnil';
+import isNumber from 'lodash.isnumber';
+import partition from 'lodash.partition';
 import { getSheetIndex } from './index.js';
 import { getFlowdata } from './../context.js';
 const addtionalMergeOps = (ops, id) => {
@@ -81,7 +87,7 @@ function additionalCellOps(ctx, insertRowColOp) {
  * @returns {Array<Patch>}
  */
 export function filterPatch(patches) {
-  return _.filter(
+  return filter(
     patches,
     (p) =>
       p.path[0] === 'luckysheetfile' && p.path[2] !== 'luckysheet_select_save'
@@ -130,21 +136,21 @@ export function patchToOp(ctx, patches, options, undo = false) {
       value: p.value,
       path: p.path,
     };
-    if (p.path[0] === 'luckysheetfile' && _.isNumber(p.path[1])) {
+    if (p.path[0] === 'luckysheetfile' && isNumber(p.path[1])) {
       const id = ctx.luckysheetfile[p.path[1]].id;
       op.id = id;
       op.path = p.path.slice(2);
-      if (_.isEqual(op.path, ['calcChain', 'length'])) {
+      if (isEqual(op.path, ['calcChain', 'length'])) {
         op.path = ['calcChain'];
         op.value = ctx.luckysheetfile[p.path[1]].calcChain;
       }
     }
     return op;
   });
-  _.every(ops, (p) => {
+  every(ops, (p) => {
     if (
       p.op === 'replace' &&
-      !_.isNil(p.value?.hl) &&
+      !isNil(p.value?.hl) &&
       p.path.length === 3 &&
       p.path[0] === 'data'
     ) {
@@ -161,7 +167,7 @@ export function patchToOp(ctx, patches, options, undo = false) {
     }
   });
   if (options?.insertRowColOp) {
-    const [nonDataOps, dataOps] = _.partition(ops, (p) => p.path[0] !== 'data');
+    const [nonDataOps, dataOps] = partition(ops, (p) => p.path[0] !== 'data');
     // find out formula cells as their formula range may be changed
     const formulaOps = extractFormulaCellOps(dataOps);
     ops = nonDataOps;
@@ -211,7 +217,7 @@ export function patchToOp(ctx, patches, options, undo = false) {
       ops = [...ops, ...cellOps];
     }
   } else if (options?.deleteRowColOp) {
-    const [nonDataOps, dataOps] = _.partition(ops, (p) => p.path[0] !== 'data');
+    const [nonDataOps, dataOps] = partition(ops, (p) => p.path[0] !== 'data');
     // find out formula cells as their formula range may be changed
     const formulaOps = extractFormulaCellOps(dataOps);
     ops = nonDataOps;
@@ -225,7 +231,7 @@ export function patchToOp(ctx, patches, options, undo = false) {
     const mergeOps = addtionalMergeOps(ops, ctx.currentSheetId);
     ops = [...ops, ...mergeOps];
   } else if (options?.addSheetOp) {
-    const [addSheetOps, otherOps] = _.partition(
+    const [addSheetOps, otherOps] = partition(
       ops,
       (op) => op.path.length === 0 && op.op === 'add'
     );
@@ -245,7 +251,7 @@ export function patchToOp(ctx, patches, options, undo = false) {
         const sheetsRight = ctx.luckysheetfile.filter(
           (sheet) => sheet?.order >= order
         );
-        _.forEach(sheetsRight, (sheet) => {
+        forEach(sheetsRight, (sheet) => {
           ops.push({
             id: sheet.id,
             op: 'replace',
@@ -287,7 +293,7 @@ export function patchToOp(ctx, patches, options, undo = false) {
         (sheet) =>
           sheet?.order >= order && sheet.id !== options.deleteSheetOp?.id
       );
-      _.forEach(sheetsRight, (sheet) => {
+      forEach(sheetsRight, (sheet) => {
         ops.push({
           id: sheet.id,
           op: 'replace',
@@ -310,7 +316,7 @@ export function patchToOp(ctx, patches, options, undo = false) {
         const sheetsRight = ctx.luckysheetfile.filter(
           (sheet) => sheet?.order >= order
         );
-        _.forEach(sheetsRight, (sheet) => {
+        forEach(sheetsRight, (sheet) => {
           ops.push({
             id: sheet.id,
             op: 'replace',
@@ -329,7 +335,7 @@ export function patchToOp(ctx, patches, options, undo = false) {
  * @returns {[Patch[], Op[]]}
  */
 export function opToPatch(ctx, ops) {
-  const [normalOps, specialOps] = _.partition(
+  const [normalOps, specialOps] = partition(
     ops,
     (op) => op.op === 'add' || op.op === 'remove' || op.op === 'replace'
   );

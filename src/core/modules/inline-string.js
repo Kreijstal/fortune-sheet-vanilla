@@ -1,4 +1,8 @@
-import _ from 'lodash-es';
+import indexOf from 'lodash.indexof';
+import isEmpty from 'lodash.isempty';
+import isNil from 'lodash.isnil';
+import kebabCase from 'lodash.kebabcase';
+import trim from 'lodash.trim';
 import { getCellValue, getFontStyleByCell } from './cell.js';
 import { selectTextContent, selectTextContentCross } from './cursor.js';
 /**
@@ -102,7 +106,7 @@ export function getInlineStringNoStyle(r, c, data) {
  * @returns {CellStyle}
  */
 export function convertCssToStyleList(cssText, originCell) {
-  if (_.isEmpty(cssText)) {
+  if (isEmpty(cssText)) {
     return {};
   }
   const cssTextArray = cssText.split(';');
@@ -118,8 +122,8 @@ export function convertCssToStyleList(cssText, originCell) {
   };
   cssTextArray.forEach((s) => {
     s = s.toLowerCase();
-    const key = _.trim(s.substring(0, s.indexOf(':')));
-    const value = _.trim(s.substring(s.indexOf(':') + 1));
+    const key = trim(s.substring(0, s.indexOf(':')));
+    const value = trim(s.substring(s.indexOf(':') + 1));
     if (key === 'font-weight') {
       if (value === 'bold') {
         styleList.bl = 1;
@@ -201,11 +205,11 @@ export function convertSpanToShareString(
  * @param {any} value
  */
 export function updateInlineStringFormatOutside(cell, key, value) {
-  if (_.isNil(cell.ct)) {
+  if (isNil(cell.ct)) {
     return;
   }
   const { s } = cell.ct;
-  if (_.isNil(s)) {
+  if (isNil(s)) {
     return;
   }
   for (let i = 0; i < s.length; i += 1) {
@@ -222,8 +226,8 @@ function getClassWithcss(cssText, ukey) {
     for (let i = 0; i < cssTextArray.length; i += 1) {
       let s = cssTextArray[i];
       s = s.toLowerCase();
-      const key = _.trim(s.substring(0, s.indexOf(':')));
-      const value = _.trim(s.substring(s.indexOf(':') + 1));
+      const key = trim(s.substring(0, s.indexOf(':')));
+      const value = trim(s.substring(s.indexOf(':') + 1));
       if (key === ukey) {
         return value;
       }
@@ -241,8 +245,8 @@ function upsetClassWithCss(cssText, ukey, uvalue) {
     for (let i = 0; i < cssTextArray.length; i += 1) {
       let s = cssTextArray[i];
       s = s.toLowerCase();
-      const key = _.trim(s.substring(0, s.indexOf(':')));
-      const value = _.trim(s.substring(s.indexOf(':') + 1));
+      const key = trim(s.substring(0, s.indexOf(':')));
+      const value = trim(s.substring(s.indexOf(':') + 1));
       if (key === ukey) {
         newCss += `${key}:${uvalue};`;
       } else if (key.length > 0) {
@@ -269,8 +273,8 @@ function removeClassWidthCss(cssText, ukey) {
     for (let i = 0; i < cssTextArray.length; i += 1) {
       let s = cssTextArray[i];
       s = s.toLowerCase();
-      const key = _.trim(s.substring(0, s.indexOf(':')));
-      const value = _.trim(s.substring(s.indexOf(':') + 1));
+      const key = trim(s.substring(0, s.indexOf(':')));
+      const value = trim(s.substring(s.indexOf(':') + 1));
       if (
         key === ukey ||
         (oUkey === 'cl' && key === 'lucky-strike') ||
@@ -302,7 +306,7 @@ function getCssText(cssText, attr, value) {
     styleObj._color = fontColor;
   }
   const s = getFontStyleByCell(styleObj, undefined, undefined, false);
-  const ukey = _.kebabCase(Object.keys(s)[0]);
+  const ukey = kebabCase(Object.keys(s)[0]);
   const uvalue = Object.values(s)[0];
   // let cssText = span.style.cssText;
   cssText = removeClassWidthCss(cssText, attr);
@@ -318,12 +322,12 @@ function extendCssText(origin, cover, isLimit = true) {
     let so = originArray[i];
     let isAdd = true;
     so = so.toLowerCase();
-    const okey = _.trim(so.substring(0, so.indexOf(':')));
+    const okey = trim(so.substring(0, so.indexOf(':')));
     /* 不设置文字的大小，解决设置删除线等后字体变大的问题 */
     if (okey === 'font-size') {
       continue;
     }
-    const ovalue = _.trim(so.substring(so.indexOf(':') + 1));
+    const ovalue = trim(so.substring(so.indexOf(':') + 1));
     if (isLimit) {
       if (!(okey in inlineStyleAffectCssName)) {
         continue;
@@ -332,8 +336,8 @@ function extendCssText(origin, cover, isLimit = true) {
     for (let a = 0; a < coverArray.length; a += 1) {
       let sc = coverArray[a];
       sc = sc.toLowerCase();
-      const ckey = _.trim(sc.substring(0, sc.indexOf(':')));
-      const cvalue = _.trim(sc.substring(sc.indexOf(':') + 1));
+      const ckey = trim(sc.substring(0, sc.indexOf(':')));
+      const cvalue = trim(sc.substring(sc.indexOf(':') + 1));
       if (okey === ckey) {
         newCss += `${ckey}:${cvalue};`;
         isAdd = false;
@@ -348,8 +352,8 @@ function extendCssText(origin, cover, isLimit = true) {
   for (let a = 0; a < coverArray.length; a += 1) {
     let sc = coverArray[a];
     sc = sc.toLowerCase();
-    const ckey = _.trim(sc.substring(0, sc.indexOf(':')));
-    const cvalue = _.trim(sc.substring(sc.indexOf(':') + 1));
+    const ckey = trim(sc.substring(0, sc.indexOf(':')));
+    const cvalue = trim(sc.substring(sc.indexOf(':') + 1));
     if (isLimit) {
       if (!(ckey in inlineStyleAffectCssName)) {
         continue;
@@ -435,7 +439,7 @@ export function updateInlineStringFormat(ctx, cell, attr, value, cellInput) {
           cont += `<span style='${cssText}'>${right}</span>`;
         }
         if (startContainer.parentElement?.tagName === 'SPAN') {
-          spanIndex = _.indexOf($textEditor.querySelectorAll('span'), span);
+          spanIndex = indexOf($textEditor.querySelectorAll('span'), span);
           span.outerHTML = cont;
         } else {
           spanIndex = 0;
@@ -459,8 +463,8 @@ export function updateInlineStringFormat(ctx, cell, attr, value, cellInput) {
         const startSpan = startContainer.parentNode;
         const endSpan = endContainer.parentNode;
         const allSpans = $textEditor.querySelectorAll('span');
-        const startSpanIndex = _.indexOf(allSpans, startSpan);
-        const endSpanIndex = _.indexOf(allSpans, endSpan);
+        const startSpanIndex = indexOf(allSpans, startSpan);
+        const endSpanIndex = indexOf(allSpans, endSpan);
         const startContent = startSpan?.innerHTML || '';
         const endContent = endSpan?.innerHTML || '';
         let sleft = '';

@@ -1,4 +1,6 @@
-import _ from 'lodash-es';
+import cloneDeep from 'lodash.clonedeep';
+import isUndefined from 'lodash.isundefined';
+import pick from 'lodash.pick';
 import dayjs from 'dayjs';
 import { getFlowdata } from './../context.js';
 import { colLocation, rowLocation } from './location.js';
@@ -458,8 +460,8 @@ function fillCopy(data, len) {
   const applyData = [];
   for (let i = 1; i <= len; i += 1) {
     const index = (i - 1) % data.length;
-    const d = _.cloneDeep(data[index]);
-    if (!_.isUndefined(d)) {
+    const d = cloneDeep(data[index]);
+    if (!isUndefined(d)) {
       applyData.push(d);
     }
   }
@@ -469,7 +471,7 @@ function fillSeries(data, len, direction) {
   const applyData = [];
   const dataNumArr = [];
   for (let j = 0; j < data.length; j += 1) {
-    const d = _.cloneDeep(data[j]);
+    const d = cloneDeep(data[j]);
     if (d != null) {
       dataNumArr.push(Number(d.v));
     }
@@ -483,7 +485,7 @@ function fillSeries(data, len, direction) {
     // 等比数列
     for (let i = 1; i <= len; i += 1) {
       const index = (i - 1) % data.length;
-      const d = _.cloneDeep(data[index]);
+      const d = cloneDeep(data[index]);
       if (d != null) {
         let num;
         if (direction === 'down' || direction === 'right') {
@@ -507,7 +509,7 @@ function fillSeries(data, len, direction) {
     const xArr = getXArr(data.length);
     for (let i = 1; i <= len; i += 1) {
       const index = (i - 1) % data.length;
-      const d = _.cloneDeep(data[index]);
+      const d = cloneDeep(data[index]);
       if (d != null) {
         let y;
         if (direction === 'down' || direction === 'right') {
@@ -530,7 +532,7 @@ function fillExtendNumber(data, len, step) {
   const reg = /0|([1-9]+[0-9]*)/g;
   for (let i = 1; i <= len; i += 1) {
     const index = (i - 1) % data.length;
-    const d = _.cloneDeep(data[index]);
+    const d = cloneDeep(data[index]);
     let last = data[data.length - 1]?.m;
     if (d != null && last != null) {
       last = `${last}`;
@@ -552,7 +554,7 @@ function fillExtendNumber(data, len, step) {
 function fillDays(data, len, step) {
   const applyData = [];
   for (let i = 1; i <= len; i += 1) {
-    const d = _.cloneDeep(data[data.length - 1]);
+    const d = cloneDeep(data[data.length - 1]);
     if (d != null) {
       let date = update('yyyy-MM-dd', d.v);
       date = dayjs(date)
@@ -571,7 +573,7 @@ function fillDays(data, len, step) {
 function fillMonths(data, len, step) {
   const applyData = [];
   for (let i = 1; i <= len; i += 1) {
-    const d = _.cloneDeep(data[data.length - 1]);
+    const d = cloneDeep(data[data.length - 1]);
     if (d != null) {
       let date = update('yyyy-MM-dd', d.v);
       date = dayjs(date)
@@ -589,7 +591,7 @@ function fillMonths(data, len, step) {
 function fillYears(data, len, step) {
   const applyData = [];
   for (let i = 1; i <= len; i += 1) {
-    const d = _.cloneDeep(data[data.length - 1]);
+    const d = cloneDeep(data[data.length - 1]);
     if (d != null) {
       let date = update('yyyy-MM-dd', d.v);
       date = dayjs(date)
@@ -608,7 +610,7 @@ function fillChnWeek(data, len, step) {
   const applyData = [];
   for (let i = 1; i <= len; i += 1) {
     const index = (i - 1) % data.length;
-    const d = _.cloneDeep(data[index]);
+    const d = cloneDeep(data[index]);
     let num;
     const m = data[data.length - 1]?.m;
     if (m != null && d != null) {
@@ -652,7 +654,7 @@ function fillChnWeek2(data, len, step) {
   const applyData = [];
   for (let i = 1; i <= len; i += 1) {
     const index = (i - 1) % data.length;
-    const d = _.cloneDeep(data[index]);
+    const d = cloneDeep(data[index]);
     let num;
     const m = data[data.length - 1]?.m;
     if (m != null && d != null) {
@@ -698,7 +700,7 @@ function fillChnWeek3(data, len, step) {
   const applyData = [];
   for (let i = 1; i <= len; i += 1) {
     const index = (i - 1) % data.length;
-    const d = _.cloneDeep(data[index]);
+    const d = cloneDeep(data[index]);
     let num;
     const m = data[data.length - 1]?.m;
     if (m != null && d != null) {
@@ -744,7 +746,7 @@ function fillChnNumber(data, len, step) {
   const applyData = [];
   for (let i = 1; i <= len; i += 1) {
     const index = (i - 1) % data.length;
-    const d = _.cloneDeep(data[index]);
+    const d = cloneDeep(data[index]);
     const m = data[data.length - 1]?.m;
     if (m != null && d != null) {
       const num = chineseToNumber(`${m}`) + step * i;
@@ -858,7 +860,7 @@ function getDataIndex(csLen, asLen, indexArr) {
   return obj;
 }
 function getDataByType(data, len, direction, type, dataType) {
-  data = _.cloneDeep(data);
+  data = cloneDeep(data);
   let applyData = [];
   if (type === '0' || data.length === 1) {
     // 复制单元格
@@ -1090,7 +1092,7 @@ function getDataByType(data, len, direction, type, dataType) {
         const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), 'months');
         for (let i = 1; i <= len; i += 1) {
           const index = (i - 1) % data.length;
-          const d = _.cloneDeep(data[index]);
+          const d = cloneDeep(data[index]);
           const last = data[data.length - 1]?.m;
           if (d != null && last != null) {
             const day = dayjs(last)
@@ -1131,7 +1133,7 @@ function getDataByType(data, len, direction, type, dataType) {
           let step; // 以数组第一个为对比
           for (let i = 1; i <= len; i += 1) {
             const index = (i - 1) % data.length;
-            const d = _.cloneDeep(data[index]);
+            const d = cloneDeep(data[index]);
             if (d != null) {
               const num = Math.ceil(i / data.length);
               if (index === 0) {
@@ -1171,7 +1173,7 @@ function getDataByType(data, len, direction, type, dataType) {
           let step; // 以数组第一个为对比
           for (let i = 1; i <= len; i += 1) {
             const index = (i - 1) % data.length;
-            const d = _.cloneDeep(data[index]);
+            const d = cloneDeep(data[index]);
             if (d != null) {
               const num = Math.ceil(i / data.length);
               if (index === 0) {
@@ -1211,7 +1213,7 @@ function getDataByType(data, len, direction, type, dataType) {
         const step = dayjs(data[1]?.m).diff(dayjs(data[0]?.m), 'months');
         for (let i = 1; i <= len; i += 1) {
           const index = (i - 1) % data.length;
-          const d = _.cloneDeep(data[index]);
+          const d = cloneDeep(data[index]);
           const last = data[data.length - 1]?.m;
           if (d != null) {
             const day = dayjs(last)
@@ -1252,7 +1254,7 @@ function getDataByType(data, len, direction, type, dataType) {
           let step; // 以数组第一个为对比
           for (let i = 1; i <= len; i += 1) {
             const index = (i - 1) % data.length;
-            const d = _.cloneDeep(data[index]);
+            const d = cloneDeep(data[index]);
             if (d != null) {
               const num = Math.ceil(i / data.length);
               if (index === 0) {
@@ -1292,7 +1294,7 @@ function getDataByType(data, len, direction, type, dataType) {
           let step; // 以数组第一个为对比
           for (let i = 1; i <= len; i += 1) {
             const index = (i - 1) % data.length;
-            const d = _.cloneDeep(data[index]);
+            const d = cloneDeep(data[index]);
             if (d != null) {
               const num = Math.ceil(i / data.length);
               if (index === 0) {
@@ -1354,7 +1356,7 @@ function getDataByType(data, len, direction, type, dataType) {
         let step; // 以数组第一个为对比
         for (let i = 1; i <= len; i += 1) {
           const index = (i - 1) % data.length;
-          const d = _.cloneDeep(data[index]);
+          const d = cloneDeep(data[index]);
           if (d != null) {
             const num = Math.ceil(i / data.length);
             if (index === 0) {
@@ -1390,7 +1392,7 @@ function getDataByType(data, len, direction, type, dataType) {
         let step; // 以数组第一个为对比
         for (let i = 1; i <= len; i += 1) {
           const index = (i - 1) % data.length;
-          const d = _.cloneDeep(data[index]);
+          const d = cloneDeep(data[index]);
           if (d != null) {
             const num = Math.ceil(i / data.length);
             if (index === 0) {
@@ -1438,7 +1440,7 @@ function getDataByType(data, len, direction, type, dataType) {
         let step; // 以数组第一个为对比
         for (let i = 1; i <= len; i += 1) {
           const index = (i - 1) % data.length;
-          const d = _.cloneDeep(data[index]);
+          const d = cloneDeep(data[index]);
           if (d != null) {
             const num = Math.ceil(i / data.length);
             if (index === 0) {
@@ -1474,7 +1476,7 @@ function getDataByType(data, len, direction, type, dataType) {
         let step; // 以数组第一个为对比
         for (let i = 1; i <= len; i += 1) {
           const index = (i - 1) % data.length;
-          const d = _.cloneDeep(data[index]);
+          const d = cloneDeep(data[index]);
           const num = Math.ceil(i / data.length);
           if (d != null) {
             if (index === 0) {
@@ -1989,12 +1991,12 @@ export function updateDropCell(ctx) {
   const file = ctx.luckysheetfile[index];
   const hiddenRows = new Set(Object.keys(file.config?.rowhidden || {}));
   const hiddenCols = new Set(Object.keys(file.config?.colhidden || {}));
-  const cfg = _.cloneDeep(ctx.config);
+  const cfg = cloneDeep(ctx.config);
   if (cfg.borderInfo == null) {
     cfg.borderInfo = [];
   }
   const borderInfoCompute = getBorderInfoCompute(ctx, ctx.currentSheetId);
-  const dataVerification = _.cloneDeep(file.dataVerification);
+  const dataVerification = cloneDeep(file.dataVerification);
   const { direction } = dropCellCache;
   // const type = dropCellCache.applyType;
   // 复制范围
@@ -2454,7 +2456,7 @@ export function onDropCellSelectEnd(ctx, e, container) {
     let col_s = last.column[0];
     let col_e = last.column[1];
     // 复制范围
-    dropCellCache.copyRange = _.cloneDeep(_.pick(last, ['row', 'column']));
+    dropCellCache.copyRange = cloneDeep(pick(last, ['row', 'column']));
     // applyType
     const typeItemHide = getTypeItemHide(ctx);
     if (

@@ -1,4 +1,7 @@
-import _ from 'lodash-es';
+import every from 'lodash.every';
+import isNil from 'lodash.isnil';
+import isUndefined from 'lodash.isundefined';
+import startsWith from 'lodash.startswith';
 import { locale } from './../locale/index.js';
 import { checkCellIsLocked } from './../modules/index.js';
 export * from './patch.js';
@@ -105,7 +108,7 @@ export function escapeScriptTag(str) {
  */
 export function escapeHTMLTag(str) {
   if (typeof str !== 'string') return str;
-  if (str.substr(0, 5) === '<span' || _.startsWith(str, '=')) {
+  if (str.substr(0, 5) === '<span' || startsWith(str, '=')) {
     return str;
   }
   return str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -142,11 +145,11 @@ export function getSheetIdByName(ctx, name) {
  * @returns {Sheet}
  */
 export function getSheetByIndex(ctx, id) {
-  if (_.isNil(id)) {
+  if (isNil(id)) {
     id = ctx.currentSheetId;
   }
   const i = getSheetIndex(ctx, id);
-  if (_.isNil(i)) {
+  if (isNil(i)) {
     return null;
   }
   return ctx.luckysheetfile[i];
@@ -262,9 +265,9 @@ export function chatatABC(n) {
  */
 export function isAllowEdit(ctx, range) {
   const cfg = ctx.config;
-  const judgeRange = _.isUndefined(range) ? ctx.luckysheet_select_save : range;
+  const judgeRange = isUndefined(range) ? ctx.luckysheet_select_save : range;
   return (
-    _.every(judgeRange, (selection) => {
+    every(judgeRange, (selection) => {
       for (let r = selection.row[0]; r <= selection.row[1]; r += 1) {
         if (cfg.rowReadOnly?.[r]) {
           return false;
@@ -283,7 +286,7 @@ export function isAllowEdit(ctx, range) {
         }
       }
       return true;
-    }) && (_.isUndefined(ctx.allowEdit) ? true : ctx.allowEdit)
+    }) && (isUndefined(ctx.allowEdit) ? true : ctx.allowEdit)
   );
 }
 

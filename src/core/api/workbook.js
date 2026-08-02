@@ -1,4 +1,5 @@
-import _ from 'lodash-es';
+import isNumber from 'lodash.isnumber';
+import sortBy from 'lodash.sortby';
 import {
   addSheet as addSheetInternal,
   deleteSheet as deleteSheetInternal,
@@ -74,7 +75,7 @@ export function setSheetOrder(ctx, orderList) {
     }
   });
   // re-order starting from 0
-  _.sortBy(ctx.luckysheetfile, ['order']).forEach((sheet, i) => {
+  sortBy(ctx.luckysheetfile, ['order']).forEach((sheet, i) => {
     sheet.order = i;
   });
 }
@@ -91,14 +92,14 @@ export function setSheetOrder(ctx, orderList) {
  */
 export function scroll(ctx, scrollbarX, scrollbarY, options) {
   if (options.scrollLeft != null) {
-    if (!_.isNumber(options.scrollLeft)) {
+    if (!isNumber(options.scrollLeft)) {
       throw INVALID_PARAMS;
     }
     if (scrollbarX) {
       scrollbarX.scrollLeft = options.scrollLeft;
     }
   } else if (options.targetColumn != null) {
-    if (!_.isNumber(options.targetColumn)) {
+    if (!isNumber(options.targetColumn)) {
       throw INVALID_PARAMS;
     }
     const col_pre =
@@ -110,14 +111,14 @@ export function scroll(ctx, scrollbarX, scrollbarY, options) {
     }
   }
   if (options.scrollTop != null) {
-    if (!_.isNumber(options.scrollTop)) {
+    if (!isNumber(options.scrollTop)) {
       throw INVALID_PARAMS;
     }
     if (scrollbarY) {
       scrollbarY.scrollTop = options.scrollTop;
     }
   } else if (options.targetRow != null) {
-    if (!_.isNumber(options.targetRow)) {
+    if (!isNumber(options.targetRow)) {
       throw INVALID_PARAMS;
     }
     const row_pre =

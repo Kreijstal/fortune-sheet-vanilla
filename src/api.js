@@ -1,8 +1,10 @@
+import differenceBy from 'lodash.differenceby';
+import isUndefined from 'lodash.isundefined';
+import sortBy from 'lodash.sortby';
 /**
  * Public instance API. Ported from
  * @fortune-sheet/react/src/components/Workbook/api.ts (MIT).
  */
-import _ from 'lodash-es';
 import { applyPatches } from 'immer';
 import {
   addSheet,
@@ -61,10 +63,10 @@ export function generateAPIs(store, cellInput, scrollbarX, scrollbarY) {
             if (ctx_.currentSheetId === ops[0].id) {
               const shownSheets = ctx_.luckysheetfile.filter(
                 (sheet) =>
-                  (_.isUndefined(sheet.hide) || sheet?.hide !== 1) &&
+                  (isUndefined(sheet.hide) || sheet?.hide !== 1) &&
                   sheet.id !== ops[0].id
               );
-              ctx_.currentSheetId = _.sortBy(
+              ctx_.currentSheetId = sortBy(
                 shownSheets,
                 (sheet) => sheet.order
               )[0].id;
@@ -220,7 +222,7 @@ export function generateAPIs(store, cellInput, scrollbarX, scrollbarY) {
 
     addPresences: (newPresences) => {
       setContext((draftCtx) => {
-        draftCtx.presences = _.differenceBy(
+        draftCtx.presences = differenceBy(
           draftCtx.presences || [],
           newPresences,
           (v) => (v.userId == null ? v.username : v.userId)
@@ -231,7 +233,7 @@ export function generateAPIs(store, cellInput, scrollbarX, scrollbarY) {
     removePresences: (arr) => {
       setContext((draftCtx) => {
         if (draftCtx.presences != null) {
-          draftCtx.presences = _.differenceBy(draftCtx.presences, arr, (v) =>
+          draftCtx.presences = differenceBy(draftCtx.presences, arr, (v) =>
             v.userId == null ? v.username : v.userId
           );
         }

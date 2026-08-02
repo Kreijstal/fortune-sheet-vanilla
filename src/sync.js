@@ -1,3 +1,5 @@
+import last from 'lodash.last';
+import sortBy from 'lodash.sortby';
 /**
  * Imperative DOM sync: after every context change we update the DOM overlays
  * that React used to render declaratively (selection boxes, input box,
@@ -5,7 +7,6 @@
  *
  * Ported from @fortune-sheet/react SheetOverlay / SheetTab / InputBox (MIT).
  */
-import _ from 'lodash-es';
 import {
   getSheetIndex,
   getFlowdata,
@@ -120,7 +121,7 @@ function syncSelectionLayer(store, overlay) {
   // focus box (the "active cell" marker)
   const focus = overlay.focusBox;
   if (selections.length > 0) {
-    const selection = _.last(selections);
+    const selection = last(selections);
     Object.assign(focus.style, {
       left: `${selection.left}px`,
       top: `${selection.top}px`,
@@ -312,7 +313,7 @@ export function renderTabs(store, overlay) {
   const ctx = store.ctx;
   const container = overlay.tabContainer;
   container.innerHTML = '';
-  const sorted = _.sortBy(ctx.luckysheetfile, (s) => Number(s.order));
+  const sorted = sortBy(ctx.luckysheetfile, (s) => Number(s.order));
   sorted.forEach((sheet) => {
     if (sheet.hide === 1) return;
     container.appendChild(createTabItem(store, overlay, sheet));

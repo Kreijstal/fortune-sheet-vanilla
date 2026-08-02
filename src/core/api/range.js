@@ -1,4 +1,6 @@
-import _ from 'lodash-es';
+import cloneDeep from 'lodash.clonedeep';
+import isArray from 'lodash.isarray';
+import isPlainObject from 'lodash.isplainobject';
 import { getdatabyselection, getFlowdata, getRangetxt } from '../index.js';
 import { normalizeSelection, rangeValueToHtml } from './../modules/index.js';
 import { setCellFormat, setCellValue } from './cell.js';
@@ -59,7 +61,7 @@ export function getCellsByFlattenRange(ctx, range) {
  */
 export function getSelectionCoordinates(ctx) {
   const result = [];
-  const rangeArr = _.cloneDeep(ctx.luckysheet_select_save);
+  const rangeArr = cloneDeep(ctx.luckysheet_select_save);
   const sheetId = ctx.currentSheetId;
   rangeArr?.forEach((ele) => {
     const rangeText = getRangetxt(ctx, sheetId, {
@@ -125,7 +127,7 @@ export function setCellValuesByRange(
   if (range instanceof Array) {
     throw new Error('setCellValuesByRange does not support multiple ranges');
   }
-  if (!_.isPlainObject(range)) {
+  if (!isPlainObject(range)) {
     throw INVALID_PARAMS;
   }
   const rowCount = range.row[1] - range.row[0] + 1;
@@ -149,10 +151,10 @@ export function setCellValuesByRange(
  * @param {CommonOptions} [options]
  */
 export function setCellFormatByRange(ctx, attr, value, range, options = {}) {
-  if (_.isPlainObject(range)) {
+  if (isPlainObject(range)) {
     range = [range];
   }
-  if (!_.isArray(range)) {
+  if (!isArray(range)) {
     throw INVALID_PARAMS;
   }
   range.forEach((singleRange) => {

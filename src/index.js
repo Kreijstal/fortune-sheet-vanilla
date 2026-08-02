@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep';
 /**
  * fortune-sheet-vanilla: a drop-in, React-free spreadsheet component.
  *
@@ -9,7 +10,6 @@
  *
  * MIT license, same as the upstream project.
  */
-import _ from 'lodash-es';
 import {
   getSheetIndex,
   handleFormulaInput,
@@ -89,7 +89,7 @@ export class FortuneSheet {
     );
 
     // initialize data
-    this.store.init(_.cloneDeep(data));
+    this.store.init(cloneDeep(data));
 
     // size the canvas from the container, then draw
     requestAnimationFrame(() => {
@@ -122,7 +122,7 @@ export class FortuneSheet {
 
   /** Replace the workbook data. */
   setData(data) {
-    this.store.init(_.cloneDeep(data));
+    this.store.init(cloneDeep(data));
     this.sync();
   }
 

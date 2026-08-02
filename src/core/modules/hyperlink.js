@@ -1,4 +1,7 @@
-import _ from 'lodash-es';
+import cloneDeep from 'lodash.clonedeep';
+import forEach from 'lodash.foreach';
+import omit from 'lodash.omit';
+import set from 'lodash.set';
 import { getFlowdata } from './../context.js';
 import { getSheetIndex, isAllowEdit } from './../utils/index.js';
 import { mergeBorder } from './cell.js';
@@ -67,7 +70,7 @@ export function saveHyperlink(ctx, r, c, linkText, linkType, linkAddress) {
   if (sheetIndex != null && flowdata != null && linkType && linkAddress) {
     let cell = flowdata[r][c];
     if (cell == null) cell = {};
-    _.set(ctx.luckysheetfile[sheetIndex], ['hyperlink', `${r}_${c}`], {
+    set(ctx.luckysheetfile[sheetIndex], ['hyperlink', `${r}_${c}`], {
       linkType,
       linkAddress,
     });
@@ -91,11 +94,11 @@ export function removeHyperlink(ctx, r, c) {
   const sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
   const flowdata = getFlowdata(ctx);
   if (flowdata != null && sheetIndex != null) {
-    const hyperlink = _.omit(
+    const hyperlink = omit(
       ctx.luckysheetfile[sheetIndex].hyperlink,
       `${r}_${c}`
     );
-    _.set(ctx.luckysheetfile[sheetIndex], 'hyperlink', hyperlink);
+    set(ctx.luckysheetfile[sheetIndex], 'hyperlink', hyperlink);
     const cell = flowdata[r][c];
     if (cell != null) {
       flowdata[r][c] = { v: cell.v, m: cell.m };
@@ -184,14 +187,14 @@ export function goToLink(
     window.open(linkAddress);
   } else if (linkType === 'sheet') {
     let sheetId;
-    _.forEach(ctx.luckysheetfile, (f) => {
+    forEach(ctx.luckysheetfile, (f) => {
       if (linkAddress === f.name) {
         sheetId = f.id;
       }
     });
     if (sheetId != null) changeSheet(ctx, sheetId);
   } else {
-    const range = _.cloneDeep(getcellrange(ctx, linkAddress));
+    const range = cloneDeep(getcellrange(ctx, linkAddress));
     if (range == null) return;
     const row_pre =
       range.row[0] - 1 === -1 ? 0 : ctx.visibledatarow[range.row[0] - 1];
@@ -249,7 +252,7 @@ export function onRangeSelectionModalMoveStart(ctx, globalCache, e) {
   const left = box.offsetLeft;
   const top = box.offsetTop;
   const initialPosition = { left, top, width, height };
-  _.set(globalCache, 'linkCard.rangeSelectionModal', {
+  set(globalCache, 'linkCard.rangeSelectionModal', {
     cursorMoveStartPosition: {
       x: e.pageX,
       y: e.pageY,
@@ -279,7 +282,7 @@ export function onRangeSelectionModalMove(globalCache, e) {
  * @param {GlobalCache} globalCache
  */
 export function onRangeSelectionModalMoveEnd(globalCache) {
-  _.set(globalCache, 'linkCard.rangeSelectionModal', undefined);
+  set(globalCache, 'linkCard.rangeSelectionModal', undefined);
 }
 
 /**

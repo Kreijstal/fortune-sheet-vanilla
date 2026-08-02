@@ -1,4 +1,7 @@
-import _ from 'lodash-es';
+import assign from 'lodash.assign';
+import cloneDeep from 'lodash.clonedeep';
+import last from 'lodash.last';
+import set from 'lodash.set';
 import { getdatabyselection } from './cell.js';
 import { getFlowdata } from './../context.js';
 import {
@@ -55,7 +58,7 @@ export function onCellsMoveStart(
     row: [row_pre, row, row_index],
     column: [col_pre, col, col_index],
   } = getCellLocationByMouse(ctx, e, scrollbarX, scrollbarY, container);
-  const range = _.last(ctx.luckysheet_select_save);
+  const range = last(ctx.luckysheet_select_save);
   if (range == null) return;
   if (row_index < range.row[0]) {
     [row_index] = range.row;
@@ -223,7 +226,7 @@ export function onCellsMoveEnd(
   if (d == null || ctx.luckysheet_select_save == null) return;
   const last =
     ctx.luckysheet_select_save[ctx.luckysheet_select_save.length - 1];
-  const data = _.cloneDeep(getdatabyselection(ctx, last, ctx.currentSheetId));
+  const data = cloneDeep(getdatabyselection(ctx, last, ctx.currentSheetId));
   const cfg = ctx.config;
   if (cfg.merge == null) {
     cfg.merge = {};
@@ -417,15 +420,15 @@ export function onCellsMoveEnd(
         value = data[r][c];
       }
       if (value?.mc != null) {
-        const mc = _.assign({}, value.mc);
+        const mc = assign({}, value.mc);
         if ('rs' in value.mc) {
-          _.set(offsetMC, `${mc.r}_${mc.c}`, [r + row_s, c + col_s]);
+          set(offsetMC, `${mc.r}_${mc.c}`, [r + row_s, c + col_s]);
           value.mc.r = r + row_s;
           value.mc.c = c + col_s;
-          _.set(cfg.merge, `${r + row_s}_${c + col_s}`, value.mc);
+          set(cfg.merge, `${r + row_s}_${c + col_s}`, value.mc);
         } else {
-          _.set(value.mc, 'r', offsetMC[`${mc.r}_${mc.c}`][0]);
-          _.set(value.mc, 'c', offsetMC[`${mc.r}_${mc.c}`][1]);
+          set(value.mc, 'r', offsetMC[`${mc.r}_${mc.c}`][0]);
+          set(value.mc, 'c', offsetMC[`${mc.r}_${mc.c}`][1]);
         }
       }
       d[r + row_s][c + col_s] = value;
@@ -487,7 +490,7 @@ export function onCellsMoveEnd(
   ctx.luckysheet_select_save = normalizeSelection(ctx, [last]);
   const sheetIndex = getSheetIndex(ctx, ctx.currentSheetId);
   if (sheetIndex != null) {
-    ctx.luckysheetfile[sheetIndex].config = _.assign({}, cfg);
+    ctx.luckysheetfile[sheetIndex].config = assign({}, cfg);
   }
   // const allParam = {
   //   cfg,

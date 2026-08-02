@@ -1,5 +1,6 @@
+import forEach from 'lodash.foreach';
+import isNil from 'lodash.isnil';
 import dayjs from 'dayjs';
-import _ from 'lodash-es';
 import { hasChinaword } from './text.js';
 /**
  * @type {{
@@ -37,7 +38,7 @@ export function valueIsError(value) {
  * @returns {boolean}
  */
 export function isRealNull(val) {
-  return _.isNil(val) || val.toString().replace(/\s/g, '') === '';
+  return isNil(val) || val.toString().replace(/\s/g, '') === '';
 }
 // 是否是纯数字
 /**
@@ -45,7 +46,7 @@ export function isRealNull(val) {
  * @returns {boolean}
  */
 export function isRealNum(val) {
-  if (_.isNil(val) || val.toString().replace(/\s/g, '') === '') {
+  if (isNil(val) || val.toString().replace(/\s/g, '') === '') {
     return false;
   }
   if (typeof val === 'boolean') {
@@ -148,7 +149,7 @@ export function isdatatype(s) {
  */
 export function hasPartMC(ctx, cfg, r1, r2, c1, c2) {
   let ret = false;
-  _.forEach(ctx.config.merge, (mc) => {
+  forEach(ctx.config.merge, (mc) => {
     if (r1 < mc.r) {
       if (r2 >= mc.r && r2 < mc.r + mc.rs - 1) {
         if (c1 >= mc.c && c1 <= mc.c + mc.cs - 1) {

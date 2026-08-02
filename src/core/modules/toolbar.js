@@ -1,4 +1,12 @@
-import _ from 'lodash-es';
+import cloneDeep from 'lodash.clonedeep';
+import forEach from 'lodash.foreach';
+import includes from 'lodash.includes';
+import isNil from 'lodash.isnil';
+import isPlainObject from 'lodash.isplainobject';
+import isUndefined from 'lodash.isundefined';
+import pick from 'lodash.pick';
+import round from 'lodash.round';
+import set from 'lodash.set';
 import { mergeCells } from './merge.js';
 import { getFlowdata } from './../context.js';
 import { getSheetIndex, isAllowEdit } from './../utils/index.js';
@@ -62,18 +70,18 @@ export function updateFormatCell(
   col_ed,
   canvas
 ) {
-  if (_.isNil(d) || _.isNil(attr)) {
+  if (isNil(d) || isNil(attr)) {
     return;
   }
   if (attr === 'ct') {
     for (let r = row_st; r <= row_ed; r += 1) {
-      if (!_.isNil(ctx.config.rowhidden) && !_.isNil(ctx.config.rowhidden[r])) {
+      if (!isNil(ctx.config.rowhidden) && !isNil(ctx.config.rowhidden[r])) {
         continue;
       }
       for (let c = col_st; c <= col_ed; c += 1) {
         const cell = d[r][c];
         let value;
-        if (_.isPlainObject(cell)) {
+        if (isPlainObject(cell)) {
           value = cell?.v;
         } else {
           value = cell;
@@ -105,9 +113,9 @@ export function updateFormatCell(
           // type = "g";
           type = isRealNum(value) ? 'n' : 'g';
         }
-        if (cell && _.isPlainObject(cell)) {
+        if (cell && isPlainObject(cell)) {
           cell.m = `${mask}`;
-          if (_.isNil(cell.ct)) {
+          if (isNil(cell.ct)) {
             cell.ct = {};
           }
           cell.ct.fa = foucsStatus;
@@ -166,12 +174,12 @@ export function updateFormatCell(
       return;
     }
     for (let r = row_st; r <= row_ed; r += 1) {
-      if (!_.isNil(ctx.config.rowhidden) && !_.isNil(ctx.config.rowhidden[r])) {
+      if (!isNil(ctx.config.rowhidden) && !isNil(ctx.config.rowhidden[r])) {
         continue;
       }
       for (let c = col_st; c <= col_ed; c += 1) {
         const value = d[r][c];
-        if (value && _.isPlainObject(value)) {
+        if (value && isPlainObject(value)) {
           // if(attr in inlineStyleAffectAttribute && isInlineStringCell(value)){
           updateInlineStringFormatOutside(value, attr, foucsStatus);
           // }
@@ -190,25 +198,25 @@ export function updateFormatCell(
               cellWidth,
             });
             if (!textInfo) continue;
-            const rowHeight = _.round(textInfo.textHeightAll);
+            const rowHeight = round(textInfo.textHeightAll);
             const currentRowHeight =
               cfg.rowlen?.[r] ||
               ctx.luckysheetfile[sheetIndex].defaultRowHeight ||
               19;
             if (
-              !_.isUndefined(rowHeight) &&
+              !isUndefined(rowHeight) &&
               rowHeight > currentRowHeight &&
               (!cfg.customHeight || cfg.customHeight[r] !== 1)
             ) {
-              if (_.isUndefined(cfg.rowlen)) cfg.rowlen = {};
-              _.set(cfg, `rowlen.${r}`, rowHeight);
+              if (isUndefined(cfg.rowlen)) cfg.rowlen = {};
+              set(cfg, `rowlen.${r}`, rowHeight);
             }
           }
         } else {
           d[r][c] = { v: value };
           d[r][c][attr] = foucsStatus;
         }
-        // if(attr === "tr" && !_.isNil(d[r][c].tb)){
+        // if(attr === "tr" && !isNil(d[r][c].tb)){
         //     d[r][c].tb = "0";
         // }
       }
@@ -242,11 +250,11 @@ export function updateFormat(ctx, $input, d, attr, foucsStatus, canvas) {
       }
     }
   }
-  const cfg = _.cloneDeep(ctx.config);
-  if (_.isNil(cfg.rowlen)) {
+  const cfg = cloneDeep(ctx.config);
+  if (isNil(cfg.rowlen)) {
     cfg.rowlen = {};
   }
-  _.forEach(ctx.luckysheet_select_save, (selection) => {
+  forEach(ctx.luckysheet_select_save, (selection) => {
     const [row_st, row_ed] = selection.row;
     const [col_st, col_ed] = selection.column;
     updateFormatCell(
@@ -287,7 +295,7 @@ function setAttr(ctx, cellInput, attr, value, canvas) {
 }
 function checkNoNullValue(cell) {
   let v = cell;
-  if (_.isPlainObject(v)) {
+  if (isPlainObject(v)) {
     v = v.v;
   }
   if (
@@ -304,7 +312,7 @@ function checkNoNullValue(cell) {
 }
 function checkNoNullValueAll(cell) {
   let v = cell;
-  if (_.isPlainObject(v)) {
+  if (isPlainObject(v)) {
     v = v.v;
   }
   if (!isRealNull(v)) {
@@ -681,7 +689,7 @@ export function autoSelectionFormula(ctx, cellInput, fxInput, formula, cache) {
     }
   }
   if (!ctx.luckysheet_select_save) return;
-  _.forEach(ctx.luckysheet_select_save, (selection) => {
+  forEach(ctx.luckysheet_select_save, (selection) => {
     const [st_r, ed_r] = selection.row;
     const [st_c, ed_c] = selection.column;
     const row_index = selection.row_focus;
@@ -1153,13 +1161,13 @@ export function handleClearFormat(ctx) {
     const [rowSt, rowEd] = selection.row;
     const [colSt, colEd] = selection.column;
     for (let r = rowSt; r <= rowEd; r += 1) {
-      if (!_.isNil(ctx.config.rowhidden) && !_.isNil(ctx.config.rowhidden[r])) {
+      if (!isNil(ctx.config.rowhidden) && !isNil(ctx.config.rowhidden[r])) {
         continue;
       }
       for (let c = colSt; c <= colEd; c += 1) {
         const cell = flowdata[r][c];
         if (!cell) continue;
-        flowdata[r][c] = _.pick(cell, 'v', 'm', 'mc', 'f', 'ct');
+        flowdata[r][c] = pick(cell, 'v', 'm', 'mc', 'f', 'ct');
       }
     }
     // 清空表格样式时，清除边框样式
@@ -1280,16 +1288,16 @@ export function handleBorder(ctx, type, borderColor, borderStyle) {
       borderType: type,
       color,
       style,
-      range: _.cloneDeep(ctx.luckysheet_select_save) || [],
+      range: cloneDeep(ctx.luckysheet_select_save) || [],
     };
     cfg.borderInfo.push(borderInfo);
   } else {
     const rangeList = [];
-    _.forEach(ctx.luckysheet_select_save, (selection) => {
+    forEach(ctx.luckysheet_select_save, (selection) => {
       for (let r = selection.row[0]; r <= selection.row[1]; r += 1) {
         for (let c = selection.column[0]; c <= selection.column[1]; c += 1) {
           const range = `${r}_${c}`;
-          if (_.includes(rangeList, range)) continue;
+          if (includes(rangeList, range)) continue;
           const borderInfo = {
             rangeType: 'range',
             borderType: type,

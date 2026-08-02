@@ -1,4 +1,6 @@
-import _ from 'lodash-es';
+import filter from 'lodash.filter';
+import find from 'lodash.find';
+import set from 'lodash.set';
 import { mergeBorder } from './index.js';
 import { getFlowdata } from './../context.js';
 import { getSheetIndex } from './../utils/index.js';
@@ -52,7 +54,7 @@ export function saveImage(ctx) {
  * @param {Context} ctx
  */
 export function removeActiveImage(ctx) {
-  ctx.insertedImgs = _.filter(
+  ctx.insertedImgs = filter(
     ctx.insertedImgs,
     (image) => image.id !== ctx.activeImg
   );
@@ -139,7 +141,7 @@ export function onImageMoveStart(
   const position = getImagePosition();
   if (position) {
     const { top, left } = position;
-    _.set(globalCache, 'image', {
+    set(globalCache, 'image', {
       cursorMoveStartPosition: {
         x: e.pageX,
         y: e.pageY,
@@ -181,7 +183,7 @@ export function onImageMoveEnd(ctx, globalCache) {
   if (!globalCache.image?.resizingSide) {
     globalCache.image = undefined;
     if (position) {
-      const img = _.find(ctx.insertedImgs, (v) => v.id === ctx.activeImg);
+      const img = find(ctx.insertedImgs, (v) => v.id === ctx.activeImg);
       if (img) {
         img.left = position.left / ctx.zoomRatio;
         img.top = position.top / ctx.zoomRatio;
@@ -198,7 +200,7 @@ export function onImageMoveEnd(ctx, globalCache) {
 export function onImageResizeStart(globalCache, e, resizingSide) {
   const position = getImagePosition();
   if (position) {
-    _.set(globalCache, 'image', {
+    set(globalCache, 'image', {
       cursorMoveStartPosition: { x: e.pageX, y: e.pageY },
       resizingSide,
       imgInitialPosition: position,
@@ -274,7 +276,7 @@ export function onImageResizeEnd(ctx, globalCache) {
     globalCache.image = undefined;
     const position = getImagePosition();
     if (position) {
-      const img = _.find(ctx.insertedImgs, (v) => v.id === ctx.activeImg);
+      const img = find(ctx.insertedImgs, (v) => v.id === ctx.activeImg);
       if (img) {
         img.left = position.left / ctx.zoomRatio;
         img.top = position.top / ctx.zoomRatio;

@@ -1,4 +1,7 @@
-import _ from 'lodash-es';
+import forEach from 'lodash.foreach';
+import isNil from 'lodash.isnil';
+import isNumber from 'lodash.isnumber';
+import isPlainObject from 'lodash.isplainobject';
 import {
   delFunctionGroup,
   dropCellCache,
@@ -22,7 +25,7 @@ import SSF from './../modules/ssf.js';
  * @returns {any}
  */
 export function getCellValue(ctx, row, column, options = {}) {
-  if (!_.isNumber(row) || !_.isNumber(column)) {
+  if (!isNumber(row) || !isNumber(column)) {
     throw new Error('row or column cannot be null or undefined');
   }
   const sheet = getSheet(ctx, options);
@@ -33,7 +36,7 @@ export function getCellValue(ctx, row, column, options = {}) {
   }
   const cellData = targetSheetData[row][column];
   let ret;
-  if (cellData && _.isPlainObject(cellData)) {
+  if (cellData && isPlainObject(cellData)) {
     ret = cellData[type];
     if (type === 'f' && ret != null) {
       ret = functionHTMLGenerate(ret);
@@ -59,7 +62,7 @@ export function getCellValue(ctx, row, column, options = {}) {
  * @param {CommonOptions} [options]
  */
 export function setCellValue(ctx, row, column, value, cellInput, options = {}) {
-  if (!_.isNumber(row) || !_.isNumber(column)) {
+  if (!isNumber(row) || !isNumber(column)) {
     throw new Error('row or column cannot be null or undefined');
   }
   const sheet = getSheet(ctx, options);
@@ -122,7 +125,7 @@ export function setCellValue(ctx, row, column, value, cellInput, options = {}) {
       delFunctionGroup(ctx, row, column);
       setCellValueInternal(ctx, row, column, data, curv); // update text value
     }
-    _.forEach(value, (v, attr) => {
+    forEach(value, (v, attr) => {
       if (attr in formatList) {
         updateFormatCell(ctx, data, attr, v, row, row, column, column); // change range format
       } else {
@@ -149,12 +152,12 @@ export function setCellValue(ctx, row, column, value, cellInput, options = {}) {
  * @param {CommonOptions} [options]
  */
 export function clearCell(ctx, row, column, options = {}) {
-  if (!_.isNumber(row) || !_.isNumber(column)) {
+  if (!isNumber(row) || !isNumber(column)) {
     throw new Error('row or column cannot be null or undefined');
   }
   const sheet = getSheet(ctx, options);
   const cell = sheet.data?.[row]?.[column];
-  if (cell && _.isPlainObject(cell)) {
+  if (cell && isPlainObject(cell)) {
     delete cell.m;
     delete cell.v;
     if (cell.f != null) {
@@ -173,7 +176,7 @@ export function clearCell(ctx, row, column, options = {}) {
  * @param {CommonOptions} [options]
  */
 export function setCellFormat(ctx, row, column, attr, value, options = {}) {
-  if (!_.isNumber(row) || !_.isNumber(column)) {
+  if (!isNumber(row) || !isNumber(column)) {
     throw new Error('row or column cannot be null or undefined');
   }
   if (!attr) {
@@ -191,7 +194,7 @@ export function setCellFormat(ctx, row, column, attr, value, options = {}) {
     throw new Error(
       "'fa' and 't' should be present in value when attr is 'ct'"
     );
-  } else if (attr === 'ct' && !_.isNil(cellData.v)) {
+  } else if (attr === 'ct' && !isNil(cellData.v)) {
     cellData.m = SSF.format(value.fa, cellData.v); // auto generate mask
   }
   if (attr === 'bd') {

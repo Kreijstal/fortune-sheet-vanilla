@@ -1,4 +1,8 @@
-import _ from 'lodash-es';
+import assignIn from 'lodash.assignin';
+import cloneDeep from 'lodash.clonedeep';
+import filter from 'lodash.filter';
+import isNil from 'lodash.isnil';
+import toPairs from 'lodash.topairs';
 import { getFlowdata } from './../context.js';
 import { normalizeSelection } from './selection.js';
 /**
@@ -59,7 +63,7 @@ export function getRangeArr(
   const flowData = getFlowdata(ctx, ctx.currentSheetId);
   for (let r = minR; r <= maxR; r += 1) {
     for (let c = minC; c <= maxC; c += 1) {
-      if (_.isNil(flowData)) break;
+      if (isNil(flowData)) break;
       const cell = flowData[r][c];
       // cellSave中存储的是符合条件的cell坐标，找符合条件的cell坐标
       if (`${r}_${c}` in cellSave) {
@@ -133,8 +137,8 @@ export function getRangeArr(
  * @returns {string | undefined}
  */
 export function getOptionValue(constants) {
-  const tempConstans = _.cloneDeep(constants);
-  const len = _.filter(tempConstans, (o) => o).length;
+  const tempConstans = cloneDeep(constants);
+  const len = filter(tempConstans, (o) => o).length;
   let value;
   if (len === 0) {
     value = '';
@@ -142,7 +146,7 @@ export function getOptionValue(constants) {
     value = 'all';
   } else {
     const arr = [];
-    _.toPairs(constants).forEach((entry) => {
+    toPairs(constants).forEach((entry) => {
       const [k, v] = entry;
       if (v) {
         if (k === 'locationDate') {
@@ -179,12 +183,12 @@ export function getSelectRange(ctx) {
         ctx.luckysheet_select_save[0].column[1])
   ) {
     const flowdata = getFlowdata(ctx, ctx.currentSheetId);
-    if (_.isNil(flowdata)) return [];
+    if (isNil(flowdata)) return [];
     range = [
       { row: [0, flowdata.length - 1], column: [0, flowdata[0].length - 1] },
     ];
   } else {
-    range = _.assignIn([], ctx.luckysheet_select_save);
+    range = assignIn([], ctx.luckysheet_select_save);
   }
   return range;
 }
@@ -217,7 +221,7 @@ export function applyLocation(range, type, value, ctx) {
     // cellSave:记录符合条件的坐标值例，0_1
     const cellSave = {};
     const flowData = getFlowdata(ctx, ctx.currentSheetId);
-    if (_.isNil(flowData)) return [];
+    if (isNil(flowData)) return [];
     for (let s = 0; s < range.length; s += 1) {
       // 选区行起点
       const st_r = range[s].row[0];
