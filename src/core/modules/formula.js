@@ -456,7 +456,7 @@ export function isFunctionRange(
     braces: 0,
   };
   // let luckysheetfile = getluckysheetfile();
-  // let dynamicArray_compute = luckysheetfile[getSheetIndex(Store.currentSheetId)isNil(]["dynamicArray_compute"]) ? {} : luckysheetfile[getSheetIndex(Store.currentSheetId)]["dynamicArray_compute"];
+  // let dynamicArray_compute = luckysheetfile[getSheetIndex(Store.currentSheetId)]["dynamicArray_compute"] == null ? {} : luckysheetfile[getSheetIndex(Store.currentSheetId)]["dynamicArray_compute"];
   // bracket 0为运算符括号、1为函数括号
   const cal1 = [];
   const cal2 = [];
@@ -681,7 +681,7 @@ export function isFunctionRange(
       let endstr = '';
       let str_nb = str.trim().replace(/'/g, "\\'");
       if (iscelldata(str_nb) && str_nb.substring(0, 1) !== ':') {
-        // endstr = "luckysheet_getcelldata('" + trim(str) + "')";
+        // endstr = "luckysheet_getcelldata('" + str.trim() + "')";
         endstr = `luckysheet_getcelldata('${str_nb}')`;
       } else if (str_nb.substring(0, 1) === ':') {
         str_nb = str_nb.substring(1);
@@ -871,7 +871,7 @@ export function insertUpdateFunctionGroup(ctx, r, c, id, calcChainSet) {
     id = ctx.currentSheetId;
   }
   // let func = getcellFormula(ctx, r, c, id);
-  // if (isNil(func) || func.length==0) {
+  // if (func == null || func.length==0) {
   //     this.delFunctionGroup(r, c, index);
   //     return;
   // }
@@ -1449,7 +1449,7 @@ function functionRange(ctx, obj, v, vp) {
 function searchFunction(ctx, searchtxt) {
   const { functionlist } = locale(ctx);
   // // 这里的逻辑在原项目上做了修改
-  // if (isNil($editer)) {
+  // if ($editer == null) {
   //   return;
   // }
   // const inputContent = $editer.innerText.toUpperCase();

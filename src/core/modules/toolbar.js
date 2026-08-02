@@ -1,9 +1,7 @@
 import cloneDeep from 'lodash.clonedeep';
 import forEach from 'lodash.foreach';
 import includes from 'lodash.includes';
-import isNil from 'lodash.isnil';
 import isPlainObject from 'lodash.isplainobject';
-import isUndefined from 'lodash.isundefined';
 import pick from 'lodash.pick';
 import round from 'lodash.round';
 import set from 'lodash.set';
@@ -70,12 +68,12 @@ export function updateFormatCell(
   col_ed,
   canvas
 ) {
-  if (isNil(d) || isNil(attr)) {
+  if (d == null || attr == null) {
     return;
   }
   if (attr === 'ct') {
     for (let r = row_st; r <= row_ed; r += 1) {
-      if (!isNil(ctx.config.rowhidden) && !isNil(ctx.config.rowhidden[r])) {
+      if (ctx.config.rowhidden != null && ctx.config.rowhidden[r] != null) {
         continue;
       }
       for (let c = col_st; c <= col_ed; c += 1) {
@@ -115,7 +113,7 @@ export function updateFormatCell(
         }
         if (cell && isPlainObject(cell)) {
           cell.m = `${mask}`;
-          if (isNil(cell.ct)) {
+          if (cell.ct == null) {
             cell.ct = {};
           }
           cell.ct.fa = foucsStatus;
@@ -174,7 +172,7 @@ export function updateFormatCell(
       return;
     }
     for (let r = row_st; r <= row_ed; r += 1) {
-      if (!isNil(ctx.config.rowhidden) && !isNil(ctx.config.rowhidden[r])) {
+      if (ctx.config.rowhidden != null && ctx.config.rowhidden[r] != null) {
         continue;
       }
       for (let c = col_st; c <= col_ed; c += 1) {
@@ -204,11 +202,11 @@ export function updateFormatCell(
               ctx.luckysheetfile[sheetIndex].defaultRowHeight ||
               19;
             if (
-              !isUndefined(rowHeight) &&
+              rowHeight !== undefined &&
               rowHeight > currentRowHeight &&
               (!cfg.customHeight || cfg.customHeight[r] !== 1)
             ) {
-              if (isUndefined(cfg.rowlen)) cfg.rowlen = {};
+              if (cfg.rowlen === undefined) cfg.rowlen = {};
               set(cfg, `rowlen.${r}`, rowHeight);
             }
           }
@@ -216,7 +214,7 @@ export function updateFormatCell(
           d[r][c] = { v: value };
           d[r][c][attr] = foucsStatus;
         }
-        // if(attr === "tr" && !isNil(d[r][c].tb)){
+        // if(attr === "tr" && d[r][c].tb != null){
         //     d[r][c].tb = "0";
         // }
       }
@@ -251,7 +249,7 @@ export function updateFormat(ctx, $input, d, attr, foucsStatus, canvas) {
     }
   }
   const cfg = cloneDeep(ctx.config);
-  if (isNil(cfg.rowlen)) {
+  if (cfg.rowlen == null) {
     cfg.rowlen = {};
   }
   forEach(ctx.luckysheet_select_save, (selection) => {
@@ -1161,7 +1159,7 @@ export function handleClearFormat(ctx) {
     const [rowSt, rowEd] = selection.row;
     const [colSt, colEd] = selection.column;
     for (let r = rowSt; r <= rowEd; r += 1) {
-      if (!isNil(ctx.config.rowhidden) && !isNil(ctx.config.rowhidden[r])) {
+      if (ctx.config.rowhidden != null && ctx.config.rowhidden[r] != null) {
         continue;
       }
       for (let c = colSt; c <= colEd; c += 1) {
@@ -1297,7 +1295,7 @@ export function handleBorder(ctx, type, borderColor, borderStyle) {
       for (let r = selection.row[0]; r <= selection.row[1]; r += 1) {
         for (let c = selection.column[0]; c <= selection.column[1]; c += 1) {
           const range = `${r}_${c}`;
-          if (includes(rangeList, range)) continue;
+          if (rangeList.includes( range)) continue;
           const borderInfo = {
             rangeType: 'range',
             borderType: type,

@@ -5,7 +5,6 @@ import keys from 'lodash.keys';
 import omit from 'lodash.omit';
 import reduce from 'lodash.reduce';
 import size from 'lodash.size';
-import union from 'lodash.union';
 import { locale } from './../locale/index.js';
 import { getFlowdata } from './../context.js';
 import { getSheetIndex, isAllowEdit, rgbToHex } from './../utils/index.js';
@@ -198,7 +197,7 @@ export function clearFilter(ctx) {
     (pre, curr) => assign(pre, curr?.rowhidden || {}),
     {}
   );
-  ctx.config.rowhidden = omit(ctx.config.rowhidden, keys(hiddenRows));
+  ctx.config.rowhidden = omit(ctx.config.rowhidden, Object.keys(hiddenRows));
   ctx.luckysheet_filter_save = undefined;
   ctx.filterOptions = undefined;
   ctx.filterContextMenu = undefined;
@@ -407,7 +406,7 @@ export function getFilterColumnValues(ctx, col, startRow, endRow, startCol) {
       dayValue.dateValues.push(dateStr);
       dateRowMap[dateStr] = (dateRowMap[dateStr] || []).concat(r);
       if (r in hiddenRows) {
-        datesUncheck = union(datesUncheck, [dateStr]);
+        datesUncheck = [...new Set([...datesUncheck, ... [dateStr]])];
       }
     } else {
       let v;
@@ -441,7 +440,7 @@ export function getFilterColumnValues(ctx, col, startRow, endRow, startCol) {
         flattenValues.push(text);
       }
       if (r in hiddenRows) {
-        valuesUncheck = union(valuesUncheck, [key]);
+        valuesUncheck = [...new Set([...valuesUncheck, ... [key]])];
       }
       valueRowMap[key] = (valueRowMap[key] || []).concat(r);
     }

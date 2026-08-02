@@ -2,7 +2,6 @@ import clone from 'lodash.clone';
 import cloneDeep from 'lodash.clonedeep';
 import forEach from 'lodash.foreach';
 import isEmpty from 'lodash.isempty';
-import isNil from 'lodash.isnil';
 import size from 'lodash.size';
 import { getSheetIndex } from './../utils/index.js';
 import { getcellFormula } from './cell.js';
@@ -155,7 +154,7 @@ export function insertRowCol(ctx, op, changeSelection = true) {
     SheetIndex += 1
   ) {
     if (
-      isNil(ctx.luckysheetfile[SheetIndex].calcChain) ||
+      ctx.luckysheetfile[SheetIndex].calcChain == null ||
       ctx.luckysheetfile.length === 0
     ) {
       continue;
@@ -1149,7 +1148,7 @@ export function deleteRowCol(ctx, op) {
     SheetIndex += 1
   ) {
     if (
-      isNil(ctx.luckysheetfile[SheetIndex].calcChain) ||
+      ctx.luckysheetfile[SheetIndex].calcChain == null ||
       ctx.luckysheetfile.length === 0
     ) {
       continue;

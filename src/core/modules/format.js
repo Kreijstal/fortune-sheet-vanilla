@@ -340,7 +340,7 @@ export function valueShowEs(r, c, d) {
     value = getCellValue(r, c, d, 'v');
   } else {
     if (!Number.isNaN(fuzzynum(value))) {
-      if (isString(value) && value.indexOf('%') > -1) {
+      if (typeof value === 'string' && value.indexOf('%') > -1) {
       } else {
         value = getCellValue(r, c, d, 'v');
       }

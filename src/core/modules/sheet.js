@@ -1,6 +1,4 @@
 import cloneDeep from 'lodash.clonedeep';
-import isNil from 'lodash.isnil';
-import isUndefined from 'lodash.isundefined';
 import sortBy from 'lodash.sortby';
 import times from 'lodash.times';
 import { v4 as uuidv4 } from 'uuid';
@@ -106,7 +104,7 @@ export function addSheet(
   const id = newSheetID ?? settings?.generateSheetId();
   const sheetname =
     sheetName || generateRandomSheetName(ctx.luckysheetfile, isPivotTable, ctx);
-  if (!isNil(sheetData)) {
+  if (sheetData != null) {
     delete sheetData.data;
     ctx.luckysheetfile.forEach((sheet) => {
       sheet.order =
@@ -114,7 +112,7 @@ export function addSheet(
       return sheet;
     });
   }
-  const sheetconfig = isNil(sheetData)
+  const sheetconfig = sheetData == null
     ? {
         name: sheetName === undefined ? sheetname : sheetName,
         status: 0,
@@ -175,7 +173,7 @@ export function deleteSheet(ctx, id) {
   // server.saveParam("shd", null, { deleIndex: index });
   if (id === ctx.currentSheetId) {
     const shownSheets = cloneDeep(ctx.luckysheetfile).filter(
-      (singleSheet) => isUndefined(singleSheet.hide) || singleSheet.hide !== 1
+      (singleSheet) => singleSheet.hide === undefined || singleSheet.hide !== 1
     );
     const orderSheets = sortBy(shownSheets, (sheet) => sheet.order);
     ctx.currentSheetId = orderSheets?.[0]?.id;

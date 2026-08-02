@@ -2,7 +2,6 @@ import clone from 'lodash.clone';
 import cloneDeep from 'lodash.clonedeep';
 import includes from 'lodash.includes';
 import isEmpty from 'lodash.isempty';
-import isNil from 'lodash.isnil';
 import { hideCRCount, removeActiveImage } from '../index.js';
 import { getFlowdata } from './../context.js';
 import { updateCell, cancelNormalSelected } from './../modules/cell.js';
@@ -35,7 +34,7 @@ export function handleGlobalEnter(ctx, cellInput, e, canvas) {
   if ((e.altKey || e.metaKey) && ctx.luckysheetCellUpdate.length > 0) {
     const last =
       ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1];
-    if (last && !isNil(last.row_focus) && !isNil(last.column_focus)) {
+    if (last && last.row_focus != null && last.column_focus != null) {
       // const row_index = last.row_focus;
       // const col_index = last.column_focus;
       // enterKeyControll(flowdata?.[row_index]?.[col_index]);
@@ -121,9 +120,9 @@ function moveToEdge(
   let c = colDelta === 0 ? curr : selectedLimit;
   while (r >= 0 && c >= 0 && (colDelta === 0 ? r : c) < maxRowCol - 1) {
     if (
-      !isNil(sheetData?.[r]?.[c]?.v) &&
-      (isNil(sheetData?.[r - rowDelta]?.[c - colDelta]?.v) ||
-        isNil(sheetData?.[r + rowDelta]?.[c + colDelta]?.v))
+      sheetData?.[r]?.[c]?.v != null &&
+      (sheetData?.[r - rowDelta]?.[c - colDelta]?.v == null ||
+        sheetData?.[r + rowDelta]?.[c + colDelta]?.v == null)
     ) {
       break;
     } else {
@@ -136,7 +135,7 @@ function moveToEdge(
 function handleControlPlusArrowKey(ctx, e, shiftPressed) {
   if (ctx.luckysheetCellUpdate.length > 0) return;
   const idx = getSheetIndex(ctx, ctx.currentSheetId);
-  if (isNil(idx)) return;
+  if (idx == null) return;
   const file = ctx.luckysheetfile[idx];
   if (!file || !file.row || !file.column) return;
   const maxRow = file.row;
@@ -147,7 +146,7 @@ function handleControlPlusArrowKey(ctx, e, shiftPressed) {
   if (!last) return;
   const currR = last.row_focus;
   const currC = last.column_focus;
-  if (isNil(currR) || isNil(currC)) return;
+  if (currR == null || currC == null) return;
   const startR = last.row[0];
   const endR = last.row[1];
   const startC = last.column[0];
@@ -283,7 +282,7 @@ export function handleWithCtrlOrMetaKey(
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
       // Ctrl + Shift + 方向键  调整选区
       handleControlPlusArrowKey(ctx, e, true);
-    } else if (includes([';', '"', ':', "'"], e.key)) {
+    } else if ([';', '"', ':', "'"].includes(e.key)) {
       const last =
         ctx.luckysheet_select_save?.[ctx.luckysheet_select_save.length - 1];
       if (!last) return;

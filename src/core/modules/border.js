@@ -1,5 +1,4 @@
 import isEmpty from 'lodash.isempty';
-import isNil from 'lodash.isnil';
 import isPlainObject from 'lodash.isplainobject';
 import { getFlowdata } from './../context.js';
 import { getSheetIndex } from './../utils/index.js';
@@ -30,7 +29,7 @@ export function getBorderInfoComputeRange(
     data = flowdata;
   } else {
     const index = getSheetIndex(ctx, sheetId);
-    if (!isNil(index)) {
+    if (index != null) {
       cfg = ctx.luckysheetfile[index].config;
       data = ctx.luckysheetfile[index].data;
     } else {
@@ -67,7 +66,7 @@ export function getBorderInfoComputeRange(
         if (borderType === 'border-slash') {
           const bd_r = borderRange[0].row_focus;
           const bd_c = borderRange[0].column_focus;
-          if (!isNil(cfg.rowhidden) && !isNil(cfg.rowhidden[bd_r])) {
+          if (cfg.rowhidden != null && cfg.rowhidden[bd_r] != null) {
             continue;
           }
           if (bd_c < dataset_col_st || bd_c > dataset_col_ed) continue;
@@ -82,7 +81,7 @@ export function getBorderInfoComputeRange(
         }
         if (borderType === 'border-left') {
           for (let bd_r = bd_r1; bd_r <= bd_r2; bd_r += 1) {
-            if (!isNil(cfg.rowhidden) && !isNil(cfg.rowhidden[bd_r])) {
+            if (cfg.rowhidden != null && cfg.rowhidden[bd_r] != null) {
               continue;
             }
             if (borderInfoCompute[`${bd_r}_${bd_c1}`] === undefined) {
@@ -94,7 +93,7 @@ export function getBorderInfoComputeRange(
             };
             const bd_c_left = bd_c1 - 1;
             if (bd_c_left >= 0 && borderInfoCompute[`${bd_r}_${bd_c_left}`]) {
-              if (!isNil(data[bd_r]?.[bd_c_left]?.mc)) {
+              if (data[bd_r]?.[bd_c_left]?.mc != null) {
                 const cell_left = data[bd_r][bd_c_left];
                 const mc =
                   cfg.merge?.[`${cell_left?.mc?.r}_${cell_left?.mc?.c}`];
@@ -126,7 +125,7 @@ export function getBorderInfoComputeRange(
           }
         } else if (borderType === 'border-right') {
           for (let bd_r = bd_r1; bd_r <= bd_r2; bd_r += 1) {
-            if (!isNil(cfg.rowhidden) && !isNil(cfg.rowhidden[bd_r])) {
+            if (cfg.rowhidden != null && cfg.rowhidden[bd_r] != null) {
               continue;
             }
             if (borderInfoCompute[`${bd_r}_${bd_c2}`] === undefined) {
@@ -141,7 +140,7 @@ export function getBorderInfoComputeRange(
               bd_c_right < data[0].length &&
               borderInfoCompute[`${bd_r}_${bd_c_right}`]
             ) {
-              if (!isNil(data[bd_r]?.[bd_c_right]?.mc)) {
+              if (data[bd_r]?.[bd_c_right]?.mc != null) {
                 const cell_right = data[bd_r][bd_c_right];
                 const mc =
                   cfg.merge?.[`${cell_right?.mc?.r}_${cell_right?.mc?.c}`];
@@ -172,7 +171,7 @@ export function getBorderInfoComputeRange(
             });
           }
         } else if (borderType === 'border-top') {
-          if (!isNil(cfg.rowhidden) && !isNil(cfg.rowhidden[bd_r1])) {
+          if (cfg.rowhidden != null && cfg.rowhidden[bd_r1] != null) {
             continue;
           }
           for (let bd_c = bd_c1; bd_c <= bd_c2; bd_c += 1) {
@@ -185,7 +184,7 @@ export function getBorderInfoComputeRange(
             };
             const bd_r_top = bd_r1 - 1;
             if (bd_r_top >= 0 && borderInfoCompute[`${bd_r_top}_${bd_c}`]) {
-              if (!isNil(data[bd_r_top]?.[bd_c]?.mc)) {
+              if (data[bd_r_top]?.[bd_c]?.mc != null) {
                 const cell_top = data[bd_r_top][bd_c];
                 const mc = cfg.merge?.[`${cell_top?.mc?.r}_${cell_top?.mc?.c}`];
                 if (mc && mc.r + mc.rs - 1 === bd_r_top) {
@@ -215,7 +214,7 @@ export function getBorderInfoComputeRange(
             });
           }
         } else if (borderType === 'border-bottom') {
-          if (!isNil(cfg.rowhidden) && !isNil(cfg.rowhidden[bd_r2])) {
+          if (cfg.rowhidden != null && cfg.rowhidden[bd_r2] != null) {
             continue;
           }
           for (let bd_c = bd_c1; bd_c <= bd_c2; bd_c += 1) {
@@ -231,7 +230,7 @@ export function getBorderInfoComputeRange(
               bd_r_bottom < data.length &&
               borderInfoCompute[`${bd_r_bottom}_${bd_c}`]
             ) {
-              if (!isNil(data[bd_r_bottom]?.[bd_c]?.mc)) {
+              if (data[bd_r_bottom]?.[bd_c]?.mc != null) {
                 const cell_bottom = data[bd_r_bottom][bd_c];
                 const mc =
                   cfg.merge?.[`${cell_bottom?.mc?.r}_${cell_bottom?.mc?.c}`];
@@ -263,11 +262,11 @@ export function getBorderInfoComputeRange(
           }
         } else if (borderType === 'border-all') {
           for (let bd_r = bd_r1; bd_r <= bd_r2; bd_r += 1) {
-            if (!isNil(cfg.rowhidden) && !isNil(cfg.rowhidden[bd_r])) {
+            if (cfg.rowhidden != null && cfg.rowhidden[bd_r] != null) {
               continue;
             }
             for (let bd_c = bd_c1; bd_c <= bd_c2; bd_c += 1) {
-              if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+              if (data[bd_r]?.[bd_c]?.mc != null) {
                 const cell = data[bd_r][bd_c];
                 const mc = cfg.merge?.[`${cell?.mc?.r}_${cell?.mc?.c}`];
                 if (mc?.r === bd_r) {
@@ -330,7 +329,7 @@ export function getBorderInfoComputeRange(
               if (bd_r === bd_r1) {
                 const bd_r_top = bd_r1 - 1;
                 if (bd_r_top >= 0 && borderInfoCompute[`${bd_r_top}_${bd_c}`]) {
-                  if (!isNil(data[bd_r_top]?.[bd_c]?.mc)) {
+                  if (data[bd_r_top]?.[bd_c]?.mc != null) {
                     const cell_top = data[bd_r_top][bd_c];
                     const mc =
                       cfg.merge?.[`${cell_top?.mc?.r}_${cell_top?.mc?.c}`];
@@ -354,7 +353,7 @@ export function getBorderInfoComputeRange(
                   bd_r_bottom < data.length &&
                   borderInfoCompute[`${bd_r_bottom}_${bd_c}`]
                 ) {
-                  if (!isNil(data[bd_r_bottom]?.[bd_c]?.mc)) {
+                  if (data[bd_r_bottom]?.[bd_c]?.mc != null) {
                     const cell_bottom = data[bd_r_bottom][bd_c];
                     const mc =
                       cfg.merge?.[
@@ -380,7 +379,7 @@ export function getBorderInfoComputeRange(
                   bd_c_left >= 0 &&
                   borderInfoCompute[`${bd_r}_${bd_c_left}`]
                 ) {
-                  if (!isNil(data[bd_r]?.[bd_c_left]?.mc)) {
+                  if (data[bd_r]?.[bd_c_left]?.mc != null) {
                     const cell_left = data[bd_r][bd_c_left];
                     const mc =
                       cfg.merge?.[`${cell_left?.mc?.r}_${cell_left?.mc?.c}`];
@@ -404,7 +403,7 @@ export function getBorderInfoComputeRange(
                   bd_c_right < data[0].length &&
                   borderInfoCompute[`${bd_r}_${bd_c_right}`]
                 ) {
-                  if (!isNil(data[bd_r]?.[bd_c_right]?.mc)) {
+                  if (data[bd_r]?.[bd_c_right]?.mc != null) {
                     const cell_right = data[bd_r][bd_c_right];
                     const mc =
                       cfg.merge?.[`${cell_right?.mc?.r}_${cell_right?.mc?.c}`];
@@ -426,7 +425,7 @@ export function getBorderInfoComputeRange(
           }
         } else if (borderType === 'border-outside') {
           for (let bd_r = bd_r1; bd_r <= bd_r2; bd_r += 1) {
-            if (!isNil(cfg.rowhidden) && !isNil(cfg.rowhidden[bd_r])) {
+            if (cfg.rowhidden != null && cfg.rowhidden[bd_r] != null) {
               continue;
             }
             for (let bd_c = bd_c1; bd_c <= bd_c2; bd_c += 1) {
@@ -448,7 +447,7 @@ export function getBorderInfoComputeRange(
                 };
                 const bd_r_top = bd_r1 - 1;
                 if (bd_r_top >= 0 && borderInfoCompute[`${bd_r_top}_${bd_c}`]) {
-                  if (!isNil(data[bd_r_top]?.[bd_c]?.mc)) {
+                  if (data[bd_r_top]?.[bd_c]?.mc != null) {
                     const cell_top = data[bd_r_top][bd_c];
                     const mc =
                       cfg.merge?.[`${cell_top?.mc?.r}_${cell_top?.mc?.c}`];
@@ -479,7 +478,7 @@ export function getBorderInfoComputeRange(
                   bd_r_bottom < data.length &&
                   borderInfoCompute[`${bd_r_bottom}_${bd_c}`]
                 ) {
-                  if (!isNil(data[bd_r_bottom]?.[bd_c]?.mc)) {
+                  if (data[bd_r_bottom]?.[bd_c]?.mc != null) {
                     const cell_bottom = data[bd_r_bottom][bd_c];
                     const mc =
                       cfg.merge?.[
@@ -512,7 +511,7 @@ export function getBorderInfoComputeRange(
                   bd_c_left >= 0 &&
                   borderInfoCompute[`${bd_r}_${bd_c_left}`]
                 ) {
-                  if (!isNil(data[bd_r]?.[bd_c_left]?.mc)) {
+                  if (data[bd_r]?.[bd_c_left]?.mc != null) {
                     const cell_left = data[bd_r][bd_c_left];
                     const mc =
                       cfg.merge?.[`${cell_left?.mc?.r}_${cell_left?.mc?.c}`];
@@ -543,7 +542,7 @@ export function getBorderInfoComputeRange(
                   bd_c_right < data[0].length &&
                   borderInfoCompute[`${bd_r}_${bd_c_right}`]
                 ) {
-                  if (!isNil(data[bd_r]?.[bd_c_right]?.mc)) {
+                  if (data[bd_r]?.[bd_c_right]?.mc != null) {
                     const cell_right = data[bd_r][bd_c_right];
                     const mc =
                       cfg.merge?.[`${cell_right?.mc?.r}_${cell_right?.mc?.c}`];
@@ -565,12 +564,12 @@ export function getBorderInfoComputeRange(
           }
         } else if (borderType === 'border-inside') {
           for (let bd_r = bd_r1; bd_r <= bd_r2; bd_r += 1) {
-            if (!isNil(cfg.rowhidden) && !isNil(cfg.rowhidden[bd_r])) {
+            if (cfg.rowhidden != null && cfg.rowhidden[bd_r] != null) {
               continue;
             }
             for (let bd_c = bd_c1; bd_c <= bd_c2; bd_c += 1) {
               if (bd_r === bd_r1 && bd_c === bd_c1) {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                 } else {
                   if (borderInfoCompute[`${bd_r}_${bd_c}`] === undefined) {
                     borderInfoCompute[`${bd_r}_${bd_c}`] = {};
@@ -589,7 +588,7 @@ export function getBorderInfoComputeRange(
                   }
                 }
               } else if (bd_r === bd_r2 && bd_c === bd_c1) {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                 } else {
                   if (borderInfoCompute[`${bd_r}_${bd_c}`] === undefined) {
                     borderInfoCompute[`${bd_r}_${bd_c}`] = {};
@@ -606,7 +605,7 @@ export function getBorderInfoComputeRange(
                   };
                 }
               } else if (bd_r === bd_r1 && bd_c === bd_c2) {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                 } else {
                   if (borderInfoCompute[`${bd_r}_${bd_c}`] === undefined) {
                     borderInfoCompute[`${bd_r}_${bd_c}`] = {};
@@ -623,7 +622,7 @@ export function getBorderInfoComputeRange(
                   }
                 }
               } else if (bd_r === bd_r2 && bd_c === bd_c2) {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                 } else {
                   if (borderInfoCompute[`${bd_r}_${bd_c}`] === undefined) {
                     borderInfoCompute[`${bd_r}_${bd_c}`] = {};
@@ -638,7 +637,7 @@ export function getBorderInfoComputeRange(
                   };
                 }
               } else if (bd_r === bd_r1) {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                   const cell = data[bd_r][bd_c];
                   const mc = cfg.merge?.[`${cell?.mc?.r}_${cell?.mc?.c}`];
                   if (mc?.c === bd_c) {
@@ -682,7 +681,7 @@ export function getBorderInfoComputeRange(
                   }
                 }
               } else if (bd_r === bd_r2) {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                   const cell = data[bd_r][bd_c];
                   const mc = cfg.merge?.[`${cell?.mc?.r}_${cell?.mc?.c}`];
                   if (mc?.c === bd_c) {
@@ -724,7 +723,7 @@ export function getBorderInfoComputeRange(
                   };
                 }
               } else if (bd_c === bd_c1) {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                   const cell = data[bd_r][bd_c];
                   const mc = cfg.merge?.[`${cell?.mc?.r}_${cell?.mc?.c}`];
                   if (mc?.r === bd_r) {
@@ -768,7 +767,7 @@ export function getBorderInfoComputeRange(
                   }
                 }
               } else if (bd_c === bd_c2) {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                   const cell = data[bd_r][bd_c];
                   const mc = cfg.merge?.[`${cell?.mc?.r}_${cell?.mc?.c}`];
                   if (mc?.r === bd_r) {
@@ -810,7 +809,7 @@ export function getBorderInfoComputeRange(
                   }
                 }
               } else {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                   const cell = data[bd_r][bd_c];
                   const mc = cfg.merge?.[`${cell?.mc?.r}_${cell?.mc?.c}`];
                   if (mc?.r === bd_r) {
@@ -881,12 +880,12 @@ export function getBorderInfoComputeRange(
           }
         } else if (borderType === 'border-horizontal') {
           for (let bd_r = bd_r1; bd_r <= bd_r2; bd_r += 1) {
-            if (!isNil(cfg.rowhidden) && !isNil(cfg.rowhidden[bd_r])) {
+            if (cfg.rowhidden != null && cfg.rowhidden[bd_r] != null) {
               continue;
             }
             for (let bd_c = bd_c1; bd_c <= bd_c2; bd_c += 1) {
               if (bd_r === bd_r1) {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                 } else {
                   if (borderInfoCompute[`${bd_r}_${bd_c}`] === undefined) {
                     borderInfoCompute[`${bd_r}_${bd_c}`] = {};
@@ -897,7 +896,7 @@ export function getBorderInfoComputeRange(
                   };
                 }
               } else if (bd_r === bd_r2) {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                 } else {
                   if (borderInfoCompute[`${bd_r}_${bd_c}`] === undefined) {
                     borderInfoCompute[`${bd_r}_${bd_c}`] = {};
@@ -908,7 +907,7 @@ export function getBorderInfoComputeRange(
                   };
                 }
               } else {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                   const cell = data[bd_r][bd_c];
                   const mc = cfg.merge?.[`${cell?.mc?.r}_${cell?.mc?.c}`];
                   if (mc?.r === bd_r) {
@@ -946,12 +945,12 @@ export function getBorderInfoComputeRange(
           }
         } else if (borderType === 'border-vertical') {
           for (let bd_r = bd_r1; bd_r <= bd_r2; bd_r += 1) {
-            if (!isNil(cfg.rowhidden) && !isNil(cfg.rowhidden[bd_r])) {
+            if (cfg.rowhidden != null && cfg.rowhidden[bd_r] != null) {
               continue;
             }
             for (let bd_c = bd_c1; bd_c <= bd_c2; bd_c += 1) {
               if (bd_c === bd_c1) {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                 } else {
                   if (borderInfoCompute[`${bd_r}_${bd_c}`] === undefined) {
                     borderInfoCompute[`${bd_r}_${bd_c}`] = {};
@@ -962,7 +961,7 @@ export function getBorderInfoComputeRange(
                   };
                 }
               } else if (bd_c === bd_c2) {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                 } else {
                   if (borderInfoCompute[`${bd_r}_${bd_c}`] === undefined) {
                     borderInfoCompute[`${bd_r}_${bd_c}`] = {};
@@ -973,7 +972,7 @@ export function getBorderInfoComputeRange(
                   };
                 }
               } else {
-                if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+                if (data[bd_r]?.[bd_c]?.mc != null) {
                   const cell = data[bd_r][bd_c];
                   const mc = cfg.merge?.[`${cell?.mc?.r}_${cell?.mc?.c}`];
                   if (mc?.c === bd_c) {
@@ -1011,11 +1010,11 @@ export function getBorderInfoComputeRange(
           }
         } else if (borderType === 'border-none') {
           for (let bd_r = bd_r1; bd_r <= bd_r2; bd_r += 1) {
-            if (!isNil(cfg.rowhidden) && !isNil(cfg.rowhidden[bd_r])) {
+            if (cfg.rowhidden != null && cfg.rowhidden[bd_r] != null) {
               continue;
             }
             for (let bd_c = bd_c1; bd_c <= bd_c2; bd_c += 1) {
-              if (!isNil(borderInfoCompute[`${bd_r}_${bd_c}`])) {
+              if (borderInfoCompute[`${bd_r}_${bd_c}`] != null) {
                 delete borderInfoCompute[`${bd_r}_${bd_c}`];
               }
               if (bd_r === bd_r1) {
@@ -1067,22 +1066,22 @@ export function getBorderInfoComputeRange(
       ) {
         continue;
       }
-      if (!isNil(cfg.rowhidden) && !isNil(cfg.rowhidden[bd_r])) {
+      if (cfg.rowhidden != null && cfg.rowhidden[bd_r] != null) {
         continue;
       }
       if (
-        !isNil(value.l) ||
-        !isNil(value.r) ||
-        !isNil(value.t) ||
-        !isNil(value.b)
+        value.l != null ||
+        value.r != null ||
+        value.t != null ||
+        value.b != null
       ) {
         if (borderInfoCompute[`${bd_r}_${bd_c}`] === undefined) {
           borderInfoCompute[`${bd_r}_${bd_c}`] = {};
         }
-        if (!isNil(data[bd_r]?.[bd_c]?.mc)) {
+        if (data[bd_r]?.[bd_c]?.mc != null) {
           const cell = data[bd_r][bd_c];
           const mc = cfg.merge?.[`${cell?.mc?.r}_${cell?.mc?.c}`];
-          if (!isNil(value.l) && bd_c === mc?.c) {
+          if (value.l != null && bd_c === mc?.c) {
             // 左边框
             borderInfoCompute[`${bd_r}_${bd_c}`].l = {
               color: value.l.color,
@@ -1090,7 +1089,7 @@ export function getBorderInfoComputeRange(
             };
             const bd_c_left = bd_c - 1;
             if (bd_c_left >= 0 && borderInfoCompute[`${bd_r}_${bd_c_left}`]) {
-              if (!isNil(data[bd_r]?.[bd_c_left]?.mc)) {
+              if (data[bd_r]?.[bd_c_left]?.mc != null) {
                 const cell_left = data[bd_r][bd_c_left];
                 const mc_l =
                   cfg.merge?.[`${cell_left?.mc?.r}_${cell_left?.mc?.c}`];
@@ -1110,7 +1109,7 @@ export function getBorderInfoComputeRange(
           } else {
             borderInfoCompute[`${bd_r}_${bd_c}`].l = null;
           }
-          if (!isNil(value.r) && mc && bd_c === mc.c + mc.cs - 1) {
+          if (value.r != null && mc && bd_c === mc.c + mc.cs - 1) {
             // 右边框
             borderInfoCompute[`${bd_r}_${bd_c}`].r = {
               color: value.r.color,
@@ -1121,7 +1120,7 @@ export function getBorderInfoComputeRange(
               bd_c_right < data[0].length &&
               borderInfoCompute[`${bd_r}_${bd_c_right}`]
             ) {
-              if (!isNil(data[bd_r]?.[bd_c_right]?.mc)) {
+              if (data[bd_r]?.[bd_c_right]?.mc != null) {
                 const cell_right = data[bd_r][bd_c_right];
                 const mc_r =
                   cfg.merge?.[`${cell_right?.mc?.r}_${cell_right?.mc?.c}`];
@@ -1141,7 +1140,7 @@ export function getBorderInfoComputeRange(
           } else {
             borderInfoCompute[`${bd_r}_${bd_c}`].r = null;
           }
-          if (!isNil(value.t) && bd_r === mc?.r) {
+          if (value.t != null && bd_r === mc?.r) {
             // 上边框
             borderInfoCompute[`${bd_r}_${bd_c}`].t = {
               color: value.t.color,
@@ -1149,7 +1148,7 @@ export function getBorderInfoComputeRange(
             };
             const bd_r_top = bd_r - 1;
             if (bd_r_top >= 0 && borderInfoCompute[`${bd_r_top}_${bd_c}`]) {
-              if (!isNil(data[bd_r_top]?.[bd_c]?.mc)) {
+              if (data[bd_r_top]?.[bd_c]?.mc != null) {
                 const cell_top = data[bd_r_top][bd_c];
                 const mc_t =
                   cfg.merge?.[`${cell_top?.mc?.r}_${cell_top?.mc?.c}`];
@@ -1169,7 +1168,7 @@ export function getBorderInfoComputeRange(
           } else {
             borderInfoCompute[`${bd_r}_${bd_c}`].t = null;
           }
-          if (!isNil(value.b) && mc && bd_r === mc.r + mc.rs - 1) {
+          if (value.b != null && mc && bd_r === mc.r + mc.rs - 1) {
             // 下边框
             borderInfoCompute[`${bd_r}_${bd_c}`].b = {
               color: value.b.color,
@@ -1180,7 +1179,7 @@ export function getBorderInfoComputeRange(
               bd_r_bottom < data.length &&
               borderInfoCompute[`${bd_r_bottom}_${bd_c}`]
             ) {
-              if (!isNil(data[bd_r_bottom]?.[bd_c]?.mc)) {
+              if (data[bd_r_bottom]?.[bd_c]?.mc != null) {
                 const cell_bottom = data[bd_r_bottom][bd_c];
                 const mc_b =
                   cfg.merge?.[`${cell_bottom?.mc?.r}_${cell_bottom?.mc?.c}`];
@@ -1201,7 +1200,7 @@ export function getBorderInfoComputeRange(
             borderInfoCompute[`${bd_r}_${bd_c}`].b = null;
           }
         } else {
-          if (!isNil(value.l)) {
+          if (value.l != null) {
             // 左边框
             borderInfoCompute[`${bd_r}_${bd_c}`].l = {
               color: value.l.color,
@@ -1209,7 +1208,7 @@ export function getBorderInfoComputeRange(
             };
             const bd_c_left = bd_c - 1;
             if (bd_c_left >= 0 && borderInfoCompute[`${bd_r}_${bd_c_left}`]) {
-              if (!isNil(data[bd_r]?.[bd_c_left]?.mc)) {
+              if (data[bd_r]?.[bd_c_left]?.mc != null) {
                 const cell_left = data[bd_r][bd_c_left];
                 const mc_l =
                   cfg.merge?.[`${cell_left?.mc?.r}_${cell_left?.mc?.c}`];
@@ -1229,7 +1228,7 @@ export function getBorderInfoComputeRange(
           } else {
             borderInfoCompute[`${bd_r}_${bd_c}`].l = null;
           }
-          if (!isNil(value.r)) {
+          if (value.r != null) {
             // 右边框
             borderInfoCompute[`${bd_r}_${bd_c}`].r = {
               color: value.r.color,
@@ -1241,9 +1240,9 @@ export function getBorderInfoComputeRange(
               borderInfoCompute[`${bd_r}_${bd_c_right}`]
             ) {
               if (
-                !isNil(data[bd_r]) &&
+                data[bd_r] != null &&
                 isPlainObject(data[bd_r][bd_c_right]) &&
-                !isNil(data[bd_r]?.[bd_c_right]?.mc)
+                data[bd_r]?.[bd_c_right]?.mc != null
               ) {
                 const cell_right = data[bd_r][bd_c_right];
                 const mc_r =
@@ -1264,7 +1263,7 @@ export function getBorderInfoComputeRange(
           } else {
             borderInfoCompute[`${bd_r}_${bd_c}`].r = null;
           }
-          if (!isNil(value.t)) {
+          if (value.t != null) {
             // 上边框
             borderInfoCompute[`${bd_r}_${bd_c}`].t = {
               color: value.t.color,
@@ -1272,7 +1271,7 @@ export function getBorderInfoComputeRange(
             };
             const bd_r_top = bd_r - 1;
             if (bd_r_top >= 0 && borderInfoCompute[`${bd_r_top}_${bd_c}`]) {
-              if (!isNil(data[bd_r_top]?.[bd_c]?.mc)) {
+              if (data[bd_r_top]?.[bd_c]?.mc != null) {
                 const cell_top = data[bd_r_top][bd_c];
                 const mc_t =
                   cfg.merge?.[`${cell_top?.mc?.r}_${cell_top?.mc?.c}`];
@@ -1292,7 +1291,7 @@ export function getBorderInfoComputeRange(
           } else {
             borderInfoCompute[`${bd_r}_${bd_c}`].t = null;
           }
-          if (!isNil(value.b)) {
+          if (value.b != null) {
             // 下边框
             borderInfoCompute[`${bd_r}_${bd_c}`].b = {
               color: value.b.color,
@@ -1303,7 +1302,7 @@ export function getBorderInfoComputeRange(
               bd_r_bottom < data.length &&
               borderInfoCompute[`${bd_r_bottom}_${bd_c}`]
             ) {
-              if (!isNil(data[bd_r_bottom]?.[bd_c]?.mc)) {
+              if (data[bd_r_bottom]?.[bd_c]?.mc != null) {
                 const cell_bottom = data[bd_r_bottom][bd_c];
                 const mc_b =
                   cfg.merge?.[`${cell_bottom?.mc?.r}_${cell_bottom?.mc?.c}`];
@@ -1344,7 +1343,7 @@ export function getBorderInfoCompute(ctx, sheetId) {
     data = flowdata;
   } else {
     const index = getSheetIndex(ctx, sheetId);
-    if (!isNil(index)) {
+    if (index != null) {
       data = ctx.luckysheetfile[index].data;
     } else {
       return borderInfoCompute;

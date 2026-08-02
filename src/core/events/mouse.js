@@ -1,12 +1,10 @@
 import cloneDeep from 'lodash.clonedeep';
 import indexOf from 'lodash.indexof';
 import isEmpty from 'lodash.isempty';
-import isNil from 'lodash.isnil';
 import last from 'lodash.last';
 import set from 'lodash.set';
 import some from 'lodash.some';
 import sortedIndex from 'lodash.sortedindex';
-import uniq from 'lodash.uniq';
 import { getFlowdata } from './../context.js';
 import {
   cancelActiveImgItem,
@@ -107,7 +105,7 @@ export function handleGlobalWheel(ctx, e, cache, scrollbarX, scrollbarY) {
   if (cache.visibleColumnsUnique != null) {
     visibledatacolumn_c = cache.visibleColumnsUnique;
   } else {
-    visibledatacolumn_c = uniq(visibledatacolumn_c);
+    visibledatacolumn_c = [...new Set(visibledatacolumn_c)];
     cache.visibleColumnsUnique = visibledatacolumn_c;
   }
   // }
@@ -115,7 +113,7 @@ export function handleGlobalWheel(ctx, e, cache, scrollbarX, scrollbarY) {
   if (cache.visibleRowsUnique != null) {
     visibledatarow_c = cache.visibleRowsUnique;
   } else {
-    visibledatarow_c = uniq(visibledatarow_c);
+    visibledatarow_c = [...new Set(visibledatarow_c)];
     cache.visibleRowsUnique = visibledatarow_c;
   }
   // }
@@ -1263,8 +1261,8 @@ export function handleCellAreaDoubleClick(
   // 检查当前坐标和焦点坐标是否一致，如果不一致那么进行修正
   const { column_focus, row_focus } = ctx.luckysheet_select_save[0];
   if (
-    !isNil(column_focus) &&
-    !isNil(row_focus) &&
+    column_focus != null &&
+    row_focus != null &&
     (column_focus !== col_index || row_focus !== row_index)
   ) {
     row_index = row_focus;
@@ -1646,12 +1644,12 @@ function mouseRender(
     );
     if (
       !last ||
-      isNil(last.left) ||
-      isNil(last.top) ||
-      isNil(last.height) ||
-      isNil(last.width) ||
-      isNil(last.row_focus) ||
-      isNil(last.column_focus)
+      last.left == null ||
+      last.top == null ||
+      last.height == null ||
+      last.width == null ||
+      last.row_focus == null ||
+      last.column_focus == null
     ) {
       return;
     }
@@ -4423,9 +4421,9 @@ export function handleRowHeaderMouseDown(
       ); // 选区最后一个
       if (
         !last ||
-        isNil(last.top) ||
-        isNil(last.height) ||
-        isNil(last.row_focus)
+        last.top == null ||
+        last.height == null ||
+        last.row_focus == null
       ) {
         return;
       }
@@ -4802,9 +4800,9 @@ export function handleColumnHeaderMouseDown(
       let _columnseleted = [];
       if (
         !last ||
-        isNil(last.left) ||
-        isNil(last.width) ||
-        isNil(last.column_focus)
+        last.left == null ||
+        last.width == null ||
+        last.column_focus == null
       ) {
         return;
       }

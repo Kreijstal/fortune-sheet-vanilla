@@ -1,6 +1,5 @@
 import cloneDeep from 'lodash.clonedeep';
 import filter from 'lodash.filter';
-import toPairs from 'lodash.topairs';
 import { getFlowdata } from './../context.js';
 import { normalizeSelection } from './selection.js';
 /**
@@ -144,7 +143,7 @@ export function getOptionValue(constants) {
     value = 'all';
   } else {
     const arr = [];
-    toPairs(constants).forEach((entry) => {
+    Object.entries(constants).forEach((entry) => {
       const [k, v] = entry;
       if (v) {
         if (k === 'locationDate') {

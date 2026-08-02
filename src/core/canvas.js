@@ -1,6 +1,5 @@
 import forEach from 'lodash.foreach';
 import isEmpty from 'lodash.isempty';
-import isNil from 'lodash.isnil';
 import isPlainObject from 'lodash.isplainobject';
 import sortedIndex from 'lodash.sortedindex';
 import { getFlowdata } from './context.js';
@@ -115,10 +114,10 @@ export class Canvas {
     this.cellOverflowMapCache = {};
   }
   drawRowHeader(scrollHeight, drawHeight, offsetTop) {
-    if (isNil(drawHeight)) {
+    if (drawHeight == null) {
       [, drawHeight] = this.sheetCtx.luckysheetTableContentHW;
     }
-    if (isNil(offsetTop)) {
+    if (offsetTop == null) {
       offsetTop = this.sheetCtx.columnHeaderHeight;
     }
     const renderCtx = this.canvasElement.getContext('2d');
@@ -454,7 +453,7 @@ export class Canvas {
     clear,
   }) {
     const flowdata = getFlowdata(this.sheetCtx);
-    if (isNil(flowdata)) {
+    if (flowdata == null) {
       return;
     }
     clearTimeout(this.measureTextCacheTimeOut);
@@ -479,7 +478,7 @@ export class Canvas {
     }
     // //表格canvas
     // let renderCtx = null;
-    // if (isNil(mycanvas)) {
+    // if (mycanvas == null) {
     //   renderCtx = $("#renderCtx")
     //     .get(0)
     //     .getContext("2d");
@@ -608,7 +607,7 @@ export class Canvas {
             } else {
               const key = `r${value.mc.r}c${value.mc.c}`;
               const margeMain = cellupdate[mergeCache[key]];
-              if (isNil(margeMain)) {
+              if (margeMain == null) {
                 mergeCache[key] = cellupdate.length;
                 cellupdate.push({
                   r,
@@ -679,10 +678,10 @@ export class Canvas {
       const { startX } = item;
       const { endY } = item;
       const { endX } = item;
-      if (isNil(flowdata[r])) {
+      if (flowdata[r] == null) {
         continue;
       }
-      if (isNil(flowdata[r][c])) {
+      if (flowdata[r][c] == null) {
         // 空单元格
         this.nullCellRender(
           r,
@@ -713,7 +712,7 @@ export class Canvas {
         } else {
           value = getRealCellValue(r, c, flowdata);
         }
-        if (isNil(value) || value.toString().length === 0) {
+        if (value == null || value.toString().length === 0) {
           this.nullCellRender(
             r,
             c,
@@ -814,7 +813,7 @@ export class Canvas {
         this.sheetCtx.visibledatarow[r + mainCell.mc.rs - 1] - scrollHeight;
       endX =
         this.sheetCtx.visibledatacolumn[c + mainCell.mc.cs - 1] - scrollWidth;
-      if (isNil(value) || value.toString().length === 0) {
+      if (value == null || value.toString().length === 0) {
         this.nullCellRender(
           r,
           c,
@@ -1248,7 +1247,7 @@ export class Canvas {
       return map;
     }
     for (let r = rowStart; r <= rowEnd; r += 1) {
-      if (isNil(data[r])) {
+      if (data[r] == null) {
         continue;
       }
       if (this.cellOverflowMapCache[r]) {
@@ -1264,7 +1263,7 @@ export class Canvas {
         if (
           cell &&
           (!isEmpty(cell.v) || isInlineStringCell(cell)) &&
-          isNil(cell.mc) &&
+          cell.mc == null &&
           cell.tb === '1'
         ) {
           // 水平对齐
@@ -1354,7 +1353,7 @@ export class Canvas {
               stc,
               edc,
             };
-            if (isNil(map[r])) {
+            if (map[r] == null) {
               map[r] = {};
             }
             map[r][c] = item;
@@ -1401,7 +1400,7 @@ export class Canvas {
     //   // 交替颜色
     //   fillStyle = checksAF[1];
     // }
-    if (!isNil(checksCF) && !isNil(checksCF.cellColor)) {
+    if (checksCF != null && checksCF.cellColor != null) {
       // 条件格式
       fillStyle = checksCF.cellColor;
     }
@@ -1450,7 +1449,7 @@ export class Canvas {
       const verticalAlignPos = endY + offsetTop - 2;
       renderCtx.textBaseline = 'bottom';
       renderCtx.fillText(
-        isNil(value) ? '' : value,
+        value == null ? '' : value,
         horizonAlignPos,
         verticalAlignPos
       );
@@ -1478,10 +1477,10 @@ export class Canvas {
     // 此单元格 为 溢出单元格渲染范围最后一列，绘制溢出单元格内容
     if (
       cellOverflow_colInObj.colLast &&
-      !isNil(cellOverflow_colInObj.rowIndex) &&
-      !isNil(cellOverflow_colInObj.colIndex) &&
-      !isNil(cellOverflow_colInObj.stc) &&
-      !isNil(cellOverflow_colInObj.edc)
+      cellOverflow_colInObj.rowIndex != null &&
+      cellOverflow_colInObj.colIndex != null &&
+      cellOverflow_colInObj.stc != null &&
+      cellOverflow_colInObj.edc != null
     ) {
       this.cellOverflowRender(
         cellOverflow_colInObj.rowIndex,
@@ -1591,7 +1590,7 @@ export class Canvas {
     //   // 若单元格有交替颜色 背景颜色
     //   fillStyle = checksAF[1];
     // }
-    if (!isNil(checksCF) && !isNil(checksCF.cellColor)) {
+    if (checksCF != null && checksCF.cellColor != null) {
       // 若单元格有条件格式 背景颜色
       fillStyle = checksCF.cellColor;
     }
@@ -1680,10 +1679,10 @@ export class Canvas {
       // 此单元格 为 溢出单元格渲染范围最后一列，绘制溢出单元格内容
       if (
         cellOverflow_colInObj.colLast &&
-        !isNil(cellOverflow_colInObj.rowIndex) &&
-        !isNil(cellOverflow_colInObj.colIndex) &&
-        !isNil(cellOverflow_colInObj.stc) &&
-        !isNil(cellOverflow_colInObj.edc)
+        cellOverflow_colInObj.rowIndex != null &&
+        cellOverflow_colInObj.colIndex != null &&
+        cellOverflow_colInObj.stc != null &&
+        cellOverflow_colInObj.edc != null
       ) {
         this.cellOverflowRender(
           cellOverflow_colInObj.rowIndex,
@@ -1761,7 +1760,7 @@ export class Canvas {
       // 文本
       renderCtx.fillStyle = normalizedAttr(flowdata, r, c, 'fc');
       renderCtx.fillText(
-        isNil(value) ? '' : value,
+        value == null ? '' : value,
         horizonAlignPos + 14,
         verticalAlignPos_text
       );
