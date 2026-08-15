@@ -14,7 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # esm.sh caches unpinned gh/ URLs, so pin the deployed site to this
       # commit's SHA to guarantee it serves the just-pushed code.
       - name: Pin esm.sh URL to this commit
